@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Hand, Users, User, Settings, Lock, Unlock, Plus, Search as SearchIcon, Loader2 } from 'lucide-react';
+import { Sun, Moon, Bell, ChevronDown, Lock, Unlock, Plus, Search as SearchIcon, Loader2 } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import 'react-toastify/dist/ReactToastify.css';
 import adminService from '../services/adminService';
+import authService from '../services/authService';
+import { useTheme } from '../utils/ThemeContext';
+import Sidebar from '../components/Sidebar';
 import Logo from '../assets/images/Logo.png';
 
 const AdminList = () => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+  const [admin, setAdmin] = useState(null);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,9 +22,20 @@ const AdminList = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [togglingId, setTogglingId] = useState(null); // Track which admin is being toggled
 
+  // Get admin info
+  useEffect(() => {
+    const currentAdmin = authService.getCurrentUser();
+    setAdmin(currentAdmin);
+  }, []);
+
   useEffect(() => {
     fetchAdmins();
   }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/');
+  };
 
   const fetchAdmins = async () => {
     try {
@@ -132,88 +149,121 @@ const AdminList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-black/50 border-r border-cyan-primary/20 min-h-screen p-6">
-          <div className="mb-8">
-            <img src={Logo} alt="GestPipe Logo" className="h-16 mx-auto" />
-          </div>
-          
-          {/* Search Bar */}
-          <div className="mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:border-cyan-primary"
-              />
-            </div>
+    <div className={`h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Header - Fixed Top */}
+      <header className={`sticky top-0 z-50 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'} border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className="px-6 py-4 flex items-center relative">
+          {/* Logo in Center */}
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <img src={Logo} alt="GestPipe Logo" className="h-16" />
           </div>
 
-          {/* Menu Items */}
-          <div className="space-y-2">
-            <button 
-              onClick={() => navigate('/dashboard')}
-              className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800/50 rounded-lg transition-colors"
+          {/* Right Section - Theme, Notification, User */}
+          <div className="flex items-center gap-4 ml-auto">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg transition-all ${
+                theme === 'dark' 
+                  ? 'hover:bg-gray-700 text-yellow-400 hover:text-yellow-300' 
+                  : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
+              }`}
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              <LayoutGrid size={20} />
-              <span>OverView</span>
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800/50 rounded-lg transition-colors">
-              <Hand size={20} />
-              <span>Gestures Control</span>
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 bg-cyan-primary/20 text-cyan-primary rounded-lg">
-              <Users size={20} />
-              <span>Admin</span>
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800/50 rounded-lg transition-colors">
-              <User size={20} />
-              <span>User</span>
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800/50 rounded-lg transition-colors">
-              <Settings size={20} />
-              <span>Version</span>
-            </button>
-          </div>
 
-          {/* Language Selector */}
-          <div className="absolute bottom-6 left-6 flex gap-2">
-            <span className="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold">VI</span>
-            <span className="w-8 h-8 bg-white rounded flex items-center justify-center text-gray-800 text-xs font-bold">EN</span>
+            {/* Notification Bell */}
+            <button
+              className={`p-2 rounded-lg transition-all relative ${
+                theme === 'dark'
+                  ? 'hover:bg-gray-700 text-gray-300 hover:text-white'
+                  : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
+              }`}
+              title="Notifications"
+            >
+              <Bell size={20} />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            {/* User Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-700 text-gray-300 hover:text-white'
+                    : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full ${theme === 'dark' ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : 'bg-gradient-to-r from-blue-400 to-cyan-400'} flex items-center justify-center text-white font-bold`}>
+                  {admin?.fullName?.charAt(0).toUpperCase() || 'A'}
+                </div>
+                <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {admin?.fullName || 'Admin'}
+                </span>
+                <ChevronDown size={16} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {showUserDropdown && (
+                <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700'
+                    : 'bg-white border-gray-200'
+                } py-2 z-50`}>
+                  <div className={`px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {admin?.fullName || 'Admin'}
+                    </p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                      {admin?.email || 'admin@gestpipe.com'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/change-password')}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                      theme === 'dark'
+                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    Change Password
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                      theme === 'dark'
+                        ? 'text-red-400 hover:bg-gray-700'
+                        : 'text-red-600 hover:bg-red-50'
+                    }`}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </header>
 
-        {/* Main Content */}
-        <div className="flex-1">
-          {/* Header */}
-          <div className="bg-black/30 border-b border-cyan-primary/20 px-8 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold">
-              <span className="text-cyan-primary">Gest</span>
-              <span className="text-cyan-secondary">Pipe</span>
-            </h1>
-            <div className="flex items-center gap-4">
-              <button className="p-2 text-gray-400 hover:text-cyan-primary">
-                <Settings size={20} />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-cyan-primary">
-                🔔
-              </button>
-              <button className="p-2 text-gray-400 hover:text-cyan-primary">
-                <User size={20} />
-              </button>
-            </div>
-          </div>
+      {/* Content Area with Sidebar */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar - Fixed */}
+        <Sidebar theme={theme} />
 
-          {/* Content */}
-          <div className="p-8">
+        {/* Main Content - Scrollable */}
+        <main className={`flex-1 px-6 py-6 overflow-y-auto ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {/* Action Bar */}
             <div className="flex justify-between items-center mb-6">
               <div className="flex gap-4">
                 <button 
                   onClick={() => navigate('/create-admin')}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-primary text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-primary/50 transition-all"
+                  className={`flex items-center gap-2 px-6 py-3 font-semibold rounded-lg transition-all shadow-lg ${
+                    theme === 'dark'
+                      ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:shadow-cyan-500/50'
+                      : 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:shadow-cyan-400/50'
+                  }`}
                 >
                   <Plus size={20} />
                   Add new admin
@@ -223,7 +273,11 @@ const AdminList = () => {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-6 py-3 bg-gray-700/50 text-white border border-gray-600 rounded-lg appearance-none cursor-pointer pr-10 hover:bg-gray-700 transition-colors"
+                    className={`px-6 py-3 border rounded-lg appearance-none cursor-pointer pr-10 transition-colors ${
+                      theme === 'dark'
+                        ? 'bg-gray-700/50 text-white border-gray-600 hover:bg-gray-700'
+                        : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50'
+                    }`}
                   >
                     <option value="all">All Status</option>
                     <option value="inactive">Inactive</option>
@@ -235,20 +289,28 @@ const AdminList = () => {
 
               {/* Search Box */}
               <div className="relative">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <SearchIcon className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} size={20} />
                 <input
                   type="text"
                   placeholder="Search Admin..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-primary w-80"
+                  className={`pl-10 pr-4 py-3 border rounded-lg w-80 transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
+                  } focus:outline-none`}
                 />
               </div>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
+              <div className={`mb-4 p-4 border rounded-lg ${
+                theme === 'dark'
+                  ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                  : 'bg-red-50 border-red-200 text-red-700'
+              }`}>
                 {error}
               </div>
             )}
@@ -256,27 +318,36 @@ const AdminList = () => {
             {/* Admin Table */}
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                <Loader2 size={48} className="text-cyan-primary animate-spin" />
-                <p className="text-cyan-primary text-lg font-medium">Loading admins...</p>
+                <Loader2 size={48} className={`${theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'} animate-spin`} />
+                <p className={`text-lg font-medium ${theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'}`}>Loading admins...</p>
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl overflow-hidden backdrop-blur-sm">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-700/50 border-b border-gray-600">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white">ID</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white">Name</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white">Gmail</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white">Phone Number</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white">Create Date</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white">Status</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-white">Toggle</th>
+              <div className={`border rounded-xl overflow-hidden backdrop-blur-sm ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700'
+                  : 'bg-white border-gray-200'
+              }`}>
+                <div className="max-h-[calc(100vh-350px)] overflow-y-auto">
+                  <table className="w-full">
+                    <thead className="sticky top-0 z-10">
+                    <tr className={`border-b ${
+                      theme === 'dark'
+                        ? 'bg-gray-700/50 border-gray-600'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>ID</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Name</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Gmail</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Phone Number</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Create Date</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Status</th>
+                      <th className={`px-6 py-4 text-center text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Toggle</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredAdmins.length === 0 ? (
                       <tr>
-                        <td colSpan="7" className="px-6 py-12 text-center text-gray-400">
+                        <td colSpan="7" className={`px-6 py-12 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                           No admins found
                         </td>
                       </tr>
@@ -284,21 +355,25 @@ const AdminList = () => {
                       filteredAdmins.map((admin, index) => (
                         <tr 
                           key={admin._id} 
-                          className="border-b border-gray-700/50 hover:bg-gray-800/30 transition-colors"
+                          className={`border-b transition-colors ${
+                            theme === 'dark'
+                              ? 'border-gray-700/50 hover:bg-gray-800/30'
+                              : 'border-gray-100 hover:bg-gray-50'
+                          }`}
                         >
-                          <td className="px-6 py-4 text-gray-300">
+                          <td className={`px-6 py-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                             {String(index + 1).padStart(3, '0')}
                           </td>
-                          <td className="px-6 py-4 text-white font-medium">{admin.fullName}</td>
-                          <td className="px-6 py-4 text-gray-300">{admin.email}</td>
-                          <td className="px-6 py-4 text-gray-300">{admin.phoneNumber || 'N/A'}</td>
-                          <td className="px-6 py-4 text-gray-300">{formatDate(admin.createdAt)}</td>
+                          <td className={`px-6 py-4 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{admin.fullName}</td>
+                          <td className={`px-6 py-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{admin.email}</td>
+                          <td className={`px-6 py-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{admin.phoneNumber || 'N/A'}</td>
+                          <td className={`px-6 py-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{formatDate(admin.createdAt)}</td>
                           <td className="px-6 py-4">
                             <span className={`px-3 py-1 rounded text-sm font-medium ${
                               admin.accountStatus === 'active' 
                                 ? 'bg-green-500/20 text-green-400' 
                                 : admin.accountStatus === 'inactive'
-                                ? 'bg-gray-500/20 text-gray-400'
+                                ? theme === 'dark' ? 'bg-gray-500/20 text-gray-400' : 'bg-gray-200 text-gray-600'
                                 : 'bg-red-500/20 text-red-400'
                             }`}>
                               {admin.accountStatus.charAt(0).toUpperCase() + admin.accountStatus.slice(1)}
@@ -310,8 +385,8 @@ const AdminList = () => {
                               disabled={togglingId === admin._id}
                               className={`p-2 rounded-lg transition-all ${
                                 togglingId === admin._id
-                                  ? 'bg-gray-700/50 cursor-not-allowed'
-                                  : 'hover:bg-gray-700 hover:scale-110'
+                                  ? theme === 'dark' ? 'bg-gray-700/50 cursor-not-allowed' : 'bg-gray-200 cursor-not-allowed'
+                                  : theme === 'dark' ? 'hover:bg-gray-700 hover:scale-110' : 'hover:bg-gray-100 hover:scale-110'
                               }`}
                               title={
                                 togglingId === admin._id 
@@ -322,7 +397,7 @@ const AdminList = () => {
                               }
                             >
                               {togglingId === admin._id ? (
-                                <Loader2 size={20} className="text-cyan-primary animate-spin" />
+                                <Loader2 size={20} className={`${theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'} animate-spin`} />
                               ) : admin.accountStatus === 'active' ? (
                                 <Unlock size={20} className="text-green-400 transition-transform" />
                               ) : (
@@ -335,31 +410,43 @@ const AdminList = () => {
                     )}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
 
             {/* Stats */}
             <div className="mt-6 flex gap-4">
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg px-6 py-3">
-                <span className="text-gray-400 text-sm">Total Admins: </span>
-                <span className="text-white font-bold text-lg">{admins.length}</span>
+              <div className={`border rounded-lg px-6 py-3 ${
+                theme === 'dark'
+                  ? 'bg-gray-800/50 border-gray-700'
+                  : 'bg-white border-gray-200'
+              }`}>
+                <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Total Admins: </span>
+                <span className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{admins.length}</span>
               </div>
-              <div className="bg-green-500/20 border border-green-500/50 rounded-lg px-6 py-3">
-                <span className="text-green-400 text-sm">Active: </span>
-                <span className="text-green-400 font-bold text-lg">
+              <div className={`border rounded-lg px-6 py-3 ${
+                theme === 'dark'
+                  ? 'bg-green-500/20 border-green-500/50'
+                  : 'bg-green-50 border-green-200'
+              }`}>
+                <span className={`text-sm ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>Active: </span>
+                <span className={`font-bold text-lg ${theme === 'dark' ? 'text-green-400' : 'text-green-700'}`}>
                   {admins.filter(a => a.accountStatus === 'active').length}
                 </span>
               </div>
-              <div className="bg-gray-500/20 border border-gray-500/50 rounded-lg px-6 py-3">
-                <span className="text-gray-400 text-sm">Inactive: </span>
-                <span className="text-gray-400 font-bold text-lg">
+              <div className={`border rounded-lg px-6 py-3 ${
+                theme === 'dark'
+                  ? 'bg-gray-500/20 border-gray-500/50'
+                  : 'bg-gray-100 border-gray-300'
+              }`}>
+                <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Inactive: </span>
+                <span className={`font-bold text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
                   {admins.filter(a => a.accountStatus === 'inactive').length}
                 </span>
               </div>
             </div>
-          </div>
+          </main>
         </div>
-      </div>
 
       {/* Toast Container */}
       <ToastContainer

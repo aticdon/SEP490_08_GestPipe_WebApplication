@@ -50,6 +50,12 @@ const authService = {
     return response.data;
   },
 
+  // Get Current User (alias for getCurrentAdmin, for convenience)
+  getCurrentUser: () => {
+    const adminData = localStorage.getItem('admin');
+    return adminData ? JSON.parse(adminData) : null;
+  },
+
   // Logout
   logout: () => {
     localStorage.removeItem('token');
