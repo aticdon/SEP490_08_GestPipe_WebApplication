@@ -43,6 +43,21 @@ const adminService = {
       }
     });
     return response.data;
+  },
+
+  // Toggle admin status (SuperAdmin only)
+  toggleAdminStatus: async (adminId) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.put(
+      `${API_URL}/toggle-status/${adminId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
   }
 };
 

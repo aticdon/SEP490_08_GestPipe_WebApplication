@@ -30,8 +30,22 @@ const AdminList = () => {
   };
 
   const handleToggleStatus = async (adminId, currentStatus) => {
-    // TODO: Implement toggle status API
-    console.log('Toggle status for admin:', adminId, currentStatus);
+    try {
+      const confirmed = window.confirm(
+        `Are you sure you want to ${currentStatus === 'active' ? 'suspend' : 'activate'} this admin account?`
+      );
+      
+      if (!confirmed) return;
+
+      await adminService.toggleAdminStatus(adminId);
+      
+      // Refresh admin list
+      await fetchAdmins();
+      
+      alert('Admin status updated successfully!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update admin status');
+    }
   };
 
   // Filter admins

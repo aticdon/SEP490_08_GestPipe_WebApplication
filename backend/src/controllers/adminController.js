@@ -143,3 +143,61 @@ exports.deleteAdmin = async (req, res) => {
     });
   }
 };
+
+// @desc    Toggle admin status (active <-> suspended)
+// @route   PUT /api/admin/toggle-status/:id
+// @access  Private (SuperAdmin)
+exports.toggleAdminStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await Admin.findById(id);
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found'
+      });
+    }
+
+    // Prevent changing status of superadmin
+    if (admin.role === 'superadmin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Cannot change SuperAdmin status'
+      });
+    }
+
+    // Toggle status: active <-> suspended
+    if (admin.accountStatus === 'active') {
+      admin.accountStatus = 'suspended';
+    } else if (admin.accountStatus === 'suspended') {
+      admin.accountStatus = 'active';
+    } else {
+      // If status is inactive, set to active
+      admin.accountStatus = 'active';
+    }
+
+    await admin.save();
+
+    console.log(`✅ Admin ${admin.email} status changed to ${admin.accountStatus}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Admin status updated successfully',
+      admin: {
+        _id: admin._id,
+        email: admin.email,
+        fullName: admin.fullName,
+        accountStatus: admin.accountStatus
+      }
+    });
+
+  } catch (error) {
+    console.error('Toggle status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
