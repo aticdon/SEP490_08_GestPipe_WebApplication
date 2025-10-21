@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Hand, Users, User, Settings, Lock, Unlock, Plus, Search as SearchIcon } from 'lucide-react';
+import { LayoutGrid, Hand, Users, User, Settings, Lock, Unlock, Plus, Search as SearchIcon, Loader2 } from 'lucide-react';
+import { ToastContainer, toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import 'react-toastify/dist/ReactToastify.css';
 import adminService from '../services/adminService';
 import Logo from '../assets/images/Logo.png';
 
@@ -11,6 +14,7 @@ const AdminList = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [togglingId, setTogglingId] = useState(null); // Track which admin is being toggled
 
   useEffect(() => {
     fetchAdmins();
@@ -23,28 +27,94 @@ const AdminList = () => {
       setAdmins(response.admins || []);
       setError('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load admins');
+      const errorMsg = err.response?.data?.message || 'Failed to load admins';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   const handleToggleStatus = async (adminId, currentStatus) => {
-    try {
-      const confirmed = window.confirm(
-        `Are you sure you want to ${currentStatus === 'active' ? 'suspend' : 'activate'} this admin account?`
-      );
-      
-      if (!confirmed) return;
+    const action = currentStatus === 'active' ? 'suspend' : 'activate';
+    const actionText = currentStatus === 'active' ? 'Suspend' : 'Activate';
+    
+    // Show beautiful confirm dialog
+    const result = await Swal.fire({
+      title: `${actionText} Account?`,
+      html: `Are you sure you want to <strong>${action}</strong> this admin account?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: currentStatus === 'active' ? '#ef4444' : '#10b981',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: `Yes, ${action}!`,
+      cancelButtonText: 'Cancel',
+      background: '#1f2937',
+      color: '#fff',
+      customClass: {
+        popup: 'border border-gray-700 rounded-xl',
+        title: 'text-white',
+        htmlContainer: 'text-gray-300',
+      }
+    });
 
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    setTogglingId(adminId); // Show loading spinner for this admin
+
+    try {
       await adminService.toggleAdminStatus(adminId);
       
-      // Refresh admin list
-      await fetchAdmins();
+      // Update local state immediately for better UX
+      setAdmins(prevAdmins => 
+        prevAdmins.map(admin => 
+          admin._id === adminId 
+            ? { ...admin, accountStatus: currentStatus === 'active' ? 'suspended' : 'active' }
+            : admin
+        )
+      );
       
-      alert('Admin status updated successfully!');
+      // Show success notification
+      await Swal.fire({
+        title: 'Success!',
+        html: `Admin account has been <strong>${action}d</strong> successfully!`,
+        icon: 'success',
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        background: '#1f2937',
+        color: '#fff',
+        customClass: {
+          popup: 'border border-gray-700 rounded-xl',
+          title: 'text-white',
+          htmlContainer: 'text-gray-300',
+        }
+      });
+      
+      toast.success(`Admin account ${action}d successfully!`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update admin status');
+      const errorMsg = err.response?.data?.message || 'Failed to update admin status';
+      
+      // Show error dialog
+      await Swal.fire({
+        title: 'Error!',
+        text: errorMsg,
+        icon: 'error',
+        confirmButtonColor: '#ef4444',
+        background: '#1f2937',
+        color: '#fff',
+        customClass: {
+          popup: 'border border-gray-700 rounded-xl',
+          title: 'text-white',
+          htmlContainer: 'text-gray-300',
+        }
+      });
+      
+      toast.error(errorMsg);
+    } finally {
+      setTogglingId(null); // Hide loading spinner
     }
   };
 
@@ -185,7 +255,10 @@ const AdminList = () => {
 
             {/* Admin Table */}
             {loading ? (
-              <div className="text-center py-12 text-cyan-primary text-xl">Loading...</div>
+              <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                <Loader2 size={48} className="text-cyan-primary animate-spin" />
+                <p className="text-cyan-primary text-lg font-medium">Loading admins...</p>
+              </div>
             ) : (
               <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl overflow-hidden backdrop-blur-sm">
                 <table className="w-full">
@@ -234,13 +307,26 @@ const AdminList = () => {
                           <td className="px-6 py-4 text-center">
                             <button
                               onClick={() => handleToggleStatus(admin._id, admin.accountStatus)}
-                              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                              title={admin.accountStatus === 'active' ? 'Deactivate' : 'Activate'}
+                              disabled={togglingId === admin._id}
+                              className={`p-2 rounded-lg transition-all ${
+                                togglingId === admin._id
+                                  ? 'bg-gray-700/50 cursor-not-allowed'
+                                  : 'hover:bg-gray-700 hover:scale-110'
+                              }`}
+                              title={
+                                togglingId === admin._id 
+                                  ? 'Processing...'
+                                  : admin.accountStatus === 'active' 
+                                  ? 'Suspend Account' 
+                                  : 'Activate Account'
+                              }
                             >
-                              {admin.accountStatus === 'active' ? (
-                                <Unlock size={20} className="text-green-400" />
+                              {togglingId === admin._id ? (
+                                <Loader2 size={20} className="text-cyan-primary animate-spin" />
+                              ) : admin.accountStatus === 'active' ? (
+                                <Unlock size={20} className="text-green-400 transition-transform" />
                               ) : (
-                                <Lock size={20} className="text-gray-400" />
+                                <Lock size={20} className="text-red-400 transition-transform" />
                               )}
                             </button>
                           </td>
@@ -274,6 +360,21 @@ const AdminList = () => {
           </div>
         </div>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        style={{ zIndex: 9999 }}
+      />
     </div>
   );
 };

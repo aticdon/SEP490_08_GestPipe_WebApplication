@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check, LayoutGrid, Hand, Users, User, Settings, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import adminService from '../services/adminService';
 import Logo from '../assets/images/Logo.png';
 
@@ -49,6 +50,7 @@ const CreateAdmin = () => {
     // Validate form
     if (!formData.email || !formData.fullName || !formData.phoneNumber || !formData.province) {
       setError('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -62,8 +64,11 @@ const CreateAdmin = () => {
         formData.province
       );
       setSuccess(response);
+      toast.success('Admin account created successfully!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create admin');
+      const errorMsg = err.response?.data?.message || 'Failed to create admin';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -72,6 +77,7 @@ const CreateAdmin = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(success.temporaryPassword);
     setCopied(true);
+    toast.success('Password copied to clipboard!', { autoClose: 2000 });
     setTimeout(() => setCopied(false), 2000);
   };
 
