@@ -34,7 +34,7 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    toast.info('Logging out... See you soon! 👋', {
+    toast.info(t('notifications.logoutMessage'), {
       position: "top-right",
       autoClose: 1500,
     });

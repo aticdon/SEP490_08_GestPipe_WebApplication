@@ -43,7 +43,7 @@ const Profile = () => {
       localStorage.setItem('admin', JSON.stringify(response.admin));
     } catch (error) {
       console.error('Error fetching profile:', error);
-      toast.error('Failed to load profile');
+      toast.error(t('notifications.failedLoadProfile'));
       // Fallback to localStorage data
       const adminData = localStorage.getItem('admin');
       if (adminData) {
@@ -55,7 +55,7 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
-    toast.info('Logging out... See you soon! 👋', {
+    toast.info(t('notifications.logoutMessage'), {
       position: "top-right",
       autoClose: 1500,
     });

@@ -43,7 +43,7 @@ const ChangePassword = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    toast.info('Logging out... See you soon! 👋', {
+    toast.info(t('notifications.logoutMessage'), {
       position: "top-right",
       autoClose: 1500,
     });
@@ -73,17 +73,17 @@ const ChangePassword = () => {
 
     // Validation
     if (!formData.oldPassword || !formData.newPassword || !formData.confirmPassword) {
-      toast.error('Please fill in all fields');
+      toast.error(t('notifications.fillAllFields'));
       return;
     }
 
     if (formData.newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters');
+      toast.error(t('notifications.passwordMinLength'));
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('New passwords do not match');
+      toast.error(t('notifications.passwordsNotMatch'));
       return;
     }
 
@@ -92,7 +92,7 @@ const ChangePassword = () => {
     try {
       await authService.changePassword(formData.oldPassword, formData.newPassword);
       
-      toast.success('Password changed successfully! 🎉');
+      toast.success(t('notifications.passwordChanged'));
       
       setTimeout(() => {
         if (admin?.role === 'superadmin') {
@@ -102,7 +102,7 @@ const ChangePassword = () => {
         }
       }, 1500);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to change password');
+      toast.error(err.response?.data?.message || t('notifications.failedChangePassword'));
     } finally {
       setLoading(false);
     }

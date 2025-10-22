@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Bell, ChevronDown, Copy, Check } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,6 +14,7 @@ import backgroundImage from '../assets/backgrounds/background.jpg';
 const CreateAdmin = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [admin, setAdmin] = useState(() => {
     const adminData = localStorage.getItem('admin');
     return adminData ? JSON.parse(adminData) : null;
@@ -47,7 +49,7 @@ const CreateAdmin = () => {
   ];
 
   const handleLogout = () => {
-    toast.info('Logging out... See you soon! 👋', {
+    toast.info(t('notifications.logoutMessage'), {
       position: "top-right",
       autoClose: 1500,
     });
@@ -70,7 +72,7 @@ const CreateAdmin = () => {
     
     // Validate
     if (!formData.email || !formData.fullName || !formData.phoneNumber || !formData.province) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('notifications.fillRequiredFields'));
       return;
     }
 
@@ -84,9 +86,9 @@ const CreateAdmin = () => {
         formData.province
       );
       setSuccess(response);
-      toast.success('Admin account created successfully! 🎉');
+      toast.success(t('notifications.adminCreated'));
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Failed to create admin';
+      const errorMsg = err.response?.data?.message || t('notifications.failedCreateAdmin');
       toast.error(errorMsg);
     } finally {
       setLoading(false);
@@ -96,7 +98,7 @@ const CreateAdmin = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(success.temporaryPassword);
     setCopied(true);
-    toast.success('Password copied to clipboard! 📋');
+    toast.success(t('notifications.passwordCopied'));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -206,7 +208,7 @@ const CreateAdmin = () => {
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      Profile
+                      {t('profile.title')}
                     </button>
                     <button
                       onClick={() => {
@@ -219,7 +221,7 @@ const CreateAdmin = () => {
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      Change Password
+                      {t('profile.changePassword')}
                     </button>
                     <button
                       onClick={handleLogout}
@@ -229,7 +231,7 @@ const CreateAdmin = () => {
                           : 'text-red-600 hover:bg-gray-100'
                       }`}
                     >
-                      Logout
+                      {t('common.logout')}
                     </button>
                   </div>
                 )}
@@ -250,14 +252,14 @@ const CreateAdmin = () => {
                 /* Create Form */
                 <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} backdrop-blur-sm rounded-2xl border ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200/50'} p-8`}>
                   <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Create New Admin
+                    {t('createAdmin.title')}
                   </h2>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Email */}
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Email <span className="text-red-500">*</span>
+                        {t('createAdmin.email')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -272,7 +274,7 @@ const CreateAdmin = () => {
                     {/* Full Name */}
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Full Name <span className="text-red-500">*</span>
+                        {t('createAdmin.fullName')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -287,7 +289,7 @@ const CreateAdmin = () => {
                     {/* Phone Number */}
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Phone Number <span className="text-red-500">*</span>
+                        {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="tel"
@@ -302,7 +304,7 @@ const CreateAdmin = () => {
                     {/* Province */}
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Province <span className="text-red-500">*</span>
+                        {t('createAdmin.province')} <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="province"
@@ -310,7 +312,7 @@ const CreateAdmin = () => {
                         onChange={handleChange}
                         className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400`}
                       >
-                        <option value="">Select Province</option>
+                        <option value="">{t('createAdmin.selectProvince')}</option>
                         {provinces.map((province) => (
                           <option key={province} value={province}>{province}</option>
                         ))}
@@ -328,14 +330,14 @@ const CreateAdmin = () => {
                             : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                         }`}
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                       <button
                         type="submit"
                         disabled={loading}
                         className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-cyan-400 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {loading ? 'Creating...' : 'Create Admin'}
+                        {loading ? t('createAdmin.creating') : t('createAdmin.createButton')}
                       </button>
                     </div>
                   </form>
@@ -348,27 +350,27 @@ const CreateAdmin = () => {
                       <Check size={40} className="text-white" />
                     </div>
                     <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      Admin Created Successfully!
+                      {t('createAdmin.successTitle')}
                     </h2>
                     <p className="text-cyan-400">
-                      Please send the temporary password to the admin via email
+                      {t('createAdmin.accountCreated')}
                     </p>
                   </div>
 
                   <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100/50'} rounded-xl p-6 mb-6`}>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Email</p>
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t('createAdmin.email')}</p>
                         <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{success.admin.email}</p>
                       </div>
                       <div>
-                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Full Name</p>
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t('createAdmin.fullName')}</p>
                         <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{success.admin.fullName}</p>
                       </div>
                     </div>
                     
                     <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} rounded-lg p-4 mb-2`}>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Temporary Password</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{t('createAdmin.tempPassword')}</p>
                       <div className="flex items-center justify-between">
                         <code className={`text-lg font-mono font-bold ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`}>
                           {success.temporaryPassword}
@@ -388,7 +390,7 @@ const CreateAdmin = () => {
                       </div>
                     </div>
                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
-                      ⚠️ This password will be required to change on first login
+                      ⚠️ {t('createAdmin.importantNote')}
                     </p>
                   </div>
 
@@ -401,13 +403,13 @@ const CreateAdmin = () => {
                           : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                       }`}
                     >
-                      Back to Admin List
+                      {t('createAdmin.backToList')}
                     </button>
                     <button
                       onClick={handleFinish}
                       className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-cyan-400 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
                     >
-                      Create Another
+                      {t('createAdmin.createAnother')}
                     </button>
                   </div>
                 </div>

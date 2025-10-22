@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Bell, ChevronDown, Lock, Unlock, Plus, Search as SearchIcon, Loader2 } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import Swal from 'sweetalert2';
@@ -14,6 +15,7 @@ import backgroundImage from '../assets/backgrounds/background.jpg';
 const AdminList = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [admin, setAdmin] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [admins, setAdmins] = useState([]);
@@ -34,7 +36,7 @@ const AdminList = () => {
   }, []);
 
   const handleLogout = () => {
-    toast.info('Logging out... See you soon! 👋', {
+    toast.info(t('notifications.logoutMessage'), {
       position: "top-right",
       autoClose: 1500,
     });
@@ -52,7 +54,7 @@ const AdminList = () => {
       setAdmins(response.admins || []);
       setError('');
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Failed to load admins';
+      const errorMsg = err.response?.data?.message || t('notifications.failedLoadAdmins');
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -62,18 +64,20 @@ const AdminList = () => {
 
   const handleToggleStatus = async (adminId, currentStatus) => {
     const action = currentStatus === 'active' ? 'suspend' : 'activate';
-    const actionText = currentStatus === 'active' ? 'Suspend' : 'Activate';
+    const actionText = currentStatus === 'active' ? t('alerts.suspendTitle') : t('alerts.activateTitle');
+    const actionMessage = currentStatus === 'active' ? t('alerts.suspendMessage') : t('alerts.activateMessage');
+    const confirmText = currentStatus === 'active' ? t('alerts.yesSuspend') : t('alerts.yesActivate');
     
     // Show beautiful confirm dialog
     const result = await Swal.fire({
-      title: `${actionText} Account?`,
-      html: `Are you sure you want to <strong>${action}</strong> this admin account?`,
+      title: actionText,
+      html: actionMessage,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: currentStatus === 'active' ? '#ef4444' : '#10b981',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: 'Cancel',
+      confirmButtonText: confirmText,
+      cancelButtonText: t('alerts.cancel'),
       background: '#1f2937',
       color: '#fff',
       customClass: {
@@ -102,9 +106,10 @@ const AdminList = () => {
       );
       
       // Show success notification
+      const successMessage = currentStatus === 'active' ? t('alerts.accountSuspended') : t('alerts.accountActivated');
       await Swal.fire({
-        title: 'Success!',
-        html: `Admin account has been <strong>${action}d</strong> successfully!`,
+        title: t('alerts.success'),
+        html: successMessage,
         icon: 'success',
         timer: 2000,
         timerProgressBar: true,
@@ -118,13 +123,14 @@ const AdminList = () => {
         }
       });
       
-      toast.success(`Admin account ${action}d successfully!`);
+      const toastMessage = currentStatus === 'active' ? t('notifications.adminSuspended') : t('notifications.adminActivated');
+      toast.success(toastMessage);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Failed to update admin status';
+      const errorMsg = err.response?.data?.message || t('notifications.failedUpdateStatus');
       
       // Show error dialog
       await Swal.fire({
-        title: 'Error!',
+        title: t('alerts.error'),
         text: errorMsg,
         icon: 'error',
         confirmButtonColor: '#ef4444',
@@ -252,7 +258,7 @@ const AdminList = () => {
                         : 'text-cyan-600 hover:bg-gray-100'
                     }`}
                   >
-                    Profile
+                    {t('profile.title')}
                   </button>
                   <button
                     onClick={() => navigate('/change-password')}
@@ -262,7 +268,7 @@ const AdminList = () => {
                         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                     }`}
                   >
-                    Change Password
+                    {t('profile.changePassword')}
                   </button>
                   <button
                     onClick={handleLogout}
@@ -272,7 +278,7 @@ const AdminList = () => {
                         : 'text-red-600 hover:bg-red-50'
                     }`}
                   >
-                    Logout
+                    {t('common.logout')}
                   </button>
                 </div>
               )}
@@ -300,7 +306,7 @@ const AdminList = () => {
                   }`}
                 >
                   <Plus size={20} />
-                  Add new admin
+                  {t('adminList.createNew')}
                 </button>
                 
                 <div className="relative">
@@ -313,10 +319,10 @@ const AdminList = () => {
                         : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <option value="all">All Status</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
+                    <option value="all">{t('adminList.allAdmins')}</option>
+                    <option value="inactive">{t('adminList.inactive')}</option>
+                    <option value="active">{t('adminList.active')}</option>
+                    <option value="suspended">{t('adminList.suspended')}</option>
                   </select>
                 </div>
               </div>
@@ -326,7 +332,7 @@ const AdminList = () => {
                 <SearchIcon className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} size={20} />
                 <input
                   type="text"
-                  placeholder="Search Admin..."
+                  placeholder={t('adminList.searchAdmin')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={`pl-10 pr-4 py-3 border rounded-lg w-80 transition-colors ${
@@ -353,7 +359,7 @@ const AdminList = () => {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 space-y-4">
                 <Loader2 size={48} className={`${theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'} animate-spin`} />
-                <p className={`text-lg font-medium ${theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'}`}>Loading admins...</p>
+                <p className={`text-lg font-medium ${theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'}`}>{t('adminList.loading')}</p>
               </div>
             ) : (
               <div className={`border rounded-xl overflow-hidden backdrop-blur-sm ${
@@ -370,19 +376,19 @@ const AdminList = () => {
                         : 'bg-gray-50 border-gray-200'
                     }`}>
                       <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>ID</th>
-                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Name</th>
-                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Gmail</th>
-                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Phone Number</th>
-                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Create Date</th>
-                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Status</th>
-                      <th className={`px-6 py-4 text-center text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Toggle</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('adminList.name')}</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('adminList.email')}</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('adminList.phone')}</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('adminList.createDate')}</th>
+                      <th className={`px-6 py-4 text-left text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('adminList.status')}</th>
+                      <th className={`px-6 py-4 text-center text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('adminList.action')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredAdmins.length === 0 ? (
                       <tr>
                         <td colSpan="7" className={`px-6 py-12 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                          No admins found
+                          {t('adminList.noAdmins')}
                         </td>
                       </tr>
                     ) : (

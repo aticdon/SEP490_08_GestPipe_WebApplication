@@ -68,7 +68,7 @@ const EditProfile = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    toast.info('Logging out... See you soon! 👋', {
+    toast.info(t('notifications.logoutMessage'), {
       position: "top-right",
       autoClose: 1500,
     });
@@ -91,7 +91,7 @@ const EditProfile = () => {
     
     // Validation
     if (!formData.fullName) {
-      toast.error('Name is required!');
+      toast.error(t('notifications.nameRequired'));
       return;
     }
 
@@ -119,13 +119,13 @@ const EditProfile = () => {
       localStorage.setItem('admin', JSON.stringify(updatedAdmin));
       setAdmin(updatedAdmin);
 
-      toast.success('Profile updated successfully! 🎉');
+      toast.success(t('notifications.profileUpdated'));
       
       setTimeout(() => {
         navigate('/profile');
       }, 1500);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Failed to update profile';
+      const errorMsg = err.response?.data?.message || t('notifications.failedUpdateProfile');
       toast.error(errorMsg);
     } finally {
       setLoading(false);
