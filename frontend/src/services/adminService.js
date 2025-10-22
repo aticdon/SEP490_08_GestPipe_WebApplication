@@ -58,6 +58,35 @@ const adminService = {
       }
     );
     return response.data;
+  },
+
+  // Get profile (Admin & SuperAdmin)
+  getProfile: async (adminId) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(
+      `${API_URL}/profile/${adminId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  },
+
+  // Update profile (Admin & SuperAdmin)
+  updateProfile: async (adminId, profileData) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.put(
+      `${API_URL}/update-profile/${adminId}`,
+      profileData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
   }
 };
 

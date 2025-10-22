@@ -4,9 +4,12 @@ import {
   Sun, Moon, Bell, ChevronDown, TrendingUp, Activity, MousePointer, 
   Users as UsersIcon, BarChart3, User
 } from 'lucide-react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
 import Logo from '../assets/images/Logo.png';
+import backgroundImage from '../assets/backgrounds/background.jpg';
 import Sidebar from '../components/Sidebar';
 
 const Dashboard = () => {
@@ -29,8 +32,15 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    authService.logout();
-    navigate('/');
+    toast.info('Logging out... See you soon! 👋', {
+      position: "top-right",
+      autoClose: 1500,
+    });
+    
+    setTimeout(() => {
+      authService.logout();
+      navigate('/');
+    }, 1000);
   };
 
   // Mock data - will be replaced with real API data later
@@ -52,12 +62,25 @@ const Dashboard = () => {
   }
 
   return (
-    <div className={`h-screen flex flex-col transition-colors duration-300 ${
-      theme === 'dark' 
-        ? 'bg-gray-900' 
-        : 'bg-gray-100'
-    }`}>
-      {/* Header - Fixed Top */}
+    <div 
+      className="h-screen flex flex-col transition-colors duration-300 relative"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Background Overlay */}
+      <div className={`absolute inset-0 ${
+        theme === 'dark' ? 'bg-gray-900/85' : 'bg-gray-100/85'
+      }`}></div>
+      
+      {/* Content */}
+      <div className="relative z-10 h-full flex flex-col">
+        <ToastContainer theme={theme === 'dark' ? 'dark' : 'light'} />
+        {/* Header - Fixed Top */}
       <header className={`sticky top-0 z-50 border-b transition-colors ${
         theme === 'dark' 
           ? 'bg-gray-800 border-gray-700' 
@@ -66,7 +89,7 @@ const Dashboard = () => {
         <div className="px-6 py-4 flex items-center relative">
           {/* Logo in Center */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <img src={Logo} alt="GestPipe" className="h-16" />
+            <img src={Logo} alt="GestPipe" className="h-24" />
           </div>
 
           {/* Right Side Icons */}
@@ -129,6 +152,16 @@ const Dashboard = () => {
                       </span>
                     </div>
                     <button
+                      onClick={() => navigate('/profile')}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                        theme === 'dark'
+                          ? 'text-cyan-primary hover:bg-gray-700'
+                          : 'text-cyan-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      Profile
+                    </button>
+                    <button
                       onClick={() => navigate('/change-password')}
                       className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                         theme === 'dark'
@@ -161,10 +194,10 @@ const Dashboard = () => {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           {/* Total Users */}
-          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg ${
+          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg backdrop-blur-sm ${
             theme === 'dark'
-              ? 'bg-gray-800 border-gray-700'
-              : 'bg-white border-gray-200'
+              ? 'bg-gray-800/50 border-gray-700/50'
+              : 'bg-white/50 border-gray-200/50'
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -179,10 +212,10 @@ const Dashboard = () => {
           </div>
 
           {/* Online Users */}
-          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg ${
+          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg backdrop-blur-sm ${
             theme === 'dark'
-              ? 'bg-gray-800 border-gray-700'
-              : 'bg-white border-gray-200'
+              ? 'bg-gray-800/50 border-gray-700/50'
+              : 'bg-white/50 border-gray-200/50'
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -196,10 +229,10 @@ const Dashboard = () => {
           </div>
 
           {/* Accuracy Rate */}
-          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg ${
+          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg backdrop-blur-sm ${
             theme === 'dark'
-              ? 'bg-gray-800 border-gray-700'
-              : 'bg-white border-gray-200'
+              ? 'bg-gray-800/50 border-gray-700/50'
+              : 'bg-white/50 border-gray-200/50'
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -213,10 +246,10 @@ const Dashboard = () => {
           </div>
 
           {/* Total Requests */}
-          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg ${
+          <div className={`p-6 rounded-xl border transition-all hover:shadow-lg backdrop-blur-sm ${
             theme === 'dark'
-              ? 'bg-gray-800 border-gray-700'
-              : 'bg-white border-gray-200'
+              ? 'bg-gray-800/50 border-gray-700/50'
+              : 'bg-white/50 border-gray-200/50'
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -314,6 +347,7 @@ const Dashboard = () => {
           </div>
         </div>
         </main>
+      </div>
       </div>
     </div>
   );

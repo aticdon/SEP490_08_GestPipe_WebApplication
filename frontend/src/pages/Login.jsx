@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
@@ -44,12 +46,31 @@ const Login = () => {
       localStorage.setItem('token', response.token);
       localStorage.setItem('admin', JSON.stringify(response.admin));
 
-      // Redirect based on response
-      if (response.redirect === 'change-password') {
-        navigate('/change-password');
-      } else {
-        navigate('/dashboard');
-      }
+      // Show success toast
+      toast.success(`Welcome back, ${response.admin.fullName}! 🎉`, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      // Delay redirect to show toast
+      setTimeout(() => {
+        // Redirect based on response
+        if (response.redirect === 'change-password') {
+          navigate('/change-password');
+        } else {
+          // Redirect based on role
+          if (response.admin.role === 'superadmin') {
+            navigate('/dashboard');
+          } else if (response.admin.role === 'admin') {
+            navigate('/user-list');
+          }
+        }
+      }, 1000);
+      
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Invalid username or password';
       
@@ -74,6 +95,7 @@ const Login = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
+      <ToastContainer theme="dark" />
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/20"></div>
       

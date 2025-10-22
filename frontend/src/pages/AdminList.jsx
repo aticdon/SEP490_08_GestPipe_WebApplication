@@ -9,6 +9,7 @@ import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
 import Sidebar from '../components/Sidebar';
 import Logo from '../assets/images/Logo.png';
+import backgroundImage from '../assets/backgrounds/background.jpg';
 
 const AdminList = () => {
   const navigate = useNavigate();
@@ -33,8 +34,15 @@ const AdminList = () => {
   }, []);
 
   const handleLogout = () => {
-    authService.logout();
-    navigate('/');
+    toast.info('Logging out... See you soon! 👋', {
+      position: "top-right",
+      autoClose: 1500,
+    });
+    
+    setTimeout(() => {
+      authService.logout();
+      navigate('/');
+    }, 1000);
   };
 
   const fetchAdmins = async () => {
@@ -149,13 +157,29 @@ const AdminList = () => {
   };
 
   return (
-    <div className={`h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Header - Fixed Top */}
-      <header className={`sticky top-0 z-50 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'} border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+    <div 
+      className="h-screen flex flex-col relative"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Background Overlay */}
+      <div className={`absolute inset-0 ${
+        theme === 'dark' ? 'bg-gray-900/85' : 'bg-gray-50/85'
+      }`}></div>
+      
+      {/* Content */}
+      <div className="relative z-10 h-full flex flex-col">
+        {/* Header - Fixed Top */}
+        <header className={`sticky top-0 z-50 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} backdrop-blur-sm border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="px-6 py-4 flex items-center relative">
           {/* Logo in Center */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <img src={Logo} alt="GestPipe Logo" className="h-16" />
+            <img src={Logo} alt="GestPipe Logo" className="h-24" />
           </div>
 
           {/* Right Section - Theme, Notification, User */}
@@ -221,6 +245,16 @@ const AdminList = () => {
                     </p>
                   </div>
                   <button
+                    onClick={() => navigate('/profile')}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                      theme === 'dark'
+                        ? 'text-cyan-primary hover:bg-gray-700'
+                        : 'text-cyan-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Profile
+                  </button>
+                  <button
                     onClick={() => navigate('/change-password')}
                     className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                       theme === 'dark'
@@ -253,7 +287,7 @@ const AdminList = () => {
         <Sidebar theme={theme} />
 
         {/* Main Content - Scrollable */}
-        <main className={`flex-1 px-6 py-6 overflow-y-auto ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <main className="flex-1 px-6 py-6 overflow-y-auto">
             {/* Action Bar */}
             <div className="flex justify-between items-center mb-6">
               <div className="flex gap-4">
@@ -324,8 +358,8 @@ const AdminList = () => {
             ) : (
               <div className={`border rounded-xl overflow-hidden backdrop-blur-sm ${
                 theme === 'dark'
-                  ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700'
-                  : 'bg-white border-gray-200'
+                  ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50'
+                  : 'bg-white/50 border-gray-200/50'
               }`}>
                 <div className="max-h-[calc(100vh-350px)] overflow-y-auto">
                   <table className="w-full">
@@ -462,6 +496,7 @@ const AdminList = () => {
         theme="dark"
         style={{ zIndex: 9999 }}
       />
+      </div>
     </div>
   );
 };
