@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Bell, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -7,13 +8,12 @@ import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
 import Sidebar from '../components/Sidebar';
 import Logo from '../assets/images/Logo.png';
-import vnFlag from '../assets/flags/vn.svg';
-import gbFlag from '../assets/flags/gb.svg';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 
 const ChangePassword = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [admin, setAdmin] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -213,7 +213,7 @@ const ChangePassword = () => {
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    Profile
+                    {t('profile.title')}
                   </button>
                   <button
                     onClick={() => {
@@ -226,7 +226,7 @@ const ChangePassword = () => {
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    Change Password
+                    {t('profile.changePassword')}
                   </button>
                   <button
                     onClick={handleLogout}
@@ -236,7 +236,7 @@ const ChangePassword = () => {
                         : 'text-red-600 hover:bg-gray-100'
                     }`}
                   >
-                    Logout
+                    {t('common.logout')}
                   </button>
                 </div>
               )}
@@ -259,7 +259,7 @@ const ChangePassword = () => {
                   {/* Old Password */}
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Old Password
+                      {t('changePassword.oldPassword')}
                     </label>
                     <div className="relative">
                       <input
@@ -283,7 +283,7 @@ const ChangePassword = () => {
                   {/* New Password */}
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      New Password
+                      {t('changePassword.newPassword')}
                     </label>
                     <div className="relative">
                       <input
@@ -307,7 +307,7 @@ const ChangePassword = () => {
                   {/* Re-enter Password */}
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Re-enter Password
+                      {t('changePassword.confirmPassword')}
                     </label>
                     <div className="relative">
                       <input
@@ -335,7 +335,7 @@ const ChangePassword = () => {
                       disabled={loading}
                       className="px-12 py-3 bg-gradient-to-r from-cyan-500 to-cyan-400 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loading ? 'Saving...' : 'Save'}
+                      {loading ? 'Saving...' : t('changePassword.submit')}
                     </button>
                   </div>
                 </form>

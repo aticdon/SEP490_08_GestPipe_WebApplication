@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Bell, ChevronDown } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,6 +14,7 @@ import backgroundImage from '../assets/backgrounds/background.jpg';
 const EditProfile = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [admin, setAdmin] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -227,7 +229,7 @@ const EditProfile = () => {
                           : 'text-cyan-600 hover:bg-gray-100'
                       }`}
                     >
-                      Profile
+                      {t('profile.title')}
                     </button>
                     <button
                       onClick={() => navigate('/change-password')}
@@ -237,7 +239,7 @@ const EditProfile = () => {
                           : 'text-gray-800 hover:bg-gray-100'
                       }`}
                     >
-                      Change Password
+                      {t('profile.changePassword')}
                     </button>
                     <button
                       onClick={handleLogout}
@@ -245,7 +247,7 @@ const EditProfile = () => {
                         theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
                       }`}
                     >
-                      Logout
+                      {t('common.logout')}
                     </button>
                   </div>
                 )}
@@ -275,7 +277,7 @@ const EditProfile = () => {
                     <label className={`w-48 font-semibold text-lg ${
                       theme === 'dark' ? 'text-white' : 'text-gray-800'
                     }`}>
-                      Name
+                      {t('editProfile.name')}
                     </label>
                     <input
                       type="text"
@@ -296,7 +298,7 @@ const EditProfile = () => {
                     <label className={`w-48 font-semibold text-lg ${
                       theme === 'dark' ? 'text-white' : 'text-gray-800'
                     }`}>
-                      Date of Birthday
+                      {t('editProfile.birthday')}
                     </label>
                     <input
                       type="date"
@@ -316,7 +318,7 @@ const EditProfile = () => {
                     <label className={`w-48 font-semibold text-lg ${
                       theme === 'dark' ? 'text-white' : 'text-gray-800'
                     }`}>
-                      Gmail
+                      {t('editProfile.email')}
                     </label>
                     <input
                       type="email"
@@ -336,7 +338,7 @@ const EditProfile = () => {
                     <label className={`w-48 font-semibold text-lg ${
                       theme === 'dark' ? 'text-white' : 'text-gray-800'
                     }`}>
-                      Phone Number
+                      {t('editProfile.phone')}
                     </label>
                     <input
                       type="tel"
@@ -357,7 +359,7 @@ const EditProfile = () => {
                     <label className={`w-48 font-semibold text-lg ${
                       theme === 'dark' ? 'text-white' : 'text-gray-800'
                     }`}>
-                      Address
+                      {t('editProfile.province')}
                     </label>
                     <select
                       name="province"
@@ -387,7 +389,7 @@ const EditProfile = () => {
                         loading ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
-                      {loading ? 'Saving...' : 'Save'}
+                      {loading ? 'Saving...' : t('editProfile.save')}
                     </button>
                   </div>
                 </form>

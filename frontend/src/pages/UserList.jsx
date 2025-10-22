@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Bell, ChevronDown, Lock, Unlock, Search as SearchIcon } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import Logo from '../assets/images/Logo.png';
-import VNFlag from '../assets/flags/vn.svg';
-import UKFlag from '../assets/flags/uk.svg';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 
 const UserList = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [admin, setAdmin] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  const [language, setLanguage] = useState('vi');
 
   // Active menu state
   const [activeMenu, setActiveMenu] = useState('user');
@@ -97,13 +97,19 @@ const UserList = () => {
   };
 
   const getStatusText = (status) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    const statusMap = {
+      'online': t('userList.online'),
+      'locked': t('userList.locked'),
+      'offline': t('userList.offline'),
+      'inactive': t('userList.inactive')
+    };
+    return statusMap[status] || status;
   };
 
   if (!admin) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-cyan-400 text-xl">Loading...</div>
+        <div className="text-cyan-400 text-xl">{t('userList.loading')}</div>
       </div>
     );
   }
@@ -205,7 +211,7 @@ const UserList = () => {
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    Profile
+                    {t('profile.title')}
                   </button>
                   <button
                     onClick={() => {
@@ -218,7 +224,7 @@ const UserList = () => {
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    Change Password
+                    {t('profile.changePassword')}
                   </button>
                   <button
                     onClick={handleLogout}
@@ -228,7 +234,7 @@ const UserList = () => {
                         : 'text-red-600 hover:bg-gray-100'
                     }`}
                   >
-                    Logout
+                    {t('common.logout')}
                   </button>
                 </div>
               )}
@@ -260,7 +266,7 @@ const UserList = () => {
               }`}
             >
               <span className="text-xl">🎮</span>
-              <span className="font-medium">Gestures Control</span>
+              <span className="font-medium">{t('userList.gesturesControl')}</span>
             </button>
 
             {/* User - Active */}
@@ -275,7 +281,7 @@ const UserList = () => {
               }`}
             >
               <span className="text-xl">👥</span>
-              <span className="font-medium">User</span>
+              <span className="font-medium">{t('userList.user')}</span>
             </button>
 
             {/* Version */}
@@ -292,31 +298,12 @@ const UserList = () => {
               }`}
             >
               <span className="text-xl">⚙️</span>
-              <span className="font-medium">Version</span>
+              <span className="font-medium">{t('userList.version')}</span>
             </button>
           </nav>
 
           {/* Language Switcher - Bottom */}
-          <div className={`p-4 border-t flex gap-2 justify-center ${
-            theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
-          }`}>
-            <button
-              onClick={() => setLanguage('vi')}
-              className={`w-10 h-10 rounded-lg overflow-hidden border-2 transition-all ${
-                language === 'vi' ? 'border-cyan-400' : 'border-transparent opacity-60 hover:opacity-100'
-              }`}
-            >
-              <img src={VNFlag} alt="Tiếng Việt" className="w-full h-full object-cover" />
-            </button>
-            <button
-              onClick={() => setLanguage('en')}
-              className={`w-10 h-10 rounded-lg overflow-hidden border-2 transition-all ${
-                language === 'en' ? 'border-cyan-400' : 'border-transparent opacity-60 hover:opacity-100'
-              }`}
-            >
-              <img src={UKFlag} alt="English" className="w-full h-full object-cover" />
-            </button>
-          </div>
+          <LanguageSwitcher />
         </aside>
 
         {/* Main Content - Scrollable */}
@@ -330,7 +317,7 @@ const UserList = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-all"
               >
                 <span className="text-cyan-400">📋</span>
-                <span>{filterType === 'all' ? 'All User' : getStatusText(filterType)}</span>
+                <span>{filterType === 'all' ? t('userList.allUser') : getStatusText(filterType)}</span>
                 <ChevronDown size={16} className="text-gray-400" />
               </button>
 
@@ -340,31 +327,31 @@ const UserList = () => {
                     onClick={() => { setFilterType('all'); setShowFilterDropdown(false); }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
                   >
-                    All User
+                    {t('userList.allUser')}
                   </button>
                   <button
                     onClick={() => { setFilterType('online'); setShowFilterDropdown(false); }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
                   >
-                    Online
+                    {t('userList.online')}
                   </button>
                   <button
                     onClick={() => { setFilterType('offline'); setShowFilterDropdown(false); }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
                   >
-                    Offline
+                    {t('userList.offline')}
                   </button>
                   <button
                     onClick={() => { setFilterType('locked'); setShowFilterDropdown(false); }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
                   >
-                    Locked
+                    {t('userList.locked')}
                   </button>
                   <button
                     onClick={() => { setFilterType('inactive'); setShowFilterDropdown(false); }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
                   >
-                    Inactive
+                    {t('userList.inactive')}
                   </button>
                 </div>
               )}
@@ -375,7 +362,7 @@ const UserList = () => {
               <SearchIcon size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search User..."
+                placeholder={t('userList.searchUser')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-cyan-400 transition-colors"
@@ -398,22 +385,22 @@ const UserList = () => {
                 <tr>
                   <th className={`px-6 py-4 text-left font-medium ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>ID</th>
+                  }`}>{t('userList.id')}</th>
                   <th className={`px-6 py-4 text-left font-medium ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>Name</th>
+                  }`}>{t('userList.name')}</th>
                   <th className={`px-6 py-4 text-left font-medium ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>Occupation</th>
+                  }`}>{t('userList.occupation')}</th>
                   <th className={`px-6 py-4 text-left font-medium ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>Create Date</th>
+                  }`}>{t('userList.createDate')}</th>
                   <th className={`px-6 py-4 text-left font-medium ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>Status</th>
+                  }`}>{t('userList.status')}</th>
                   <th className={`px-6 py-4 text-left font-medium ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>Toggle</th>
+                  }`}>{t('userList.toggle')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -454,7 +441,7 @@ const UserList = () => {
 
             {filteredUsers.length === 0 && (
               <div className="text-center py-12 text-gray-400">
-                No users found
+                {t('userList.noUsers')}
               </div>
             )}
           </div>

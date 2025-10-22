@@ -208,7 +208,7 @@ exports.toggleAdminStatus = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    const { fullName, birthday, phoneNumber, province } = req.body;
+    const { fullName, birthday, phoneNumber, province, uiLanguage } = req.body;
 
     // Check if admin exists
     const admin = await Admin.findById(id);
@@ -224,6 +224,7 @@ exports.updateProfile = async (req, res) => {
     if (birthday) admin.birthday = birthday;
     if (phoneNumber) admin.phoneNumber = phoneNumber;
     if (province) admin.province = province;
+    if (uiLanguage) admin.uiLanguage = uiLanguage;
 
     await admin.save();
 

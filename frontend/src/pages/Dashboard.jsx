@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Sun, Moon, Bell, ChevronDown, TrendingUp, Activity, MousePointer, 
   Users as UsersIcon, BarChart3, User
@@ -13,6 +14,7 @@ import backgroundImage from '../assets/backgrounds/background.jpg';
 import Sidebar from '../components/Sidebar';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
   const { theme, toggleTheme } = useTheme();
@@ -159,7 +161,7 @@ const Dashboard = () => {
                           : 'text-cyan-600 hover:bg-gray-100'
                       }`}
                     >
-                      Profile
+                      {t('profile.title')}
                     </button>
                     <button
                       onClick={() => navigate('/change-password')}
@@ -169,13 +171,13 @@ const Dashboard = () => {
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      Change Password
+                      {t('profile.changePassword')}
                     </button>
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 rounded-b-lg"
                     >
-                      Logout
+                      {t('common.logout')}
                     </button>
                   </div>
                 )}
@@ -201,7 +203,7 @@ const Dashboard = () => {
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Total Users
+                {t('dashboard.totalUsers')}
               </h3>
               <UsersIcon className="text-cyan-primary" size={20} />
             </div>
@@ -219,7 +221,7 @@ const Dashboard = () => {
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Online Users
+                {t('dashboard.onlineUsers')}
               </h3>
               <Activity className="text-green-500" size={20} />
             </div>
@@ -236,7 +238,7 @@ const Dashboard = () => {
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Accuracy Rate
+                {t('dashboard.accuracyRate')}
               </h3>
               <TrendingUp className="text-blue-500" size={20} />
             </div>
@@ -253,7 +255,7 @@ const Dashboard = () => {
           }`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Total Requests
+                {t('dashboard.totalRequests')}
               </h3>
               <MousePointer className="text-purple-500" size={20} />
             </div>

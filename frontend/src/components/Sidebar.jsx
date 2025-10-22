@@ -1,19 +1,20 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { LayoutGrid, Users, User as UserIcon, GitBranch, Hand } from 'lucide-react';
-import VNFlag from '../assets/flags/vn.svg';
-import GBFlag from '../assets/flags/gb.svg';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Sidebar = ({ theme }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const menuItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutGrid, path: '/dashboard' },
-    { id: 'gestures', label: 'Gestures Control', icon: Hand, path: '/gestures' },
-    { id: 'admin', label: 'Admin', icon: Users, path: '/admin-list' },
-    { id: 'user', label: 'User', icon: UserIcon, path: '/users' },
-    { id: 'version', label: 'Version', icon: GitBranch, path: '/version' },
+    { id: 'overview', label: t('sidebar.dashboard'), icon: LayoutGrid, path: '/dashboard' },
+    { id: 'gestures', label: t('sidebar.actions'), icon: Hand, path: '/gestures' },
+    { id: 'admin', label: t('sidebar.adminManagement'), icon: Users, path: '/admin-list' },
+    { id: 'user', label: t('sidebar.userManagement'), icon: UserIcon, path: '/users' },
+    { id: 'version', label: t('sidebar.version'), icon: GitBranch, path: '/version' },
   ];
 
   return (
@@ -52,28 +53,7 @@ const Sidebar = ({ theme }) => {
       <div className={`pb-8 px-8 flex gap-3 justify-center border-t pt-6 ${
         theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
       }`}>
-        <button
-          className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-            theme === 'dark'
-              ? 'bg-gray-700 hover:bg-gray-600 text-white'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-          }`}
-          title="Tiếng Việt"
-        >
-          <img src={VNFlag} alt="VN" className="w-6 h-6 rounded-sm" />
-          <span className="font-medium">VN</span>
-        </button>
-        <button
-          className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-            theme === 'dark'
-              ? 'bg-gray-700 hover:bg-gray-600 text-white'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-          }`}
-          title="English"
-        >
-          <img src={GBFlag} alt="EN" className="w-6 h-6 rounded-sm" />
-          <span className="font-medium">EN</span>
-        </button>
+        <LanguageSwitcher theme={theme} />
       </div>
     </aside>
   );

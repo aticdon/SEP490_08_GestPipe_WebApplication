@@ -15,10 +15,12 @@ app.use(express.json());
 // Routes
 const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const translationRoutes = require('./src/routes/translationRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/translations', translationRoutes);
 
 // Simple route for testing
 app.get('/', (req, res) => {

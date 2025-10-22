@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Bell, ChevronDown, User as UserIcon } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,6 +14,7 @@ import backgroundImage from '../assets/backgrounds/background.jpg';
 const Profile = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [admin, setAdmin] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -168,7 +170,7 @@ const Profile = () => {
                         : 'text-cyan-600 hover:bg-gray-100'
                     }`}
                   >
-                    Profile
+                    {t('profile.title')}
                   </button>
                   <button
                     onClick={() => navigate('/change-password')}
@@ -178,15 +180,13 @@ const Profile = () => {
                         : 'text-gray-800 hover:bg-gray-100'
                     }`}
                   >
-                    Change Password
+                    {t('profile.changePassword')}
                   </button>
                   <button
                     onClick={handleLogout}
-                    className={`w-full text-left px-4 py-2 text-red-400 transition-colors ${
-                      theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-                    }`}
+                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-500/10 rounded-b-lg"
                   >
-                    Logout
+                    {t('common.logout')}
                   </button>
                 </div>
               )}
@@ -215,7 +215,7 @@ const Profile = () => {
                   <label className={`w-48 font-semibold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-800'
                   }`}>
-                    Name:
+                    {t('profile.name')}:
                   </label>
                   <span className={`text-lg ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -229,7 +229,7 @@ const Profile = () => {
                   <label className={`w-48 font-semibold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-800'
                   }`}>
-                    Date of Birth:
+                    {t('profile.dateOfBirth')}:
                   </label>
                   <span className={`text-lg ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -243,7 +243,7 @@ const Profile = () => {
                   <label className={`w-48 font-semibold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-800'
                   }`}>
-                    Gmail:
+                    {t('profile.email')}:
                   </label>
                   <span className={`text-lg ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -257,7 +257,7 @@ const Profile = () => {
                   <label className={`w-48 font-semibold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-800'
                   }`}>
-                    Phone Number:
+                    {t('profile.phone')}:
                   </label>
                   <span className={`text-lg ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -271,7 +271,7 @@ const Profile = () => {
                   <label className={`w-48 font-semibold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-800'
                   }`}>
-                    Address:
+                    {t('profile.address')}:
                   </label>
                   <span className={`text-lg ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -285,7 +285,7 @@ const Profile = () => {
                   <label className={`w-48 font-semibold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-800'
                   }`}>
-                    Role:
+                    {t('profile.role')}:
                   </label>
                   <span className="text-lg">
                     <span className="px-3 py-1 rounded-full bg-cyan-primary/20 text-cyan-primary font-semibold">
@@ -299,7 +299,7 @@ const Profile = () => {
                   <label className={`w-48 font-semibold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-800'
                   }`}>
-                    Create date:
+                    {t('profile.createdAt')}:
                   </label>
                   <span className={`text-lg ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -315,13 +315,17 @@ const Profile = () => {
                   onClick={() => navigate('/change-password')}
                   className="px-6 py-2 rounded-lg bg-cyan-primary hover:bg-cyan-600 text-white font-medium transition-all"
                 >
-                  Change Password
+                  {t('profile.changePassword')}
                 </button>
                 <button
                   onClick={() => navigate('/edit-profile')}
-                  className="px-6 py-2 rounded-lg bg-cyan-primary hover:bg-cyan-600 text-white font-medium transition-all"
+                  className={`px-6 py-2 rounded-lg font-medium transition-all ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                  }`}
                 >
-                  Edit
+                  {t('profile.edit')}
                 </button>
               </div>
             </div>

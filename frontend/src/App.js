@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './i18n';
+import { LanguageProvider } from './utils/LanguageContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ChangePassword from './pages/ChangePassword';
@@ -32,64 +35,70 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/change-password" element={<ChangePassword />} />
-      
-      {/* SuperAdmin Only Routes */}
-      <Route 
-        path="/dashboard" 
-        element={
-          <ProtectedRoute allowedRoles={['superadmin']}>
-            <Dashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin-list" 
-        element={
-          <ProtectedRoute allowedRoles={['superadmin']}>
-            <AdminList />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/create-admin" 
-        element={
-          <ProtectedRoute allowedRoles={['superadmin']}>
-            <CreateAdmin />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/profile" 
-        element={
-          <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-            <Profile />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/edit-profile" 
-        element={
-          <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-            <EditProfile />
-          </ProtectedRoute>
-        } 
-      />
+    <I18nextProvider i18n={i18n}>
+      <LanguageProvider>
+        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/change-password" element={<ChangePassword />} />
+            
+            {/* SuperAdmin Only Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-list" 
+              element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <AdminList />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/create-admin" 
+              element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <CreateAdmin />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/edit-profile" 
+              element={
+                <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                  <EditProfile />
+                </ProtectedRoute>
+              } 
+            />
 
-      {/* Admin Only Routes */}
-      <Route 
-        path="/user-list" 
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <UserList />
-          </ProtectedRoute>
-        } 
-      />
+            {/* Admin Only Routes */}
+            <Route 
+              path="/user-list" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <UserList />
+                </ProtectedRoute>
+              } 
+            />
 
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
+      </LanguageProvider>
+    </I18nextProvider>
   );
 }
 
