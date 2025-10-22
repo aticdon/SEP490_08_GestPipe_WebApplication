@@ -201,3 +201,90 @@ exports.toggleAdminStatus = async (req, res) => {
     });
   }
 };
+
+// @desc    Update admin profile
+// @route   PUT /api/admin/update-profile/:id
+// @access  Private (Admin & SuperAdmin - own profile only)
+exports.updateProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullName, birthday, phoneNumber, province } = req.body;
+
+    // Check if admin exists
+    const admin = await Admin.findById(id);
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found'
+      });
+    }
+
+    // Update fields
+    if (fullName) admin.fullName = fullName;
+    if (birthday) admin.birthday = birthday;
+    if (phoneNumber) admin.phoneNumber = phoneNumber;
+    if (province) admin.province = province;
+
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      admin: {
+        _id: admin._id,
+        fullName: admin.fullName,
+        email: admin.email,
+        birthday: admin.birthday,
+        phoneNumber: admin.phoneNumber,
+        province: admin.province,
+        role: admin.role
+      }
+    });
+
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during profile update'
+    });
+  }
+};
+
+// @desc    Get admin profile by ID
+// @route   GET /api/admin/profile/:id
+// @access  Private (Admin & SuperAdmin - own profile only)
+exports.getProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await Admin.findById(id).select('-password -temporaryPassword');
+    
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      admin: {
+        _id: admin._id,
+        fullName: admin.fullName,
+        email: admin.email,
+        birthday: admin.birthday,
+        phoneNumber: admin.phoneNumber,
+        province: admin.province,
+        role: admin.role,
+        createdAt: admin.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
