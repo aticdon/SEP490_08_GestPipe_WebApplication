@@ -314,42 +314,48 @@ const UserList = () => {
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-all"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 text-cyan-400 hover:bg-gray-700'
+                    : 'bg-white border-gray-200 text-cyan-600 hover:bg-gray-100'
+                }`}
               >
-                <span className="text-cyan-400">📋</span>
+                <span className={theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}>📋</span>
                 <span>{filterType === 'all' ? t('userList.allUser') : getStatusText(filterType)}</span>
-                <ChevronDown size={16} className="text-gray-400" />
+                <ChevronDown size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute top-full mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+                <div className={`absolute top-full mt-2 w-48 rounded-lg shadow-xl z-50 border ${
+                  theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                }`}>
                   <button
                     onClick={() => { setFilterType('all'); setShowFilterDropdown(false); }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
+                    className={`w-full text-left px-4 py-2 transition-colors ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                   >
                     {t('userList.allUser')}
                   </button>
                   <button
                     onClick={() => { setFilterType('online'); setShowFilterDropdown(false); }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
+                    className={`w-full text-left px-4 py-2 transition-colors ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                   >
                     {t('userList.online')}
                   </button>
                   <button
                     onClick={() => { setFilterType('offline'); setShowFilterDropdown(false); }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
+                    className={`w-full text-left px-4 py-2 transition-colors ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                   >
                     {t('userList.offline')}
                   </button>
                   <button
                     onClick={() => { setFilterType('locked'); setShowFilterDropdown(false); }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
+                    className={`w-full text-left px-4 py-2 transition-colors ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                   >
                     {t('userList.locked')}
                   </button>
                   <button
                     onClick={() => { setFilterType('inactive'); setShowFilterDropdown(false); }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors"
+                    className={`w-full text-left px-4 py-2 transition-colors ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                   >
                     {t('userList.inactive')}
                   </button>
@@ -359,13 +365,17 @@ const UserList = () => {
 
             {/* Search Bar */}
             <div className="relative w-96">
-              <SearchIcon size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <SearchIcon size={20} className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
               <input
                 type="text"
                 placeholder={t('userList.searchUser')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-cyan-400 transition-colors"
+                className={`w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 text-white focus:border-cyan-400'
+                    : 'bg-white border-gray-200 text-gray-900 focus:border-cyan-400'
+                }`}
               />
             </div>
           </div>
