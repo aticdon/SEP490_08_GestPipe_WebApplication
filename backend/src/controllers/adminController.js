@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const Admin = require('../models/Admin');
+const { sendMail } = require('../utils/mailer');
 
 // Helper: Generate random password
 const generateRandomPassword = () => {
@@ -16,7 +17,8 @@ const hashPassword = (password) => {
 // @access  Private (SuperAdmin)
 exports.createAdmin = async (req, res) => {
   try {
-    console.log('🚀 Create Admin called with body:', req.body);
+  console.log('🚀 Create Admin called with body:', req.body);
+  console.log('🕒 Timestamp:', new Date().toISOString());
     const { email, fullName, phoneNumber, province } = req.body;
 
     // Validation
@@ -59,6 +61,41 @@ exports.createAdmin = async (req, res) => {
     console.log('✅ Admin created successfully!');
     console.log('📧 Email:', newAdmin.email);
     console.log('🔑 Temporary Password:', tempPassword);
+
+
+    // Send professional email to new admin with logo, color, greeting, signature
+    try {
+      console.log('📨 Preparing to send email to:', newAdmin.email);
+      await sendMail({
+        to: newAdmin.email,
+        subject: 'Welcome to GestPipe Admin Portal',
+        text:
+          `Dear ${newAdmin.fullName},\n\n` +
+          `Congratulations! Your admin account has been successfully created on GestPipe.\n` +
+          `Your temporary password: ${tempPassword}\n` +
+          `For security, please log in and change your password immediately upon first access.\n\n` +
+          `If you have any questions, feel free to contact our support team.\n\n` +
+          `Best regards,\nGestPipe Team`,
+        html:
+          `<div style='font-family:Montserrat,sans-serif;color:#222;background:#f8fafc;padding:32px;border-radius:12px;max-width:480px;margin:auto;'>` +
+          `<div style='text-align:center;margin-bottom:24px;'><img src='https://raw.githubusercontent.com/aticdon/SEP490_08_GestPipe_WebApplication/master/frontend/src/assets/images/Logo.png' alt='GestPipe Logo' style='height:64px;'/></div>` +
+          `<h2 style='color:#00B8D4;text-align:center;margin-bottom:24px;'>Welcome to GestPipe Admin Portal</h2>` +
+          `<p style='font-size:16px;color:#333;'>Dear <b style='color:#6c2eb6;'>${newAdmin.fullName}</b>,</p>` +
+          `<p style='font-size:16px;color:#333;'>Congratulations! Your admin account has been <b style='color:#00B8D4;'>successfully created</b> on <b>GestPipe</b>.</p>` +
+          `<p style='font-size:16px;margin:24px 0;'><b style='color:#222;'>Your temporary password:</b> <span style='background:#e0f7fa;padding:6px 14px;border-radius:6px;color:#00B8D4;font-weight:bold;'>${tempPassword}</span></p>` +
+          `<p style='font-size:15px;color:#333;'>For security, please <b>log in and change your password immediately</b> upon first access.</p>` +
+          `<hr style='margin:32px 0;border:none;border-top:1px solid #eee;'/>` +
+          `<p style='font-size:15px;color:#333;'>If you have any questions, feel free to contact our support team.</p>` +
+          `<div style='margin-top:32px;text-align:left;'>` +
+          `<p style='font-size:15px;color:#222;'>Best regards,</p>` +
+          `<p style='font-size:15px;color:#00B8D4;font-weight:bold;'>GestPipe Team</p>` +
+          `</div>` +
+          `</div>`
+      });
+      console.log('📧 Email sent to new admin:', newAdmin.email);
+    } catch (mailErr) {
+      console.error('❌ Failed to send email:', mailErr);
+    }
 
     res.status(201).json({
       success: true,
