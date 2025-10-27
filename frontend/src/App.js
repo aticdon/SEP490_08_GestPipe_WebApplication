@@ -11,6 +11,7 @@ import AdminList from './pages/AdminList';
 import UserList from './pages/UserList';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
+import ForgotPassword from './pages/ForgotPassword';
 
 // Protected Route Component for Role-Based Access
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -41,6 +42,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/change-password" element={<ChangePassword />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             
             {/* SuperAdmin Only Routes */}
             <Route 

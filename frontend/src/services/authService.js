@@ -3,6 +3,16 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5000/api/auth';
 
 const authService = {
+  // Logout (xóa token và thông tin admin khỏi localStorage)
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('admin');
+  },
+  // Get Current User (lấy thông tin admin từ localStorage)
+  getCurrentUser: () => {
+    const adminData = localStorage.getItem('admin');
+    return adminData ? JSON.parse(adminData) : null;
+  },
   // Login
   login: async (email, password) => {
     const response = await axios.post(`${API_URL}/login`, { email, password });
@@ -50,17 +60,23 @@ const authService = {
     return response.data;
   },
 
-  // Get Current User (alias for getCurrentAdmin, for convenience)
-  getCurrentUser: () => {
-    const adminData = localStorage.getItem('admin');
-    return adminData ? JSON.parse(adminData) : null;
+  // Forgot Password: gửi OTP
+  sendForgotPasswordOTP: async (email) => {
+    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    return response.data;
   },
 
-  // Logout
-  logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('admin');
-  }
+  // Forgot Password: xác thực OTP
+  verifyForgotPasswordOTP: async (email, otp) => {
+    const response = await axios.post(`${API_URL}/verify-otp`, { email, otp });
+    return response.data;
+  },
+
+  // Forgot Password: đổi mật khẩu mới
+  resetForgotPassword: async (email, newPassword) => {
+    const response = await axios.post(`${API_URL}/reset-password`, { email, newPassword });
+    return response.data;
+  },
 };
 
 export default authService;

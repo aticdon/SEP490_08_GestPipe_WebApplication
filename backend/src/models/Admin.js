@@ -64,6 +64,15 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     trim: true
   }
+  ,
+  resetPasswordOTP: {
+    type: String,
+    default: null
+  },
+  resetPasswordOTPExpires: {
+    type: Date,
+    default: null
+  }
 }, {
   timestamps: true // Automatically manages createdAt and updatedAt
 });

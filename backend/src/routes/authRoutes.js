@@ -5,6 +5,9 @@ const { protect } = require('../middlewares/authMiddleware');
 
 // Public routes
 router.post('/login', authController.login);
+router.post('/forgot-password', authController.sendForgotPasswordOTP);
+router.post('/verify-otp', authController.verifyForgotPasswordOTP);
+router.post('/reset-password', authController.resetForgotPassword);
 
 // Protected routes (require authentication)
 router.post('/change-password', protect, authController.changePassword);
