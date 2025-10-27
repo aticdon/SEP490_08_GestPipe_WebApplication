@@ -117,12 +117,14 @@ const translations = [
   { language: 'vi', category: 'changePassword', key: 'newPassword', value: 'Mật khẩu mới' },
   { language: 'vi', category: 'changePassword', key: 'confirmPassword', value: 'Nhập lại mật khẩu mới' },
   { language: 'vi', category: 'changePassword', key: 'submit', value: 'Đổi mật khẩu' },
+  { language: 'vi', category: 'changePassword', key: 'firstLoginWarning', value: 'Đây là lần đăng nhập đầu tiên. Bạn phải đổi mật khẩu để tiếp tục.' },
 
   { language: 'en', category: 'changePassword', key: 'title', value: 'Change Password' },
   { language: 'en', category: 'changePassword', key: 'oldPassword', value: 'Old Password' },
   { language: 'en', category: 'changePassword', key: 'newPassword', value: 'New Password' },
   { language: 'en', category: 'changePassword', key: 'confirmPassword', value: 'Re-enter New Password' },
   { language: 'en', category: 'changePassword', key: 'submit', value: 'Change Password' },
+  { language: 'en', category: 'changePassword', key: 'firstLoginWarning', value: 'This is your first login. You must change your password to continue.' },
 
   // Edit Profile
   { language: 'vi', category: 'editProfile', key: 'title', value: 'Chỉnh sửa hồ sơ' },
