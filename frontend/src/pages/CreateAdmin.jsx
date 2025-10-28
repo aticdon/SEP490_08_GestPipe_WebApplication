@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Bell, ChevronDown, Copy, Check } from 'lucide-react';
+import { Sun, Moon, Bell, ChevronDown, Check } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import adminService from '../services/adminService';
@@ -22,7 +22,6 @@ const CreateAdmin = () => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
-  const [copied, setCopied] = useState(false);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -93,13 +92,6 @@ const CreateAdmin = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(success.temporaryPassword);
-    setCopied(true);
-    toast.success(t('notifications.passwordCopied'));
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleFinish = () => {
@@ -371,23 +363,9 @@ const CreateAdmin = () => {
                     
                     <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} rounded-lg p-4 mb-2`}>
                       <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{t('createAdmin.tempPassword')}</p>
-                      <div className="flex items-center justify-between">
-                        <code className={`text-lg font-mono font-bold ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`}>
-                          {success.temporaryPassword}
-                        </code>
-                        <button
-                          onClick={copyToClipboard}
-                          className={`p-2 rounded-lg transition-all ${
-                            copied 
-                              ? 'bg-green-500 text-white' 
-                              : theme === 'dark'
-                                ? 'bg-gray-700 text-cyan-400 hover:bg-gray-600'
-                                : 'bg-gray-200 text-cyan-600 hover:bg-gray-300'
-                          }`}
-                        >
-                          {copied ? <Check size={20} /> : <Copy size={20} />}
-                        </button>
-                      </div>
+                      <code className={`block text-lg font-mono font-bold ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`}>
+                        {success?.temporaryPassword ? '*'.repeat(success.temporaryPassword.length) : '********'}
+                      </code>
                     </div>
                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
                       ⚠️ {t('createAdmin.importantNote')}

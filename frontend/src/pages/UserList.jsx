@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import AdminSidebar from '../components/AdminSidebar';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 
@@ -20,9 +20,6 @@ const UserList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-
-  // Active menu state
-  const [activeMenu, setActiveMenu] = useState('user');
 
   useEffect(() => {
     const currentAdmin = authService.getCurrentUser();
@@ -174,32 +171,27 @@ const UserList = () => {
             <div className="relative">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                   theme === 'dark'
                     ? 'bg-gray-700 hover:bg-gray-600'
                     : 'bg-gray-200 hover:bg-gray-300'
                 }`}
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-8 h-8 rounded-full bg-cyan-primary flex items-center justify-center text-white font-semibold">
                   {admin.fullName.charAt(0).toUpperCase()}
                 </div>
+                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                  {admin.fullName}
+                </span>
                 <ChevronDown size={16} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} />
               </button>
 
               {showUserDropdown && (
-                <div className={`absolute right-0 mt-2 w-48 border rounded-lg shadow-xl z-50 ${
+                <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-xl border z-50 ${
                   theme === 'dark'
                     ? 'bg-gray-800 border-gray-700'
                     : 'bg-white border-gray-200'
                 }`}>
-                  <div className={`p-3 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {admin.fullName}
-                    </div>
-                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {admin.email}
-                    </div>
-                  </div>
                   <button
                     onClick={() => {
                       setShowUserDropdown(false);
@@ -207,8 +199,8 @@ const UserList = () => {
                     }}
                     className={`w-full text-left px-4 py-2 transition-colors ${
                       theme === 'dark'
-                        ? 'text-gray-300 hover:bg-gray-700'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'text-cyan-primary hover:bg-gray-700'
+                        : 'text-cyan-600 hover:bg-gray-100'
                     }`}
                   >
                     {t('profile.title')}
@@ -220,14 +212,17 @@ const UserList = () => {
                     }}
                     className={`w-full text-left px-4 py-2 transition-colors ${
                       theme === 'dark'
-                        ? 'text-gray-300 hover:bg-gray-700'
+                        ? 'text-white hover:bg-gray-700'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     {t('profile.changePassword')}
                   </button>
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      setShowUserDropdown(false);
+                      handleLogout();
+                    }}
                     className={`w-full text-left px-4 py-2 transition-colors ${
                       theme === 'dark'
                         ? 'text-red-400 hover:bg-gray-700'
@@ -246,65 +241,7 @@ const UserList = () => {
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Fixed */}
-        <aside className={`w-64 border-r flex-shrink-0 flex flex-col backdrop-blur-sm ${
-          theme === 'dark'
-            ? 'bg-gray-900/50 border-gray-800'
-            : 'bg-white/50 border-gray-200'
-        }`}>
-          <nav className="p-4 space-y-2 flex-1">
-            {/* Gestures Control */}
-            <button
-              onClick={() => setActiveMenu('gestures')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                activeMenu === 'gestures'
-                  ? theme === 'dark'
-                    ? 'bg-gray-800 text-cyan-400'
-                    : 'bg-cyan-50 text-cyan-600'
-                  : theme === 'dark'
-                    ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              <span className="text-xl">🎮</span>
-              <span className="font-medium">{t('userList.gesturesControl')}</span>
-            </button>
-
-            {/* User - Active */}
-            <button
-              onClick={() => setActiveMenu('user')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                activeMenu === 'user'
-                  ? 'bg-cyan-400 text-gray-900'
-                  : theme === 'dark'
-                    ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              <span className="text-xl">👥</span>
-              <span className="font-medium">{t('userList.user')}</span>
-            </button>
-
-            {/* Version */}
-            <button
-              onClick={() => setActiveMenu('version')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                activeMenu === 'version'
-                  ? theme === 'dark'
-                    ? 'bg-gray-800 text-cyan-400'
-                    : 'bg-cyan-50 text-cyan-600'
-                  : theme === 'dark'
-                    ? 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              <span className="text-xl">⚙️</span>
-              <span className="font-medium">{t('userList.version')}</span>
-            </button>
-          </nav>
-
-          {/* Language Switcher - Bottom */}
-          <LanguageSwitcher />
-        </aside>
+        <AdminSidebar theme={theme} />
 
         {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-y-auto p-8">

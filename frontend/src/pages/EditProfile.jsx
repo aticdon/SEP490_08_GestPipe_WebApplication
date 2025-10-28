@@ -8,6 +8,7 @@ import authService from '../services/authService';
 import adminService from '../services/adminService';
 import { useTheme } from '../utils/ThemeContext';
 import Sidebar from '../components/Sidebar';
+import AdminSidebar from '../components/AdminSidebar';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 
@@ -258,7 +259,11 @@ const EditProfile = () => {
 
         {/* Main Content with Sidebar */}
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar theme={theme} />
+          {admin?.role === 'admin' ? (
+            <AdminSidebar theme={theme} />
+          ) : (
+            <Sidebar theme={theme} />
+          )}
 
           {/* Main Content Area */}
           <main className={`flex-1 overflow-y-auto p-8 ${
@@ -266,11 +271,15 @@ const EditProfile = () => {
           }`}>
             <div className="max-w-4xl mx-auto">
               {/* Edit Profile Form */}
-              <div className={`rounded-2xl border p-8 ${
+              <div className={`rounded-2xl border p-10 ${
                 theme === 'dark'
                   ? 'bg-gray-800 border-gray-700'
                   : 'bg-white border-gray-200'
               }`}>
+                <h2 className="text-3xl font-bold text-center mb-8 text-cyan-primary">
+                  {t('editProfile.title')}
+                </h2>
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Name */}
                   <div className="flex items-center">

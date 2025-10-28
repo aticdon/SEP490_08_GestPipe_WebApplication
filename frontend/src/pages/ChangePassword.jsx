@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
 import Sidebar from '../components/Sidebar';
+import AdminSidebar from '../components/AdminSidebar';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 
@@ -181,27 +182,23 @@ const ChangePassword = () => {
             <div className="relative">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                   theme === 'dark'
                     ? 'bg-gray-700 hover:bg-gray-600'
                     : 'bg-gray-200 hover:bg-gray-300'
                 }`}
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-8 h-8 rounded-full bg-cyan-primary flex items-center justify-center text-white font-semibold">
                   {admin?.fullName?.charAt(0).toUpperCase() || 'A'}
                 </div>
-                <span className={`font-medium ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-800'
-                }`}>
+                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                   {admin?.fullName || 'Admin'}
                 </span>
-                <ChevronDown className={`w-4 h-4 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`} />
+                <ChevronDown size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
               </button>
 
               {showUserDropdown && (
-                <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-2 border ${
+                <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-xl border z-50 ${
                   theme === 'dark'
                     ? 'bg-gray-800 border-gray-700'
                     : 'bg-white border-gray-200'
@@ -213,8 +210,8 @@ const ChangePassword = () => {
                     }}
                     className={`w-full text-left px-4 py-2 transition-colors ${
                       theme === 'dark'
-                        ? 'text-gray-300 hover:bg-gray-700'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'text-cyan-primary hover:bg-gray-700'
+                        : 'text-cyan-600 hover:bg-gray-100'
                     }`}
                   >
                     {t('profile.title')}
@@ -226,7 +223,7 @@ const ChangePassword = () => {
                     }}
                     className={`w-full text-left px-4 py-2 transition-colors ${
                       theme === 'dark'
-                        ? 'text-gray-300 hover:bg-gray-700'
+                        ? 'text-white hover:bg-gray-700'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -273,7 +270,7 @@ const ChangePassword = () => {
 
               {/* Change Password Form */}
               <div className={`${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'} backdrop-blur-sm rounded-2xl border ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200/50'} p-8 shadow-2xl`}>
-                <h2 className={`text-2xl font-bold mb-6 text-center ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <h2 className="text-2xl font-bold mb-6 text-center text-cyan-primary">
                   {t('changePassword.title')}
                 </h2>
                 
@@ -368,13 +365,20 @@ const ChangePassword = () => {
           /* Normal Change Password - With Sidebar */
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar */}
-          <Sidebar theme={theme} />
+          {admin.role === 'admin' ? (
+            <AdminSidebar theme={theme} />
+          ) : (
+            <Sidebar theme={theme} />
+          )}
 
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto p-8">
             <div className="max-w-4xl mx-auto">
               {/* Change Password Form */}
               <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} backdrop-blur-sm rounded-2xl border ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200/50'} p-12`}>
+                <h2 className="text-3xl font-bold text-center mb-8 text-cyan-primary">
+                  {t('changePassword.title')}
+                </h2>
                 <form onSubmit={handleSubmit} className="space-y-8">
                   {/* Old Password */}
                   <div>

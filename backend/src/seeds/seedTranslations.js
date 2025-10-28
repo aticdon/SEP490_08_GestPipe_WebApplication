@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const mongoose = require('mongoose');
 const Translation = require('../models/Translation');
 
@@ -6,18 +6,20 @@ const Translation = require('../models/Translation');
 const translations = [
   // Sidebar
   { language: 'vi', category: 'sidebar', key: 'dashboard', value: 'Tổng quan' },
+  { language: 'vi', category: 'sidebar', key: 'home', value: 'Trang chủ' },
   { language: 'vi', category: 'sidebar', key: 'actions', value: 'Thao tác' },
   { language: 'vi', category: 'sidebar', key: 'adminManagement', value: 'Quản trị viên' },
   { language: 'vi', category: 'sidebar', key: 'userManagement', value: 'Người dùng' },
   { language: 'vi', category: 'sidebar', key: 'version', value: 'Phiên bản' },
 
   { language: 'en', category: 'sidebar', key: 'dashboard', value: 'Dashboard' },
+  { language: 'en', category: 'sidebar', key: 'home', value: 'Home' },
   { language: 'en', category: 'sidebar', key: 'actions', value: 'Actions' },
   { language: 'en', category: 'sidebar', key: 'adminManagement', value: 'Admin Management' },
   { language: 'en', category: 'sidebar', key: 'userManagement', value: 'User Management' },
   { language: 'en', category: 'sidebar', key: 'version', value: 'Version' },
 
-  // Dashboard - Tabs
+// Dashboard - Tabs
   { language: 'vi', category: 'dashboard', key: 'title', value: 'Tổng quan' },
   { language: 'vi', category: 'dashboard', key: 'userOverview', value: 'Tổng quan người dùng' },
   { language: 'vi', category: 'dashboard', key: 'actions', value: 'Thao tác' },
@@ -386,3 +388,5 @@ const seedTranslations = async () => {
 };
 
 seedTranslations();
+
+
