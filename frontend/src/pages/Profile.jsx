@@ -73,6 +73,8 @@ const Profile = () => {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
   };
 
+  const formatDateTime = (dateString) => (dateString ? dateString : 'N/A');
+
   if (loading || !admin) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -313,7 +315,7 @@ const Profile = () => {
                   <span className={`text-lg ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                   }`}>
-                    {admin.createdAt ? formatDate(admin.createdAt) : 'N/A'}
+                    {formatDateTime(admin.createdAt)}
                   </span>
                 </div>
               </div>

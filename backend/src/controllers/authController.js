@@ -124,6 +124,7 @@ exports.sendForgotPasswordOTP = async (req, res) => {
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const { formatAdminDocument, formatDateTimeWithOffset } = require('../utils/dateFormatter');
 
 // Helper: Hash password using SHA256
 const hashPassword = (password) => {
@@ -212,7 +213,9 @@ exports.login = async (req, res) => {
         accountStatus: admin.accountStatus,
         theme: admin.theme,
         uiLanguage: admin.uiLanguage,
-        isFirstLogin: isUsingTempPassword // Flag for frontend
+        isFirstLogin: isUsingTempPassword,
+        createdAt: formatDateTimeWithOffset(admin.createdAt),
+        updatedAt: formatDateTimeWithOffset(admin.updatedAt)
       }
     };
 
@@ -283,6 +286,7 @@ exports.changePassword = async (req, res) => {
     admin.isFirstLogin = false; // Mark as not first login anymore
     
     await admin.save();
+    const formattedAdmin = formatAdminDocument(admin);
 
     res.status(200).json({
       success: true,
@@ -325,19 +329,22 @@ exports.updateProfile = async (req, res) => {
     if (uiLanguage !== undefined) admin.uiLanguage = uiLanguage;
 
     await admin.save();
+    const formattedAdmin = formatAdminDocument(admin);
 
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
       admin: {
-        id: admin._id,
-        fullName: admin.fullName,
-        email: admin.email,
-        role: admin.role,
-        phoneNumber: admin.phoneNumber,
-        birthday: admin.birthday,
-        theme: admin.theme,
-        uiLanguage: admin.uiLanguage
+        id: formattedAdmin._id,
+        fullName: formattedAdmin.fullName,
+        email: formattedAdmin.email,
+        role: formattedAdmin.role,
+        phoneNumber: formattedAdmin.phoneNumber,
+        birthday: formattedAdmin.birthday,
+        theme: formattedAdmin.theme,
+        uiLanguage: formattedAdmin.uiLanguage,
+        createdAt: formattedAdmin.createdAt,
+        updatedAt: formattedAdmin.updatedAt
       }
     });
 
@@ -364,9 +371,11 @@ exports.getCurrentAdmin = async (req, res) => {
       });
     }
 
+    const formattedAdmin = formatAdminDocument(admin);
+
     res.status(200).json({
       success: true,
-      admin
+      admin: formattedAdmin
     });
 
   } catch (error) {

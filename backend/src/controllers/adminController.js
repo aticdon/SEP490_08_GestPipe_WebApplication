@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const Admin = require('../models/Admin');
 const { sendMail } = require('../utils/mailer');
+const { formatAdminDocument } = require('../utils/dateFormatter');
 
 // Helper: Generate random password
 const generateRandomPassword = () => {
@@ -57,6 +58,7 @@ exports.createAdmin = async (req, res) => {
     });
 
     await newAdmin.save();
+    const formattedAdmin = formatAdminDocument(newAdmin);
 
     console.log('✅ Admin created successfully!');
     console.log('📧 Email:', newAdmin.email);
@@ -101,10 +103,11 @@ exports.createAdmin = async (req, res) => {
       success: true,
       message: 'Admin created successfully',
       admin: {
-        id: newAdmin._id,
-        fullName: newAdmin.fullName,
-        email: newAdmin.email,
-        role: newAdmin.role
+        id: formattedAdmin._id,
+        fullName: formattedAdmin.fullName,
+        email: formattedAdmin.email,
+        role: formattedAdmin.role,
+        createdAt: formattedAdmin.createdAt
       },
       temporaryPassword: tempPassword // Return plain password for SuperAdmin to send via email
     });
@@ -127,10 +130,12 @@ exports.getAllAdmins = async (req, res) => {
       .select('-password -temporaryPassword')
       .sort({ createdAt: -1 });
 
+    const formattedAdmins = admins.map(formatAdminDocument);
+
     res.status(200).json({
       success: true,
-      count: admins.length,
-      admins
+      count: formattedAdmins.length,
+      admins: formattedAdmins
     });
 
   } catch (error) {
@@ -217,16 +222,20 @@ exports.toggleAdminStatus = async (req, res) => {
 
     await admin.save();
 
+    const formattedAdmin = formatAdminDocument(admin);
+
     console.log(`✅ Admin ${admin.email} status changed to ${admin.accountStatus}`);
 
     res.status(200).json({
       success: true,
       message: 'Admin status updated successfully',
       admin: {
-        _id: admin._id,
-        email: admin.email,
-        fullName: admin.fullName,
-        accountStatus: admin.accountStatus
+        _id: formattedAdmin._id,
+        email: formattedAdmin.email,
+        fullName: formattedAdmin.fullName,
+        accountStatus: formattedAdmin.accountStatus,
+        createdAt: formattedAdmin.createdAt,
+        updatedAt: formattedAdmin.updatedAt
       }
     });
 
@@ -264,18 +273,21 @@ exports.updateProfile = async (req, res) => {
     if (uiLanguage) admin.uiLanguage = uiLanguage;
 
     await admin.save();
+    const formattedAdmin = formatAdminDocument(admin);
 
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
       admin: {
-        _id: admin._id,
-        fullName: admin.fullName,
-        email: admin.email,
-        birthday: admin.birthday,
-        phoneNumber: admin.phoneNumber,
-        province: admin.province,
-        role: admin.role
+        _id: formattedAdmin._id,
+        fullName: formattedAdmin.fullName,
+        email: formattedAdmin.email,
+        birthday: formattedAdmin.birthday,
+        phoneNumber: formattedAdmin.phoneNumber,
+        province: formattedAdmin.province,
+        role: formattedAdmin.role,
+        createdAt: formattedAdmin.createdAt,
+        updatedAt: formattedAdmin.updatedAt
       }
     });
 
@@ -304,17 +316,20 @@ exports.getProfile = async (req, res) => {
       });
     }
 
+    const formattedAdmin = formatAdminDocument(admin);
+
     res.status(200).json({
       success: true,
       admin: {
-        _id: admin._id,
-        fullName: admin.fullName,
-        email: admin.email,
-        birthday: admin.birthday,
-        phoneNumber: admin.phoneNumber,
-        province: admin.province,
-        role: admin.role,
-        createdAt: admin.createdAt
+        _id: formattedAdmin._id,
+        fullName: formattedAdmin.fullName,
+        email: formattedAdmin.email,
+        birthday: formattedAdmin.birthday,
+        phoneNumber: formattedAdmin.phoneNumber,
+        province: formattedAdmin.province,
+        role: formattedAdmin.role,
+        createdAt: formattedAdmin.createdAt,
+        updatedAt: formattedAdmin.updatedAt
       }
     });
 

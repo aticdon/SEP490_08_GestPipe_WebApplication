@@ -157,10 +157,7 @@ const AdminList = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB'); // DD-MM-YYYY format
-  };
+  const formatDate = (dateString) => (dateString ? dateString : 'N/A');
 
   return (
     <div 
