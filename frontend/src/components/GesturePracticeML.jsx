@@ -108,9 +108,10 @@ const GESTURE_TEMPLATES = {
   }
 };
 
-function GesturePracticeML({ gestureName, onClose }) {
+function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   // Debug gesture name
   console.log('🎯 GesturePracticeMLFixed received gestureName:', gestureName);
+  console.log('🎨 Theme received:', theme);
   console.log('📋 Available templates:', Object.keys(GESTURE_TEMPLATES));
   
   // Refs
@@ -127,6 +128,57 @@ function GesturePracticeML({ gestureName, onClose }) {
   const [attemptStats, setAttemptStats] = useState({ correct: 0, wrong: 0 });
   const [statusMessage, setStatusMessage] = useState('');
   const [currentHandInfo, setCurrentHandInfo] = useState('');
+  
+  // Practice limit system
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [showFinalResult, setShowFinalResult] = useState(false);
+  const [attemptHistory, setAttemptHistory] = useState([]); // Track each attempt with result and error
+  const maxAttempts = 5;
+  
+  // Helper function to handle attempt completion
+  const handleAttemptResult = useCallback((isCorrect, message, errorType = '') => {
+    console.log(`🎯 handleAttemptResult called - isCorrect: ${isCorrect}, message: ${message}`);
+    
+    // Update attempt count and check completion
+    setAttemptCount(prev => {
+      const newAttemptCount = prev + 1;
+      console.log(`📊 Attempt count: ${prev} -> ${newAttemptCount}`);
+      
+      // Check if we've reached max attempts
+      if (newAttemptCount >= maxAttempts) {
+        console.log(`✅ Reached max attempts (${maxAttempts}), showing final result`);
+        setShowFinalResult(true);
+      } else {
+        // Only show message if not completed
+        setStatusMessage(message);
+        setTimeout(() => {
+          setPracticeState("IDLE");
+          practiceStateRef.current = "IDLE";
+        }, 2000);
+      }
+      
+      return newAttemptCount;
+    });
+    
+    // Update attempt history separately
+    setAttemptHistory(prevHistory => {
+      const newAttempt = {
+        attempt: prevHistory.length + 1, // Use history length instead of count
+        result: isCorrect ? 'correct' : 'wrong',
+        error: isCorrect ? '' : errorType,
+        message: message
+      };
+      console.log(`📝 Adding to history:`, newAttempt);
+      return [...prevHistory, newAttempt];
+    });
+    
+    // Update stats
+    if (isCorrect) {
+      setAttemptStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+    } else {
+      setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+    }
+  }, [maxAttempts]);
 
   
   // Add refs to track actual values
@@ -351,12 +403,7 @@ function GesturePracticeML({ gestureName, onClose }) {
     // Check finger match
     const fingerMatch = template.right_fingers.every((expected, i) => expected === avgFingers[i]);
     if (!fingerMatch) {
-      setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-      setStatusMessage(`❌ Wrong fingers: got [${avgFingers.join(',')}], expected [${template.right_fingers.join(',')}]`);
-      setTimeout(() => {
-        setPracticeState("IDLE");
-        practiceStateRef.current = "IDLE";
-      }, 2000);
+      handleAttemptResult(false, `❌ Wrong fingers: got [${avgFingers.join(',')}], expected [${template.right_fingers.join(',')}]`, 'Wrong finger position');
       return;
     }
     
@@ -372,12 +419,7 @@ function GesturePracticeML({ gestureName, onClose }) {
       const minFrames = 15; // ~0.5s at 30fps
       if (currentSequence.length < minFrames) {
         console.log(`🔵 ❌ Not enough frames: ${currentSequence.length} < ${minFrames}`);
-        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-        setStatusMessage(`❌ Hold gesture longer (need ~0.5s minimum)`);
-        setTimeout(() => {
-          setPracticeState("IDLE");
-          practiceStateRef.current = "IDLE";
-        }, 2000);
+        handleAttemptResult(false, `❌ Hold gesture longer (need ~0.5s minimum)`, 'Hold too short');
         return;
       }
       
@@ -392,12 +434,7 @@ function GesturePracticeML({ gestureName, onClose }) {
       console.log(`🔵 Frame analysis: ${matchingFrames}/${currentSequence.length} = ${matchPercentage.toFixed(1)}% match`);
       
       if (matchPercentage < 70) { // Need 70% of frames to match
-        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-        setStatusMessage(`❌ Inconsistent fingers: only ${matchPercentage.toFixed(0)}% match (need 70%)`);
-        setTimeout(() => {
-          setPracticeState("IDLE");
-          practiceStateRef.current = "IDLE";
-        }, 2000);
+        handleAttemptResult(false, `❌ Inconsistent fingers: only ${matchPercentage.toFixed(0)}% match (need 70%)`, 'Inconsistent gesture');
         return;
       }
       
@@ -416,30 +453,19 @@ function GesturePracticeML({ gestureName, onClose }) {
         console.log(`🔵 Movement check: max = ${(maxMovement * 100).toFixed(1)}cm`);
         
         if (maxMovement > 0.05) { // 5cm threshold
-          setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-          setStatusMessage(`❌ Too much movement: ${(maxMovement * 100).toFixed(1)}cm (max 5cm)`);
-          setTimeout(() => {
-            setPracticeState("IDLE");
-            practiceStateRef.current = "IDLE";
-          }, 2000);
+          handleAttemptResult(false, `❌ Too much movement: ${(maxMovement * 100).toFixed(1)}cm (max 5cm)`, 'Hand moved too much');
           return;
         }
       }
       
       // Success!
       const durationMs = currentSequence.length * (1000/30); // Estimate duration
-      setAttemptStats(prev => ({ ...prev, correct: prev.correct + 1 }));
-      setStatusMessage(`✅ Perfect static ${gestureName}! ${matchPercentage.toFixed(0)}% accuracy, ${(durationMs/1000).toFixed(1)}s hold`);
+      handleAttemptResult(true, `✅ Perfect static ${gestureName}! ${matchPercentage.toFixed(0)}% accuracy, ${(durationMs/1000).toFixed(1)}s hold`);
       toast.success(`✅ Perfect ${gestureName}!`);
     } else {
       // Motion gesture using currentSequence
       if (currentSequence.length < 3) {
-        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-        setStatusMessage('❌ Too few motion frames');
-        setTimeout(() => {
-          setPracticeState("IDLE");
-          practiceStateRef.current = "IDLE";
-        }, 2000);
+        handleAttemptResult(false, '❌ Too few motion frames', 'Motion too short');
         return;
       }
       
@@ -450,9 +476,7 @@ function GesturePracticeML({ gestureName, onClose }) {
       const deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       
       if (deltaMag < 0.03) {
-        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-        setStatusMessage('❌ Not enough motion detected');
-        setTimeout(() => setPracticeState("IDLE"), 2000);
+        handleAttemptResult(false, '❌ Not enough motion detected', 'Motion too small');
         return;
       }
       
@@ -473,12 +497,7 @@ function GesturePracticeML({ gestureName, onClose }) {
       if (expectedMainX !== actualMainX) {
         const expectedDir = expectedMainX ? 'horizontal' : 'vertical';
         const actualDir = actualMainX ? 'horizontal' : 'vertical';
-        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-        setStatusMessage(`❌ Wrong main direction: moved ${actualDir}, expected ${expectedDir}`);
-        setTimeout(() => {
-          setPracticeState("IDLE");
-          practiceStateRef.current = "IDLE";
-        }, 2000);
+        handleAttemptResult(false, `❌ Wrong main direction: moved ${actualDir}, expected ${expectedDir}`, 'Wrong direction');
         return;
       }
       
@@ -491,12 +510,7 @@ function GesturePracticeML({ gestureName, onClose }) {
         if (expectedRight !== actualRight) {
           const expectedDirStr = expectedRight ? 'right' : 'left';
           const actualDirStr = actualRight ? 'right' : 'left';
-          setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-          setStatusMessage(`❌ Wrong horizontal direction: moved ${actualDirStr}, expected ${expectedDirStr}`);
-          setTimeout(() => {
-            setPracticeState("IDLE");
-            practiceStateRef.current = "IDLE";
-          }, 2000);
+          handleAttemptResult(false, `❌ Wrong horizontal direction: moved ${actualDirStr}, expected ${expectedDirStr}`, 'Wrong horizontal direction');
           return;
         }
       } else {
@@ -507,28 +521,16 @@ function GesturePracticeML({ gestureName, onClose }) {
         if (expectedDown !== actualDown) {
           const expectedDirStr = expectedDown ? 'down' : 'up';
           const actualDirStr = actualDown ? 'down' : 'up';
-          setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-          setStatusMessage(`❌ Wrong vertical direction: moved ${actualDirStr}, expected ${expectedDirStr}`);
-          setTimeout(() => {
-            setPracticeState("IDLE");
-            practiceStateRef.current = "IDLE";
-          }, 2000);
+          handleAttemptResult(false, `❌ Wrong vertical direction: moved ${actualDirStr}, expected ${expectedDirStr}`, 'Wrong vertical direction');
           return;
         }
       }
       
       // All checks passed!
-      setAttemptStats(prev => ({ ...prev, correct: prev.correct + 1 }));
-      setStatusMessage(`✅ Perfect ${gestureName}! Direction: ${deltaMag.toFixed(3)} movement`);
+      handleAttemptResult(true, `✅ Perfect ${gestureName}! Direction: ${deltaMag.toFixed(3)} movement`);
       toast.success(`✅ Perfect ${gestureName}!`);
     }
-    
-    setTimeout(() => {
-      setPracticeState("IDLE");
-      practiceStateRef.current = "IDLE";
-      setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to start`);
-    }, 3000);
-  }, [gestureSequence, template, gestureName, staticHoldStartTime, staticRequiredDuration]);
+  }, [gestureSequence, template, gestureName, staticHoldStartTime, staticRequiredDuration, handleAttemptResult]);
   
   // MediaPipe results handler
   const onResults = useCallback((results) => {
@@ -825,97 +827,179 @@ function GesturePracticeML({ gestureName, onClose }) {
     );
   }
   
+
+
+  // Summary popup after 5 attempts
+  if (showFinalResult) {
+    console.log('🎯 SUMMARY POPUP RENDERING - This should be DARK theme!');
+    const accuracy = attemptStats.correct + attemptStats.wrong > 0 ? 
+      Math.round((attemptStats.correct / (attemptStats.correct + attemptStats.wrong)) * 100) : 0;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div 
+          className="rounded-xl shadow-xl max-w-md w-full"
+          style={{
+            backgroundColor: '#1f2937', // Dark gray-800
+            color: '#ffffff',
+            border: 'none'
+          }}
+        >
+          {/* Summary Header */}
+          <div 
+            className="p-6 border-b"
+            style={{
+              borderBottomColor: '#374151', // Force dark border
+              borderBottomWidth: '1px',
+              borderBottomStyle: 'solid'
+            }}
+          >
+            <h2 className="text-2xl font-bold text-center" style={{ color: '#ffffff' }}>📊 Practice Complete!</h2>
+            <p className="text-center mt-2" style={{ color: '#d1d5db' }}>
+              {gestureName} - 5 attempts completed
+            </p>
+          </div>
+          
+          {/* Summary Stats */}
+          <div className="p-6" style={{ backgroundColor: '#1f2937' }}>
+            <div className="grid grid-cols-3 gap-4 text-center mb-6">
+              <div>
+                <div className="text-3xl font-bold text-green-500">{attemptStats.correct}</div>
+                <div className="text-sm" style={{ color: '#9ca3af' }}>Correct</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-red-500">{attemptStats.wrong}</div>
+                <div className="text-sm" style={{ color: '#9ca3af' }}>Wrong</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-blue-500">{accuracy}%</div>
+                <div className="text-sm" style={{ color: '#9ca3af' }}>Accuracy</div>
+              </div>
+            </div>
+            
+            {/* Attempt History - Only show errors */}
+            {attemptHistory.some(att => att.result === 'wrong') && (
+              <div 
+                className="mb-4 p-4 rounded-lg"
+                style={{ backgroundColor: '#374151' }}
+              >
+                <h3 className="font-semibold mb-2" style={{ color: '#e5e7eb' }}>
+                  ❌ Errors in attempts:
+                </h3>
+                <div className="space-y-1">
+                  {attemptHistory
+                    .filter(att => att.result === 'wrong')
+                    .filter((att, index, arr) => 
+                      // Remove duplicates - keep only first occurrence of each attempt
+                      arr.findIndex(a => a.attempt === att.attempt && a.error === att.error) === index
+                    )
+                    .map((att, index) => (
+                      <div key={`${att.attempt}-${index}`} className="text-sm" style={{ color: '#d1d5db' }}>
+                        <span className="font-medium">Attempt {att.attempt}:</span> {att.error}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Performance Message */}
+            <div 
+              className="p-4 rounded-lg mb-4 text-center"
+              style={{
+                backgroundColor: accuracy >= 80 ? '#064e3b' : accuracy >= 60 ? '#92400e' : '#7f1d1d',
+                color: accuracy >= 80 ? '#bbf7d0' : accuracy >= 60 ? '#fde68a' : '#fecaca'
+              }}
+            >
+              {accuracy >= 80 ? '🎉 Excellent! Great job!' :
+               accuracy >= 60 ? '👍 Good work! Keep practicing!' :
+               '💪 Keep practicing to improve!'}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  console.log('🔄 Practice Again clicked - resetting all states');
+                  setShowFinalResult(false);
+                  setAttemptCount(0);
+                  setAttemptStats({ correct: 0, wrong: 0 });
+                  setAttemptHistory([]); // Reset error history
+                  setPracticeState("IDLE");
+                  practiceStateRef.current = "IDLE";
+                  setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to start`);
+                }}
+                className="flex-1 py-2 px-4 rounded-lg font-medium"
+                style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+              >
+                Practice Again
+              </button>
+              <button
+                onClick={onClose}
+                className="flex-1 py-2 px-4 rounded-lg font-medium"
+                style={{ backgroundColor: '#374151', color: '#d1d5db' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+      <div className={`rounded-xl shadow-xl max-w-2xl w-full ${
+        theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+      }`}>
         {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b bg-gray-50">
-          <h2 className="text-xl font-bold text-gray-800">ML Gesture Practice: {gestureName}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        <div className={`flex justify-between items-center p-4 border-b ${
+          theme === 'dark' ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'
+        }`}>
+          <div>
+            <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+              🎯 {gestureName}
+            </h2>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              {attemptCount}/{maxAttempts} attempts
+            </p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className={`p-2 rounded-lg ${
+              theme === 'dark' ? 'text-gray-400 hover:text-white hover:bg-gray-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
             <X size={24} />
           </button>
         </div>
         
-        {/* Content */}
+        {/* Camera Only */}
         <div className="p-6">
-          {/* Template Info */}
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2">Gesture Description:</h3>
-            <p className="text-blue-700">{template.description}</p>
-            <div className="mt-2 text-sm text-blue-600">
-              <span className="font-medium">Type:</span> {template.is_static ? 'Static (Hold)' : 'Motion (Move)'}
-              <span className="ml-4 font-medium">Right hand fingers:</span> [{template.right_fingers.join(', ')}]
-            </div>
-          </div>
+          <canvas
+            ref={canvasRef}
+            width={640}
+            height={480}
+            className="w-full max-w-xl mx-auto rounded-lg border"
+            style={{ transform: 'scaleX(-1)' }}
+          />
+          <video
+            ref={videoRef}
+            className="hidden"
+            autoPlay
+            playsInline
+            muted
+          />
           
-          {/* Gesture Recognition Camera */}
-          <div className="mb-4">
-            <canvas
-              ref={canvasRef}
-              width={640}
-              height={480}
-              className="w-full max-w-2xl mx-auto rounded-lg border"
-              style={{ transform: 'scaleX(-1)' }}
-            />
-            <video
-              ref={videoRef}
-              className="hidden"
-              autoPlay
-              playsInline
-              muted
-            />
-          </div>
-          
-          {/* Status */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <div className="text-sm font-medium text-gray-600 mb-1">Status</div>
-              <div className={`text-lg font-bold ${
-                practiceState === 'RECORDING' ? 'text-red-600' :
-                practiceState === 'EVALUATING' ? 'text-yellow-600' :
-                'text-gray-600'
-              }`}>
-                {statusMessage || `🎯 Practice ${gestureName} - Close left fist to start`}
-              </div>
-            </div>
-            
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <div className="text-sm font-medium text-gray-600 mb-1">Hand Detection</div>
-              <div className="text-sm font-mono text-gray-800">
-                {currentHandInfo || '❌ No hands detected'}
-              </div>
-            </div>
-          </div>
-          
-          {/* Stats */}
-          <div className="flex justify-between items-center">
-            <div className="flex gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{attemptStats.correct}</div>
-                <div className="text-sm text-gray-600">Correct</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{attemptStats.wrong}</div>
-                <div className="text-sm text-gray-600">Wrong</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {attemptStats.correct + attemptStats.wrong > 0 ? 
-                    Math.round((attemptStats.correct / (attemptStats.correct + attemptStats.wrong)) * 100) : 0}%
-                </div>
-                <div className="text-sm text-gray-600">Accuracy</div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={resetStats}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 flex items-center gap-2"
-              >
-                <RotateCcw size={16} />
-                Reset Stats
-              </button>
-            </div>
+          {/* Simple status */}
+          <div className={`mt-4 p-3 rounded-lg text-center ${
+            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
+          }`}>
+            <p className={`text-lg font-semibold ${
+              theme === 'dark' ? 'text-white' : 'text-gray-800'
+            }`}>
+              {statusMessage || `🎯 Practice ${gestureName} - Close left fist to start`}
+            </p>
           </div>
         </div>
       </div>

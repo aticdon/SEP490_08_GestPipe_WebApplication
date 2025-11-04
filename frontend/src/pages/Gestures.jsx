@@ -1013,6 +1013,7 @@ const Gestures = () => {
       {showMLPractice && selectedPracticeGesture && (
         <GesturePracticeML
           gestureName={selectedPracticeGesture}
+          theme="dark"
           onClose={() => {
             setShowMLPractice(false);
             setSelectedPracticeGesture(null);
