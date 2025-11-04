@@ -36,6 +36,26 @@ const GESTURE_TEMPLATES = {
     "is_static": false,
     "description": "Zoom in - Thumb, index, middle extended, move up"
   },
+  "zoom_out": {
+    "left_fingers": [0, 0, 0, 0, 0],
+    "right_fingers": [1, 1, 1, 0, 0],
+    "main_axis_x": 0,
+    "main_axis_y": 1,
+    "delta_x": 0.0,
+    "delta_y": 0.168766,
+    "is_static": false,
+    "description": "Zoom out - Thumb, index, middle extended, move down"
+  },
+  "rotate_up": {
+    "left_fingers": [0, 0, 0, 0, 0],
+    "right_fingers": [1, 1, 0, 0, 0],
+    "main_axis_x": 0,
+    "main_axis_y": 1,
+    "delta_x": 0.028591,
+    "delta_y": -0.185792,
+    "is_static": false,
+    "description": "Rotate up - Index and thumb extended, move up"
+  },
   "rotate_right": {
     "left_fingers": [0, 0, 0, 0, 0],
     "right_fingers": [1, 1, 0, 0, 0],
@@ -45,36 +65,6 @@ const GESTURE_TEMPLATES = {
     "delta_y": 0.04424,
     "is_static": false,
     "description": "Rotate right - Index and thumb extended, move left (your left)"
-  },
-  "zoom_out": {
-    "left_fingers": [0, 0, 0, 0, 0],
-    "right_fingers": [1, 1, 1, 0, 0],
-    "main_axis_x": 0,
-    "main_axis_y": 1,
-    "delta_x": -0.062817,
-    "delta_y": 0.191093,
-    "is_static": false,
-    "description": "Zoom out - Thumb, index, middle extended, move down"
-  },
-  "home": {
-    "left_fingers": [0, 0, 0, 0, 0],
-    "right_fingers": [1, 0, 0, 0, 0],
-    "main_axis_x": 1,
-    "main_axis_y": 0,
-    "delta_x": -0.002603,
-    "delta_y": 0.002198,
-    "is_static": true,
-    "description": "Home - Only thumb extended, hold for 1 second"
-  },
-  "rotate_up": {
-    "left_fingers": [0, 0, 0, 0, 0],
-    "right_fingers": [1, 1, 0, 0, 0],
-    "main_axis_x": 0,
-    "main_axis_y": 1,
-    "delta_x": -0.093339,
-    "delta_y": -0.186964,
-    "is_static": false,
-    "description": "Rotate up - Index and thumb extended, move up"
   },
   "previous_slide": {
     "left_fingers": [0, 0, 0, 0, 0],
@@ -98,84 +88,175 @@ const GESTURE_TEMPLATES = {
   },
   "end": {
     "left_fingers": [0, 0, 0, 0, 0],
-    "right_fingers": [0, 0, 0, 0, 1],
+    "right_fingers": [1, 1, 1, 1, 1],
     "main_axis_x": 1,
-    "main_axis_y": 0,
-    "delta_x": -0.002566,
-    "delta_y": -0.002014,
+    "main_axis_y": 1,
+    "delta_x": 0.0,
+    "delta_y": 0.0,
     "is_static": true,
-    "description": "End - Only pinky extended, hold for 1 second"
+    "description": "End - All fingers extended, static hold"
+  },
+  "home": {
+    "left_fingers": [0, 0, 0, 0, 0],
+    "right_fingers": [1, 0, 0, 0, 0],
+    "main_axis_x": 1,
+    "main_axis_y": 1,
+    "delta_x": 0.0,
+    "delta_y": 0.0,
+    "is_static": true,
+    "description": "Home - Only thumb extended, static hold"
   }
 };
 
-const GesturePracticeML = ({ gestureName, onClose, theme = 'dark' }) => {
+function GesturePracticeML({ gestureName, onClose }) {
+  // Debug gesture name
+  console.log('🎯 GesturePracticeMLFixed received gestureName:', gestureName);
+  console.log('📋 Available templates:', Object.keys(GESTURE_TEMPLATES));
+  
   // Refs
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const handsRef = useRef(null);
   const cameraRef = useRef(null);
+  const initializingRef = useRef(false);
   
-  // State management
-  const [practiceState, setPracticeState] = useState("IDLE"); // IDLE, RECORDING, EVALUATING
+  // State management - WITH REF TRACKING
+  const [practiceState, setPracticeState] = useState("IDLE");
   const [gestureSequence, setGestureSequence] = useState([]);
-  const [leftFistDetected, setLeftFistDetected] = useState(false);
-  const [prevLeftFistState, setPrevLeftFistState] = useState(false);
+  const [prevLeftFist, setPrevLeftFist] = useState(false);
   const [attemptStats, setAttemptStats] = useState({ correct: 0, wrong: 0 });
   const [statusMessage, setStatusMessage] = useState('');
   const [currentHandInfo, setCurrentHandInfo] = useState('');
+
+  
+  // Add refs to track actual values
+  const practiceStateRef = useRef("IDLE");
+  const prevLeftFistRef = useRef(false);
+  const gestureSequenceRef = useRef([]);
+  
+  // Add timestamp to prevent double evaluation  
+  const lastEvalTimeRef = useRef(0);
   
   // Static gesture tracking
   const [staticHoldStartTime, setStaticHoldStartTime] = useState(null);
-  const [staticRequiredDuration] = useState(1000);
   const [staticPositions, setStaticPositions] = useState([]);
+  const staticRequiredDuration = 1000;
   
-  // Get gesture template
-  const template = GESTURE_TEMPLATES[gestureName];
+  // Map gesture names from database to template names
+  const gestureNameMapping = {
+    "Rotate_down": "rotate_down",
+    "Rotate_left": "rotate_left", 
+    "Rotate_right": "rotate_right",
+    "Rotate_up": "rotate_up",
+    "Zoom_in": "zoom_in",
+    "Zoom_out": "zoom_out",
+    "Previous_slide": "previous_slide",
+    "Next_slide": "next_slide",
+    "End": "end",
+    "Home": "home"
+  };
   
-  // MediaPipe hands detection
+  const templateName = gestureNameMapping[gestureName] || gestureName.toLowerCase();
+  const template = GESTURE_TEMPLATES[templateName];
+  
+  console.log('🔄 Gesture mapping:', {
+    originalName: gestureName,
+    mappedName: templateName,
+    templateExists: !!template,
+    templateData: template,
+    availableTemplates: Object.keys(GESTURE_TEMPLATES)
+  });
+  
+  // Finger state detection - IMPROVED PYTHON LOGIC PORT
   const getFingerStates = useCallback((landmarks, isLeftHand = false) => {
     if (!landmarks || landmarks.length < 21) return [0, 0, 0, 0, 0];
     
     const fingers = [0, 0, 0, 0, 0];
     
-    // THUMB - khác nhau giữa tay trái và tay phải
-    if (isLeftHand) {
-      if (landmarks[4].x < landmarks[3].x) {
-        fingers[0] = 1;
+    // Get key landmarks
+    const wrist = landmarks[0];
+    const thumbTip = landmarks[4];      // Thumb tip
+    const thumbIp = landmarks[3];       // Thumb IP joint  
+    const thumbMcp = landmarks[2];      // Thumb MCP joint
+    const indexMcp = landmarks[5];      // Index MCP joint
+    const mcpMiddle = landmarks[9];     // Middle MCP
+    const mcpPinky = landmarks[17];     // Pinky MCP
+
+    // Determine palm orientation
+    const v1 = [mcpMiddle.x - wrist.x, mcpMiddle.y - wrist.y];
+    const v2 = [mcpPinky.x - wrist.x, mcpPinky.y - wrist.y];
+    const crossZ = v1[0] * v2[1] - v1[1] * v2[0];
+    const palmFacing = crossZ > 0 ? 1 : -1;
+
+    // IMPROVED THUMB DETECTION (4 methods combined)
+    
+    // Method 1: Distance from thumb tip to palm center
+    const palmCenterX = (indexMcp.x + mcpPinky.x) / 2;
+    const palmCenterY = (indexMcp.y + mcpPinky.y) / 2;
+    const thumbToPalmDist = Math.sqrt(
+      Math.pow(thumbTip.x - palmCenterX, 2) + Math.pow(thumbTip.y - palmCenterY, 2)
+    );
+    
+    // Method 2: Thumb extension check (tip vs MCP joint)
+    const thumbExtendedX = Math.abs(thumbTip.x - thumbMcp.x) > 0.04; // Extended horizontally
+    const thumbExtendedY = Math.abs(thumbTip.y - thumbMcp.y) > 0.03; // Extended vertically
+    
+    // Method 3: Relative position check (handedness-aware)
+    let thumbPositionOpen = false;
+    const handednessLabel = isLeftHand ? "Left" : "Right";
+    
+    if (handednessLabel === "Right") {
+      if (palmFacing > 0) {
+        thumbPositionOpen = thumbTip.x < thumbIp.x;
+      } else {
+        thumbPositionOpen = thumbTip.x > thumbIp.x;
       }
     } else {
-      if (landmarks[4].x > landmarks[3].x) {
-        fingers[0] = 1;
+      if (palmFacing > 0) {
+        thumbPositionOpen = thumbTip.x < thumbIp.x;
+      } else {
+        thumbPositionOpen = thumbTip.x > thumbIp.x;
       }
     }
     
-    // Các ngón còn lại
-    const fingerTips = [8, 12, 16, 20];
-    const fingerPips = [6, 10, 14, 18];
+    // Method 4: Angle-based detection (thumb joints alignment)
+    const angleBetweenPoints = (p1, p2, p3) => {
+      const v1 = [p1.x - p2.x, p1.y - p2.y];
+      const v2 = [p3.x - p2.x, p3.y - p2.y];
+      
+      const dotProduct = v1[0] * v2[0] + v1[1] * v2[1];
+      const mag1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+      const mag2 = Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+      
+      if (mag1 === 0 || mag2 === 0) return 0;
+      
+      const cosAngle = Math.max(-1, Math.min(1, dotProduct / (mag1 * mag2)));
+      return (Math.acos(cosAngle) * 180) / Math.PI;
+    };
     
-    for (let i = 0; i < 4; i++) {
-      if (landmarks[fingerTips[i]].y < landmarks[fingerPips[i]].y) {
-        fingers[i + 1] = 1;
-      }
-    }
+    const thumbAngle = angleBetweenPoints(thumbMcp, thumbIp, thumbTip);
+    const thumbStraight = thumbAngle > 140; // Straight thumb (extended)
     
+    // COMBINED THUMB DECISION (Multiple criteria with OR logic)
+    const distanceOpen = thumbToPalmDist > 0.08;
+    const extensionOpen = thumbExtendedX || thumbExtendedY;
+    const angleOpen = thumbStraight;
+    
+    // Use OR logic - if any method detects open thumb AND position check passes
+    const thumbIsOpen = (distanceOpen || extensionOpen || angleOpen) && thumbPositionOpen;
+    fingers[0] = thumbIsOpen ? 1 : 0;
+    
+    // Other fingers - simple tip vs MCP comparison
+    fingers[1] = landmarks[8].y < landmarks[6].y ? 1 : 0;   // Index: tip vs PIP
+    fingers[2] = landmarks[12].y < landmarks[10].y ? 1 : 0; // Middle: tip vs PIP
+    fingers[3] = landmarks[16].y < landmarks[14].y ? 1 : 0; // Ring: tip vs PIP
+    fingers[4] = landmarks[20].y < landmarks[18].y ? 1 : 0; // Pinky: tip vs PIP
+    
+    console.log('✋ Final finger states:', fingers);
     return fingers;
   }, []);
   
-  // Motion analysis functions
-  const calculateMaxMovement = useCallback((positions) => {
-    if (positions.length < 2) return 0;
-    
-    let maxDist = 0;
-    for (let i = 1; i < positions.length; i++) {
-      const dx = positions[i].x - positions[0].x;
-      const dy = positions[i].y - positions[0].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      maxDist = Math.max(maxDist, dist);
-    }
-    return maxDist;
-  }, []);
-  
+  // Static progress calculation
   const getStaticProgress = useCallback(() => {
     if (!staticHoldStartTime) return "0%";
     const elapsed = Date.now() - staticHoldStartTime;
@@ -183,285 +264,280 @@ const GesturePracticeML = ({ gestureName, onClose, theme = 'dark' }) => {
     return `${Math.round(progress)}%`;
   }, [staticHoldStartTime, staticRequiredDuration]);
   
-  // Gesture evaluation
-  const analyzeRecordedGesture = useCallback(() => {
+  // Handle static gesture - FIXED LOGIC
+  const handleStaticGesture = useCallback((rightFingers, wrist, currentTime) => {
+    if (!template || !template.is_static) {
+      console.log('🔵 Not a static gesture, skipping...');
+      return;
+    }
+    
+    const targetFingers = template.right_fingers;
+    const fingersMatch = rightFingers.every((f, i) => f === targetFingers[i]);
+    
+    console.log(`🔵 Static ${gestureName}: [${rightFingers.join(',')}] vs [${targetFingers.join(',')}] = ${fingersMatch ? '✅ MATCH' : '❌ NO MATCH'}`);
+    
+    if (fingersMatch) {
+      if (!staticHoldStartTime) {
+        console.log('🔵 ✅ MATCH! Starting timer...');
+        setStaticHoldStartTime(currentTime);
+        setStaticPositions([{ x: wrist.x, y: wrist.y }]);
+      } else {
+        setStaticPositions(prev => [...prev, { x: wrist.x, y: wrist.y }]);
+        const holdDuration = currentTime - staticHoldStartTime;
+        if (holdDuration % 200 < 50) { // Log every ~200ms
+          console.log(`🔵 ⏱️ Holding: ${(holdDuration/1000).toFixed(1)}s / 1.0s`);
+        }
+      }
+    } else {
+      if (staticHoldStartTime) {
+        console.log('🔵 ❌ Lost match - timer reset');
+        setStaticHoldStartTime(null);
+        setStaticPositions([]);
+      }
+    }
+  }, [template?.right_fingers, staticHoldStartTime, staticRequiredDuration]);
+  
+  // Evaluate gesture - USE REFS WITH PROTECTION
+  const evaluateGesture = useCallback(() => {
+    // Prevent double evaluation with timestamp cooldown
+    const now = Date.now();
+    if (now - lastEvalTimeRef.current < 1000) {
+      console.log('⚠️ Evaluation cooldown active, skipping...');
+      return;
+    }
+    
+    lastEvalTimeRef.current = now;
+    console.log('🔍 Starting evaluation...');
+    
+    const currentSequence = gestureSequenceRef.current;
+    console.log('🔍 Evaluating gesture with REF, sequence length:', currentSequence.length);
+    
+    if (currentSequence.length === 0) {
+      setStatusMessage('⚠️ No gesture data recorded');
+      setPracticeState("IDLE");
+      practiceStateRef.current = "IDLE";
+      return;
+    }
+    
     if (!template) {
-      return { success: false, message: "No gesture template found" };
+      setStatusMessage('❌ No template found');
+      setPracticeState("IDLE");
+      practiceStateRef.current = "IDLE";
+      return;
     }
     
-    if (gestureSequence.length === 0) {
-      return { success: false, message: "No gesture data recorded" };
-    }
+    setStatusMessage('🔍 Evaluating...');
     
-    // 1. Analyze finger states (average over all frames)
+    // Calculate average RIGHT HAND finger states ONLY (left hand ignored completely)
     const avgFingers = [0, 0, 0, 0, 0];
-    for (const frame of gestureSequence) {
+    for (const frame of currentSequence) {
+      // frame.fingers contains ONLY right hand data - left hand never recorded
       for (let i = 0; i < 5; i++) {
         avgFingers[i] += frame.fingers[i];
       }
     }
     for (let i = 0; i < 5; i++) {
-      avgFingers[i] = Math.round(avgFingers[i] / gestureSequence.length);
+      avgFingers[i] = Math.round(avgFingers[i] / currentSequence.length);
     }
     
-    // Check finger states match
+    console.log('📊 RIGHT HAND EVALUATION ONLY:', {
+      sequenceLength: currentSequence.length,
+      rightHandAvgFingers: avgFingers,
+      expectedRightFingers: template.right_fingers,
+      isStatic: template.is_static,
+      note: 'Left hand completely ignored in evaluation'
+    });
+    
+    // Check finger match
     const fingerMatch = template.right_fingers.every((expected, i) => expected === avgFingers[i]);
     if (!fingerMatch) {
-      return { 
-        success: false, 
-        message: `Wrong fingers: got [${avgFingers.join(',')}], expected [${template.right_fingers.join(',')}]` 
-      };
-    }
-    
-    // 2. For static gestures, special validation
-    if (template.is_static) {
-      if (!staticHoldStartTime) {
-        return { success: false, message: "Static gesture not held properly" };
-      }
-      
-      const holdDuration = Date.now() - staticHoldStartTime;
-      if (holdDuration < staticRequiredDuration) {
-        return { success: false, message: `Hold for ${((staticRequiredDuration - holdDuration) / 1000).toFixed(1)}s more` };
-      }
-      
-      const maxMovement = calculateMaxMovement(staticPositions);
-      if (maxMovement > 0.03) {
-        return { 
-          success: false, 
-          message: `Too much movement during hold (${(maxMovement * 100).toFixed(1)}cm)` 
-        };
-      }
-      
-      return { success: true, message: `Perfect static ${gestureName}! Held for ${(holdDuration / 1000).toFixed(1)}s` };
-    }
-    
-    // 3. For dynamic gestures, check motion
-    if (gestureSequence.length < 3) {
-      return { success: false, message: "Too few motion frames" };
-    }
-    
-    const startWrist = gestureSequence[0].wrist;
-    const endWrist = gestureSequence[gestureSequence.length - 1].wrist;
-    const deltaX = endWrist.x - startWrist.x;
-    const deltaY = endWrist.y - startWrist.y;
-    const deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    
-    // Check sufficient motion
-    if (deltaMag < 0.03) {
-      return { success: false, message: "Not enough motion detected" };
-    }
-    
-    // Check motion direction
-    const expectedMainX = template.main_axis_x;
-    const actualMainX = Math.abs(deltaX) >= Math.abs(deltaY) ? 1 : 0;
-    
-    if (expectedMainX !== actualMainX) {
-      const expectedDir = expectedMainX ? 'horizontal' : 'vertical';
-      const actualDir = actualMainX ? 'horizontal' : 'vertical';
-      return { 
-        success: false, 
-        message: `Wrong direction: moved ${actualDir}, expected ${expectedDir}` 
-      };
-    }
-    
-    // Check specific direction within main axis (với camera mirror)
-    if (expectedMainX === 1) {
-      // Horizontal motion - FLIP for camera mirror effect
-      const expectedRight = template.delta_x > 0;
-      const actualRight = deltaX < 0; // FLIPPED: camera mirror effect
-      if (expectedRight !== actualRight) {
-        return { 
-          success: false, 
-          message: `Wrong horizontal direction: moved ${actualRight ? 'right' : 'left'}, expected ${expectedRight ? 'right' : 'left'}` 
-        };
-      }
-    } else {
-      // Vertical motion - NO FLIP needed
-      const expectedDown = template.delta_y > 0;
-      const actualDown = deltaY > 0;
-      if (expectedDown !== actualDown) {
-        return { 
-          success: false, 
-          message: `Wrong vertical direction: moved ${actualDown ? 'down' : 'up'}, expected ${expectedDown ? 'down' : 'up'}` 
-        };
-      }
-    }
-    
-    return { success: true, message: `Perfect ${gestureName}!` };
-  }, [template, gestureSequence, gestureName, staticHoldStartTime, staticRequiredDuration, calculateMaxMovement, staticPositions]);
-  
-  // Practice session functions
-  // Remove startPracticeRecording - now integrated in processGestures
-  
-  const handleStaticGesture = useCallback((fingerStates, wrist, currentTime) => {
-    if (!template) return;
-    
-    const correctFingers = template.right_fingers.every((expected, i) => expected === fingerStates[i]);
-    
-    if (correctFingers) {
-      if (!staticHoldStartTime) {
-        setStaticHoldStartTime(currentTime);
-        setStaticPositions([{ x: wrist.x, y: wrist.y, time: currentTime }]);
-      } else {
-        setStaticPositions(prev => [...prev, { x: wrist.x, y: wrist.y, time: currentTime }]);
-        
-        const movement = calculateMaxMovement([...staticPositions, { x: wrist.x, y: wrist.y, time: currentTime }]);
-        if (movement > 0.03) {
-          setStaticHoldStartTime(null);
-          setStaticPositions([]);
-          return;
-        }
-        
-        const holdDuration = currentTime - staticHoldStartTime;
-        if (holdDuration >= staticRequiredDuration) {
-          setTimeout(() => evaluatePracticeGesture(), 100);
-        }
-      }
-    } else {
-      setStaticHoldStartTime(null);
-      setStaticPositions([]);
-    }
-  }, [template, staticHoldStartTime, staticPositions, calculateMaxMovement, staticRequiredDuration]);
-  
-  const evaluatePracticeGesture = () => {
-    // Get current sequence length
-    setGestureSequence(currentSequence => {
-      console.log('🔍 Evaluating gesture, current sequence length:', currentSequence.length);
-      
-      if (currentSequence.length === 0) {
-        setStatusMessage('⚠️ No gesture data recorded');
-        setPracticeState("IDLE");
-        return currentSequence;
-      }
-      
-      setStatusMessage(`🔍 Evaluating gesture...`);
-      
-      // Evaluate with current sequence
-      const result = analyzeGestureWithSequence(currentSequence);
-      
-      if (result.success) {
-        setAttemptStats(prev => ({ ...prev, correct: prev.correct + 1 }));
-        setStatusMessage(`✅ CORRECT! ${result.message}`);
-        toast.success(`✅ ${result.message}`);
-      } else {
-        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-        setStatusMessage(`❌ WRONG: ${result.message}`);
-        toast.error(`❌ ${result.message}`);
-      }
-      
+      setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+      setStatusMessage(`❌ Wrong fingers: got [${avgFingers.join(',')}], expected [${template.right_fingers.join(',')}]`);
       setTimeout(() => {
         setPracticeState("IDLE");
-        setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to try again`);
-      }, 3000);
-      
-      return currentSequence;
-    });
-  };
-  
-  // New function to analyze gesture with given sequence
-  const analyzeGestureWithSequence = (sequence) => {
-    if (!template) {
-      return { success: false, message: "No gesture template found" };
+        practiceStateRef.current = "IDLE";
+      }, 2000);
+      return;
     }
     
-    if (sequence.length === 0) {
-      return { success: false, message: "No gesture data recorded" };
-    }
-    
-    // Same analysis logic as before but with passed sequence
-    const avgFingers = [0, 0, 0, 0, 0];
-    for (const frame of sequence) {
-      for (let i = 0; i < 5; i++) {
-        avgFingers[i] += frame.fingers[i];
-      }
-    }
-    for (let i = 0; i < 5; i++) {
-      avgFingers[i] = Math.round(avgFingers[i] / sequence.length);
-    }
-    
-    const fingerMatch = template.right_fingers.every((expected, i) => expected === avgFingers[i]);
-    if (!fingerMatch) {
-      return { 
-        success: false, 
-        message: `Wrong fingers: got [${avgFingers.join(',')}], expected [${template.right_fingers.join(',')}]` 
-      };
-    }
-    
+    // Check if static gesture - USE SEQUENCE-BASED EVALUATION
     if (template.is_static) {
-      if (!staticHoldStartTime) {
-        return { success: false, message: "Static gesture not held properly" };
+      console.log('🔵 Evaluating static gesture using sequence data:', {
+        sequenceLength: currentSequence.length,
+        expectedFingers: template.right_fingers,
+        requiredDuration: staticRequiredDuration
+      });
+      
+      // Check if we have enough frames for static gesture (at least 0.5s of recording)
+      const minFrames = 15; // ~0.5s at 30fps
+      if (currentSequence.length < minFrames) {
+        console.log(`🔵 ❌ Not enough frames: ${currentSequence.length} < ${minFrames}`);
+        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+        setStatusMessage(`❌ Hold gesture longer (need ~0.5s minimum)`);
+        setTimeout(() => {
+          setPracticeState("IDLE");
+          practiceStateRef.current = "IDLE";
+        }, 2000);
+        return;
       }
       
-      const holdDuration = Date.now() - staticHoldStartTime;
-      if (holdDuration < staticRequiredDuration) {
-        return { success: false, message: `Hold for ${((staticRequiredDuration - holdDuration) / 1000).toFixed(1)}s more` };
+      // Check if majority of frames have correct fingers
+      let matchingFrames = 0;
+      for (const frame of currentSequence) {
+        const frameMatch = frame.fingers.every((f, i) => f === template.right_fingers[i]);
+        if (frameMatch) matchingFrames++;
       }
       
-      const maxMovement = calculateMaxMovement(staticPositions);
-      if (maxMovement > 0.03) {
-        return { 
-          success: false, 
-          message: `Too much movement during hold (${(maxMovement * 100).toFixed(1)}cm)` 
-        };
+      const matchPercentage = (matchingFrames / currentSequence.length) * 100;
+      console.log(`🔵 Frame analysis: ${matchingFrames}/${currentSequence.length} = ${matchPercentage.toFixed(1)}% match`);
+      
+      if (matchPercentage < 70) { // Need 70% of frames to match
+        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+        setStatusMessage(`❌ Inconsistent fingers: only ${matchPercentage.toFixed(0)}% match (need 70%)`);
+        setTimeout(() => {
+          setPracticeState("IDLE");
+          practiceStateRef.current = "IDLE";
+        }, 2000);
+        return;
       }
       
-      return { success: true, message: `Perfect static ${gestureName}! Held for ${(holdDuration / 1000).toFixed(1)}s` };
-    }
-    
-    if (sequence.length < 3) {
-      return { success: false, message: "Too few motion frames" };
-    }
-    
-    const startWrist = sequence[0].wrist;
-    const endWrist = sequence[sequence.length - 1].wrist;
-    const deltaX = endWrist.x - startWrist.x;
-    const deltaY = endWrist.y - startWrist.y;
-    const deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    
-    if (deltaMag < 0.03) {
-      return { success: false, message: "Not enough motion detected" };
-    }
-    
-    const expectedMainX = template.main_axis_x;
-    const actualMainX = Math.abs(deltaX) >= Math.abs(deltaY) ? 1 : 0;
-    
-    if (expectedMainX !== actualMainX) {
-      const expectedDir = expectedMainX ? 'horizontal' : 'vertical';
-      const actualDir = actualMainX ? 'horizontal' : 'vertical';
-      return { 
-        success: false, 
-        message: `Wrong direction: moved ${actualDir}, expected ${expectedDir}` 
-      };
-    }
-    
-    if (expectedMainX === 1) {
-      const expectedRight = template.delta_x > 0;
-      const actualRight = deltaX < 0;
-      if (expectedRight !== actualRight) {
-        return { 
-          success: false, 
-          message: `Wrong horizontal direction: moved ${actualRight ? 'right' : 'left'}, expected ${expectedRight ? 'right' : 'left'}` 
-        };
+      // Check hand movement during static hold
+      if (currentSequence.length >= 2) {
+        const startWrist = currentSequence[0].wrist;
+        let maxMovement = 0;
+        
+        for (const frame of currentSequence) {
+          const dx = frame.wrist.x - startWrist.x;
+          const dy = frame.wrist.y - startWrist.y;
+          const movement = Math.sqrt(dx * dx + dy * dy);
+          maxMovement = Math.max(maxMovement, movement);
+        }
+        
+        console.log(`🔵 Movement check: max = ${(maxMovement * 100).toFixed(1)}cm`);
+        
+        if (maxMovement > 0.05) { // 5cm threshold
+          setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+          setStatusMessage(`❌ Too much movement: ${(maxMovement * 100).toFixed(1)}cm (max 5cm)`);
+          setTimeout(() => {
+            setPracticeState("IDLE");
+            practiceStateRef.current = "IDLE";
+          }, 2000);
+          return;
+        }
       }
+      
+      // Success!
+      const durationMs = currentSequence.length * (1000/30); // Estimate duration
+      setAttemptStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+      setStatusMessage(`✅ Perfect static ${gestureName}! ${matchPercentage.toFixed(0)}% accuracy, ${(durationMs/1000).toFixed(1)}s hold`);
+      toast.success(`✅ Perfect ${gestureName}!`);
     } else {
-      const expectedDown = template.delta_y > 0;
-      const actualDown = deltaY > 0;
-      if (expectedDown !== actualDown) {
-        return { 
-          success: false, 
-          message: `Wrong vertical direction: moved ${actualDown ? 'down' : 'up'}, expected ${expectedDown ? 'down' : 'up'}` 
-        };
+      // Motion gesture using currentSequence
+      if (currentSequence.length < 3) {
+        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+        setStatusMessage('❌ Too few motion frames');
+        setTimeout(() => {
+          setPracticeState("IDLE");
+          practiceStateRef.current = "IDLE";
+        }, 2000);
+        return;
       }
+      
+      const startWrist = currentSequence[0].wrist;
+      const endWrist = currentSequence[currentSequence.length - 1].wrist;
+      const deltaX = endWrist.x - startWrist.x;
+      const deltaY = endWrist.y - startWrist.y;
+      const deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      if (deltaMag < 0.03) {
+        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+        setStatusMessage('❌ Not enough motion detected');
+        setTimeout(() => setPracticeState("IDLE"), 2000);
+        return;
+      }
+      
+      // Check main direction (horizontal vs vertical)
+      const expectedMainX = template.main_axis_x;
+      const actualMainX = Math.abs(deltaX) >= Math.abs(deltaY) ? 1 : 0;
+      
+      console.log('🎯 Direction analysis:', {
+        deltaX: deltaX.toFixed(3),
+        deltaY: deltaY.toFixed(3),
+        deltaMag: deltaMag.toFixed(3),
+        expectedMainX,
+        actualMainX,
+        expectedDeltaX: template.delta_x,
+        expectedDeltaY: template.delta_y
+      });
+      
+      if (expectedMainX !== actualMainX) {
+        const expectedDir = expectedMainX ? 'horizontal' : 'vertical';
+        const actualDir = actualMainX ? 'horizontal' : 'vertical';
+        setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+        setStatusMessage(`❌ Wrong main direction: moved ${actualDir}, expected ${expectedDir}`);
+        setTimeout(() => {
+          setPracticeState("IDLE");
+          practiceStateRef.current = "IDLE";
+        }, 2000);
+        return;
+      }
+      
+      // Check SPECIFIC direction within main axis (like Python script)
+      if (expectedMainX === 1) {
+        // Horizontal motion - check left/right with camera mirror
+        const expectedRight = template.delta_x > 0;
+        const actualRight = deltaX < 0; // Camera mirror: negative deltaX = move right
+        
+        if (expectedRight !== actualRight) {
+          const expectedDirStr = expectedRight ? 'right' : 'left';
+          const actualDirStr = actualRight ? 'right' : 'left';
+          setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+          setStatusMessage(`❌ Wrong horizontal direction: moved ${actualDirStr}, expected ${expectedDirStr}`);
+          setTimeout(() => {
+            setPracticeState("IDLE");
+            practiceStateRef.current = "IDLE";
+          }, 2000);
+          return;
+        }
+      } else {
+        // Vertical motion - check up/down
+        const expectedDown = template.delta_y > 0;
+        const actualDown = deltaY > 0;
+        
+        if (expectedDown !== actualDown) {
+          const expectedDirStr = expectedDown ? 'down' : 'up';
+          const actualDirStr = actualDown ? 'down' : 'up';
+          setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
+          setStatusMessage(`❌ Wrong vertical direction: moved ${actualDirStr}, expected ${expectedDirStr}`);
+          setTimeout(() => {
+            setPracticeState("IDLE");
+            practiceStateRef.current = "IDLE";
+          }, 2000);
+          return;
+        }
+      }
+      
+      // All checks passed!
+      setAttemptStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+      setStatusMessage(`✅ Perfect ${gestureName}! Direction: ${deltaMag.toFixed(3)} movement`);
+      toast.success(`✅ Perfect ${gestureName}!`);
     }
     
-    return { success: true, message: `Perfect ${gestureName}!` };
-  };
+    setTimeout(() => {
+      setPracticeState("IDLE");
+      practiceStateRef.current = "IDLE";
+      setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to start`);
+    }, 3000);
+  }, [gestureSequence, template, gestureName, staticHoldStartTime, staticRequiredDuration]);
   
   // MediaPipe results handler
   const onResults = useCallback((results) => {
     const canvas = canvasRef.current;
     const canvasCtx = canvas?.getContext('2d');
-    if (!canvas || !canvasCtx) return;
+    if (!canvas || !canvasCtx) {
+      console.log('❌ Canvas not available');
+      return;
+    }
     
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
@@ -474,349 +550,377 @@ const GesturePracticeML = ({ gestureName, onClose, theme = 'dark' }) => {
         const classification = results.multiHandedness[index];
         const landmarks = results.multiHandLandmarks[index];
         
-        // Draw landmarks với màu khác nhau
-        const isLeft = classification.label === 'Right'; // MediaPipe Web trả về ngược
-        drawLandmarks(canvasCtx, landmarks, isLeft ? '#00FF00' : '#FF0000');
+        console.log(`Hand ${index}: Label="${classification.label}", Score=${classification.score}`);
         
-        if (classification.label === 'Right') {
-          leftHand = landmarks;
-        } else if (classification.label === 'Left') {
-          rightHand = landmarks;
+        // MediaPipe Web camera mirrored - SWAP labels
+        if (classification.label === 'Left') {
+          rightHand = landmarks;  // MediaPipe "Left" = User's right hand
+          console.log('� Right hand detected (MediaPipe labeled as Left)');
+        } else if (classification.label === 'Right') {
+          leftHand = landmarks;   // MediaPipe "Right" = User's left hand  
+          console.log('� Left hand detected (MediaPipe labeled as Right)');
         }
+        
+        // Draw landmarks with natural colors
+        const isUserLeftHand = classification.label === 'Right'; // MediaPipe "Right" = User's left
+        drawLandmarks(canvasCtx, landmarks, isUserLeftHand ? '#FFB347' : '#FF8C69');
       }
       
-      processGestures({ leftHand, rightHand });
+      processGestures(leftHand, rightHand);
     }
     
     canvasCtx.restore();
   }, []);
   
-  // Draw landmarks function
+  // Draw landmarks
   const drawLandmarks = useCallback((ctx, landmarks, color = '#FF0000') => {
     ctx.fillStyle = color;
     for (const landmark of landmarks) {
       const x = landmark.x * canvasRef.current.width;
       const y = landmark.y * canvasRef.current.height;
       ctx.beginPath();
-      ctx.arc(x, y, 4, 0, 2 * Math.PI);
+      ctx.arc(x, y, 3, 0, 2 * Math.PI);
       ctx.fill();
-    }
-    
-    if (landmarks.length > 0) {
-      const wrist = landmarks[0];
-      const x = wrist.x * canvasRef.current.width;
-      const y = wrist.y * canvasRef.current.height;
-      
-      ctx.fillStyle = color;
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      const handLabel = color === '#00FF00' ? 'LEFT' : 'RIGHT';
-      ctx.fillText(handLabel, x, y - 20);
     }
   }, []);
   
-  // Process gestures function  
-  const processGestures = useCallback(({ leftHand, rightHand }) => {
+  // Main gesture processing - SIMPLIFIED
+  const processGestures = useCallback((leftHand, rightHand) => {
     let info = '🖐️ ';
     
-    // Kiểm tra có cả 2 tay không
+    // Debug hand presence
+    console.log('🖐️ processGestures called - Left:', !!leftHand, 'Right:', !!rightHand);
+    
     if (!leftHand || !rightHand) {
-      console.log('⚠️ Missing hands - Left:', !!leftHand, 'Right:', !!rightHand);
-      setCurrentHandInfo('❌ Need both hands');
+      setCurrentHandInfo(`❌ Missing hands - Left: ${!!leftHand}, Right: ${!!rightHand}`);
       return;
     }
     
-    const currentLeftFist = getFingerStates(leftHand, true).every(f => f === 0);
     const leftFingers = getFingerStates(leftHand, true);
     const rightFingers = getFingerStates(rightHand, false);
     
+    // LEFT FIST = chỉ check 4 ngón sau (bỏ qua ngón cái)
+    const currentLeftFist = leftFingers.slice(1).every(f => f === 0); // [1,2,3,4] = index,middle,ring,pinky
+    
     info += `Left[${leftFingers.join(',')}] Right[${rightFingers.join(',')}] `;
     
-    // Debug log chi tiết
-    console.log('🖐️ Hands detected - Left fingers:', leftFingers, 'Is fist:', currentLeftFist);
-    console.log('📊 Current practiceState:', practiceState, 'Prev fist state:', prevLeftFistState);
+    // Use refs for current values
+    const currentPracticeState = practiceStateRef.current;
+    const currentPrevFist = prevLeftFistRef.current;
     
-    // State machine logic với template
+    console.log('🎯 GESTURE STATE (REF-BASED):', {
+      stateProp: practiceState,
+      stateRef: currentPracticeState,
+      leftFist: currentLeftFist, 
+      prevFistProp: prevLeftFist,
+      prevFistRef: currentPrevFist,
+      leftFingers,
+      rightFingers
+    });
+    
+    // Simple state logging với 4-finger fist logic
+    if (currentLeftFist !== currentPrevFist) {
+      console.log(`🖐️ Left fist state changed: ${currentLeftFist ? 'CLOSED' : 'OPEN'} (4-finger check: [${leftFingers.slice(1).join(',')}] all zero)`);
+    }
+    
+    // REF-BASED STATE MANAGEMENT - LEFT HAND TRIGGERS ONLY
     if (template) {
-      if (currentLeftFist && !prevLeftFistState) {
-        console.log('� FIST DETECTED - SHOULD TRANSITION TO RECORDING');
-        setPracticeState(currentState => {
-          console.log('🔄 Functional update - Current state:', currentState);
-          if (currentState === "IDLE") {
-            console.log('✅ TRANSITIONING: IDLE → RECORDING');
-            
-            // Reset data
-            setGestureSequence([]);
-            setStaticHoldStartTime(null);
-            setStaticPositions([]);
-            
-            if (template.is_static) {
-              setStatusMessage(`🔵 Static ${gestureName} - Hold correct fingers for 1 second...`);
-            } else {
-              setStatusMessage(`🔴 Recording ${gestureName} - Make gesture with right hand...`);
-            }
-            
-            return "RECORDING";
-          }
-          console.log('⚠️ Not transitioning - current state is not IDLE');
-          return currentState;
-        });
-      } else if (!currentLeftFist && prevLeftFistState) {
-        console.log('✋ FIST RELEASED - SHOULD EVALUATE');
-        setPracticeState(currentState => {
-          console.log('🔄 Functional update - Current state:', currentState);
-          if (currentState === "RECORDING") {
-            console.log('✅ TRANSITIONING: RECORDING → EVALUATING');
-            setTimeout(() => evaluatePracticeGesture(), 100);
-            return "EVALUATING";
-          }
-          console.log('⚠️ Not evaluating - current state is not RECORDING');
-          return currentState;
-        });
+      // Start recording when fist detected
+      if (currentLeftFist && !currentPrevFist && currentPracticeState === "IDLE") {
+        console.log('🚀 REF-BASED: STARTING RECORDING');
+        practiceStateRef.current = "RECORDING";
+        setPracticeState("RECORDING");
+        setGestureSequence([]);
+        gestureSequenceRef.current = [];
+        setStaticHoldStartTime(null);
+        setStaticPositions([]);
+        
+        if (template.is_static) {
+          setStatusMessage(`🔵 Static ${gestureName} - Hold correct position`);
+        } else {
+          setStatusMessage(`🔴 Recording ${gestureName} - Make gesture now`);
+        }
+        info += '🚀 RECORDING! ';
+      }
+      
+      // Stop recording when fist released 
+      if (!currentLeftFist && currentPrevFist && currentPracticeState === "RECORDING") {
+        console.log('✋ REF-BASED: STOPPING RECORDING');
+        practiceStateRef.current = "EVALUATING";
+        setPracticeState("EVALUATING");
+        setTimeout(() => evaluateGesture(), 100);
+        info += '🔍 EVALUATING! ';
+      }
+      
+      // Record RIGHT HAND gesture data ONLY
+      if (currentPracticeState === "RECORDING") {
+        const wrist = rightHand[0];
+        
+        // ONLY RIGHT HAND DATA - no left hand influence
+        const frameData = {
+          fingers: rightFingers,           // ONLY right hand fingers
+          wrist: { x: wrist.x, y: wrist.y }, // ONLY right hand wrist
+          timestamp: Date.now()
+        };
+        
+        const newSequence = [...gestureSequenceRef.current, frameData];
+        setGestureSequence(newSequence);
+        gestureSequenceRef.current = newSequence;
+        
+        if (template.is_static) {
+          console.log(`🔵 CALLING handleStaticGesture - rightFingers: [${rightFingers.join(',')}]`);
+          handleStaticGesture(rightFingers, wrist, Date.now());
+          info += ` 🔵 STATIC:${getStaticProgress()}`;
+        } else {
+          info += ` 🔴 FRAMES:${newSequence.length}`;
+        }
       }
       
       if (currentLeftFist) info += '👊 FIST! ';
+      info += ` | State: ${currentPracticeState}`;
     }
     
-    // Handle recording
-    if (practiceState === "RECORDING") {
-      console.log('🎬 In RECORDING mode - capturing right hand');
-      const wrist = rightHand[0];
-      const currentTime = Date.now();
-      
-      const frameData = {
-        timestamp: currentTime,
-        fingers: rightFingers,
-        wrist: { x: wrist.x, y: wrist.y },
-        landmarks: rightHand
-      };
-      
-      setGestureSequence(prev => {
-        const newSequence = [...prev, frameData];
-        console.log('📹 Recording frame', newSequence.length, 'fingers:', rightFingers);
-        return newSequence;
-      });
-      
-      if (template && template.is_static) {
-        handleStaticGesture(rightFingers, wrist, currentTime);
-        info += ` 🔵 STATIC:${getStaticProgress()}`;
-      } else {
-        info += ` 🔴 REC:${gestureSequence.length + 1}`;
-      }
-    }
-    
-    setPrevLeftFistState(currentLeftFist);
-    
-    if (template) {
-      info += ` | State: ${practiceState}`;
-    }
-    
+    // Update both state and ref
+    setPrevLeftFist(currentLeftFist);
+    prevLeftFistRef.current = currentLeftFist;
     setCurrentHandInfo(info);
-  }, [getFingerStates, template, prevLeftFistState, practiceState, gestureSequence.length]);
+  }, [practiceState, prevLeftFist, template, gestureName, getFingerStates, handleStaticGesture, getStaticProgress, gestureSequence.length, evaluateGesture]);
   
-  // Initialize MediaPipe
+  // Initialize MediaPipe with better cleanup
   useEffect(() => {
     let mounted = true;
+    let hands = null;
+    let camera = null;
     
     const initializeMediaPipe = async () => {
       try {
-        // Initialize MediaPipe Hands
-        const hands = new Hands({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+        if (!mounted || initializingRef.current) return;
+        
+        initializingRef.current = true;
+        console.log('🚀 Initializing MediaPipe...');
+        
+        // Cleanup any existing instances
+        if (handsRef.current) {
+          handsRef.current.close?.();
+          handsRef.current = null;
+        }
+        
+        if (cameraRef.current) {
+          cameraRef.current.stop();
+          cameraRef.current = null;
+        }
+        
+        hands = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
         });
         
         hands.setOptions({
           maxNumHands: 2,
           modelComplexity: 1,
-          minDetectionConfidence: 0.5,
-          minTrackingConfidence: 0.5,
+          minDetectionConfidence: 0.3,
+          minTrackingConfidence: 0.3
         });
         
         hands.onResults(onResults);
         handsRef.current = hands;
         
-        // Initialize camera
+        if (!mounted) return;
+        
+        console.log('📹 Starting camera...');
+        
         if (videoRef.current) {
-          const camera = new Camera(videoRef.current, {
+          camera = new Camera(videoRef.current, {
             onFrame: async () => {
-              if (handsRef.current && videoRef.current) {
+              if (handsRef.current && videoRef.current && mounted) {
                 await handsRef.current.send({ image: videoRef.current });
               }
             },
             width: 640,
-            height: 480,
+            height: 480
           });
           
           cameraRef.current = camera;
-          await camera.start();
           
-          if (mounted) {
-            setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to start!`);
-            toast.success('MediaPipe loaded successfully!');
-          }
+          camera.h.onloadedmetadata = () => {
+            if (mounted) console.log('✅ Camera loaded successfully');
+          };
+          
+          await camera.start();
+          if (mounted) console.log('✅ Camera started successfully');
         }
       } catch (error) {
-        console.error('MediaPipe initialization error:', error);
         if (mounted) {
-          setStatusMessage('❌ Failed to initialize MediaPipe');
-          toast.error('Failed to initialize camera and MediaPipe');
+          console.error('❌ Error initializing MediaPipe:', error);
+          toast.error('Failed to initialize camera');
         }
+      } finally {
+        initializingRef.current = false;
       }
     };
     
-    initializeMediaPipe();
+    // Add delay to ensure DOM is ready
+    const timer = setTimeout(initializeMediaPipe, 100);
     
     return () => {
       mounted = false;
-      if (cameraRef.current) {
-        cameraRef.current.stop();
+      initializingRef.current = false;
+      clearTimeout(timer);
+      
+      console.log('🛑 Cleaning up MediaPipe...');
+      
+      if (camera) {
+        camera.stop();
       }
-      if (handsRef.current) {
-        handsRef.current.close();
+      
+      if (hands) {
+        hands.close?.();
       }
+      
+      // Clear refs
+      handsRef.current = null;
+      cameraRef.current = null;
     };
-  }, [gestureName, onResults]);
+  }, [onResults]);
   
-  // Initialize canvas size
+  // Sync refs with state
   useEffect(() => {
-    if (canvasRef.current) {
-      canvasRef.current.width = 640;
-      canvasRef.current.height = 480;
-    }
-  }, []);
+    practiceStateRef.current = practiceState;
+    console.log('🔄 State synced:', practiceState);
+  }, [practiceState]);
   
-  // Helper functions
-  const fingerNames = (fingerStates) => {
-    const names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
-    const open = fingerStates.map((state, i) => state ? names[i] : null).filter(Boolean);
-    return open.length ? open.join(', ') + ' extended' : 'All closed (fist)';
-  };
+  useEffect(() => {
+    prevLeftFistRef.current = prevLeftFist;
+  }, [prevLeftFist]);
   
-  const getMotionDescription = (template) => {
-    if (template.main_axis_x === 1) {
-      return template.delta_x > 0 ? 'move LEFT (your left)' : 'move RIGHT (your right)';
-    } else {
-      return template.delta_y > 0 ? 'move DOWN' : 'move UP';
+  useEffect(() => {
+    gestureSequenceRef.current = gestureSequence;
+  }, [gestureSequence]);
+  
+  // Note: Removed auto-complete timer to prevent double evaluation
+  // Static gestures only evaluate when user releases left fist
+  
+  // Set initial status message
+  useEffect(() => {
+    if (template) {
+      setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to start`);
     }
-  };
+  }, [gestureName, template]);
   
   const resetStats = () => {
     setAttemptStats({ correct: 0, wrong: 0 });
-    toast.success('📊 Stats reset!');
+    toast.info('Statistics reset');
   };
   
-  const total = attemptStats.correct + attemptStats.wrong;
-  const accuracy = total > 0 ? ((attemptStats.correct / total) * 100).toFixed(1) : 0;
-
   if (!template) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className={`rounded-xl p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
-          <h3 className="text-lg font-semibold mb-4">❌ Gesture Not Found</h3>
-          <p>Gesture "{gestureName}" is not available in the practice system.</p>
-          <button
-            onClick={onClose}
-            className={`mt-4 px-4 py-2 rounded-lg ${
-              theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
-            }`}
-          >
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Gesture Not Found</h2>
+          <p>The gesture "{gestureName}" is not available in the template library.</p>
+          <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
             Close
           </button>
         </div>
       </div>
     );
   }
-
+  
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className={`w-full max-w-4xl mx-4 rounded-xl ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
         {/* Header */}
-        <div className={`flex items-center justify-between p-6 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div>
-            <h2 className="text-xl font-bold">🎯 Practice: {gestureName.toUpperCase()}</h2>
-            <p className="text-sm opacity-75 mt-1">{template.description}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className={`p-2 rounded-lg hover:bg-gray-100 ${theme === 'dark' ? 'hover:bg-gray-700' : ''}`}
-          >
-            <X className="w-5 h-5" />
+        <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+          <h2 className="text-xl font-bold text-gray-800">ML Gesture Practice: {gestureName}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X size={24} />
           </button>
         </div>
         
         {/* Content */}
         <div className="p-6">
-          {/* Instructions */}
-          <div className={`p-4 rounded-lg mb-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <h3 className="font-semibold mb-2">📋 Instructions:</h3>
-            <div className="space-y-2 text-sm">
-              <p>• Right hand fingers: [{template.right_fingers.join(',')}] ({fingerNames(template.right_fingers)})</p>
-              <p>• {template.is_static ? '🔷 Static gesture - Hold for 1 second without moving!' : '🔶 Dynamic gesture - ' + getMotionDescription(template)}</p>
-              <div className="border-t pt-2 mt-2">
-                <p><strong>How to practice:</strong></p>
-                <p>1. 👊 Close LEFT fist to start recording</p>
-                <p>2. ✋ Make gesture with RIGHT hand</p>
-                <p>3. 🖐️ Open LEFT fist to evaluate</p>
+          {/* Template Info */}
+          <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+            <h3 className="font-semibold text-blue-800 mb-2">Gesture Description:</h3>
+            <p className="text-blue-700">{template.description}</p>
+            <div className="mt-2 text-sm text-blue-600">
+              <span className="font-medium">Type:</span> {template.is_static ? 'Static (Hold)' : 'Motion (Move)'}
+              <span className="ml-4 font-medium">Right hand fingers:</span> [{template.right_fingers.join(', ')}]
+            </div>
+          </div>
+          
+          {/* Gesture Recognition Camera */}
+          <div className="mb-4">
+            <canvas
+              ref={canvasRef}
+              width={640}
+              height={480}
+              className="w-full max-w-2xl mx-auto rounded-lg border"
+              style={{ transform: 'scaleX(-1)' }}
+            />
+            <video
+              ref={videoRef}
+              className="hidden"
+              autoPlay
+              playsInline
+              muted
+            />
+          </div>
+          
+          {/* Status */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="text-sm font-medium text-gray-600 mb-1">Status</div>
+              <div className={`text-lg font-bold ${
+                practiceState === 'RECORDING' ? 'text-red-600' :
+                practiceState === 'EVALUATING' ? 'text-yellow-600' :
+                'text-gray-600'
+              }`}>
+                {statusMessage || `🎯 Practice ${gestureName} - Close left fist to start`}
+              </div>
+            </div>
+            
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="text-sm font-medium text-gray-600 mb-1">Hand Detection</div>
+              <div className="text-sm font-mono text-gray-800">
+                {currentHandInfo || '❌ No hands detected'}
               </div>
             </div>
           </div>
           
-          {/* Camera and Canvas */}
-          <div className="flex justify-center mb-4">
-            <div className="relative">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-[640px] h-[480px] border rounded-lg transform scale-x-[-1]"
-                style={{ backgroundColor: '#333' }}
-              />
-              <canvas
-                ref={canvasRef}
-                className="absolute top-0 left-0 w-[640px] h-[480px] pointer-events-none transform scale-x-[-1]"
-              />
-            </div>
-          </div>
-          
-          {/* Status */}
-          <div className={`p-3 rounded-lg text-center mb-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <p className="font-medium">{statusMessage}</p>
-          </div>
-          
-          {/* Hand Info */}
-          <div className={`p-2 rounded-lg text-sm text-center mb-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <p>{currentHandInfo}</p>
-          </div>
-          
           {/* Stats */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm">
-                📊 Correct: <span className="font-bold text-green-500">{attemptStats.correct}</span>
-              </span>
-              <span className="text-sm">
-                Wrong: <span className="font-bold text-red-500">{attemptStats.wrong}</span>
-              </span>
-              <span className="text-sm">
-                Accuracy: <span className="font-bold text-blue-500">{accuracy}%</span>
-              </span>
+          <div className="flex justify-between items-center">
+            <div className="flex gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{attemptStats.correct}</div>
+                <div className="text-sm text-gray-600">Correct</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">{attemptStats.wrong}</div>
+                <div className="text-sm text-gray-600">Wrong</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {attemptStats.correct + attemptStats.wrong > 0 ? 
+                    Math.round((attemptStats.correct / (attemptStats.correct + attemptStats.wrong)) * 100) : 0}%
+                </div>
+                <div className="text-sm text-gray-600">Accuracy</div>
+              </div>
             </div>
             
-            <button
-              onClick={resetStats}
-              className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-sm ${
-                theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset Stats</span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={resetStats}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 flex items-center gap-2"
+              >
+                <RotateCcw size={16} />
+                Reset Stats
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default GesturePracticeML;

@@ -15,7 +15,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Sidebar from '../components/Sidebar';
 import CameraPreview from '../components/CameraPreview';
-import GesturePracticeMLFixed from '../components/GesturePracticeMLFixed';
+import GesturePracticeML from '../components/GesturePracticeML';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 import { useTheme } from '../utils/ThemeContext';
@@ -1011,7 +1011,7 @@ const Gestures = () => {
 
       {/* ML Practice Component */}
       {showMLPractice && selectedPracticeGesture && (
-        <GesturePracticeMLFixed
+        <GesturePracticeML
           gestureName={selectedPracticeGesture}
           onClose={() => {
             setShowMLPractice(false);
