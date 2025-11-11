@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,9 +13,10 @@ import {
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import RoleBasedSidebar from '../components/RoleBasedSidebar';
+import AdminSidebar from '../components/AdminSidebar';
 import CameraPreview from '../components/CameraPreview';
 import GesturePracticeML from '../components/GesturePracticeML';
+import GestureCustomization from '../components/GestureCustomization';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 import { useTheme } from '../utils/ThemeContext';
@@ -27,7 +28,7 @@ import {
   getModelStatus,
   getModelInfo,
   testModel,
-  // Practice session functions removed
+  submitCustomizationRequest,
 } from '../services/gestureService';
 
 const LIMIT = 20;
@@ -215,7 +216,7 @@ const buildInstruction = (gesture, t) => {
   return `${leftHand} ${rightHand} ${motion}`;
 };
 
-const Gestures = () => {
+const AdminGestures = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -242,6 +243,35 @@ const Gestures = () => {
   const [modelInfo, setModelInfo] = useState(null);
   const [showMLPractice, setShowMLPractice] = useState(false);
   const [selectedPracticeGesture, setSelectedPracticeGesture] = useState(null);
+
+  // New state for custom gestures
+  const [activeTab, setActiveTab] = useState('default');
+  const [customizingGesture, setCustomizingGesture] = useState(null);
+  const [customizedGestures, setCustomizedGestures] = useState([]);
+
+  const handleCustomizationCompleted = useCallback((gestureName) => {
+    setCustomizedGestures((prev) =>
+      prev.includes(gestureName) ? prev : [...prev, gestureName]
+    );
+  }, []);
+
+  const handleSubmitCustomizationRequest = useCallback(async () => {
+    if (!customizedGestures.length) {
+      toast.info('Bạn chưa thu thập gesture nào để gửi.');
+      return;
+    }
+    try {
+      await submitCustomizationRequest({
+        adminId: admin?.id || admin?._id,
+        gestures: customizedGestures,
+      });
+      toast.success('Đã gửi yêu cầu custom gesture.');
+      setCustomizedGestures([]);
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Gửi yêu cầu thất bại.';
+      toast.error(msg);
+    }
+  }, [admin, customizedGestures]);
 
   useEffect(() => {
     const currentAdmin = authService.getCurrentUser();
@@ -351,7 +381,6 @@ const Gestures = () => {
     return `${deltaXAvg.toFixed(3)}, ${deltaYAvg.toFixed(3)}`;
   }, [stats]);
 
-  // Removed training-related functions
   const handleLogout = () => {
     toast.info(t('notifications.logoutMessage'), {
       position: 'top-right',
@@ -374,21 +403,14 @@ const Gestures = () => {
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  // Removed training and Python practice functions
-
-  // ML Practice function
   const handleMLPractice = (gestureLabel) => {
     setSelectedPracticeGesture(gestureLabel);
     setShowMLPractice(true);
   };
 
-
-
   const openInstructionModal = (gesture) => {
     setActiveGesture(gesture);
   };
-
-  // Removed training cancel function
 
   const closeInstructionModal = () => setActiveGesture(null);
 
@@ -523,7 +545,7 @@ const Gestures = () => {
                       className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                         theme === 'dark'
                           ? 'text-cyan-primary hover:bg-gray-700'
-                          : 'text-cyan-600 hover:bg-gray-100'
+                          : 'text-gray-300 hover:bg-gray-100'
                       }`}
                     >
                       {t('gestures.menuProfile', { defaultValue: 'Profile' })}
@@ -556,7 +578,7 @@ const Gestures = () => {
         </header>
 
         <div className="flex flex-1 overflow-hidden">
-    <RoleBasedSidebar admin={admin} theme={theme} />
+          <AdminSidebar admin={admin} theme={theme} />
 
           <main className="flex-1 px-6 py-6 overflow-y-auto">
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -646,46 +668,229 @@ const Gestures = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-              <CameraPreview theme={theme} />
-
-              {/* Removed training section - not needed for current use case */}
+            {/* Tabs for Default and Custom Gestures */}
+            <div className="mb-6 border-b border-gray-700">
+              <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
+                <li className="mr-2">
+                  <button
+                    onClick={() => setActiveTab('default')}
+                    className={`inline-block p-4 rounded-t-lg transition-colors ${
+                      activeTab === 'default'
+                        ? 'border-b-2 text-cyan-400 border-cyan-400 font-semibold'
+                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+                    }`}
+                  >
+                    Default Gestures
+                  </button>
+                </li>
+                <li className="mr-2">
+                  <button
+                    onClick={() => setActiveTab('custom')}
+                    className={`inline-block p-4 rounded-t-lg transition-colors ${
+                      activeTab === 'custom'
+                        ? 'border-b-2 text-cyan-400 border-cyan-400 font-semibold'
+                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+                    }`}
+                  >
+                    Custom Gestures
+                  </button>
+                </li>
+              </ul>
             </div>
 
-            {/* Gesture List */}
-            {/* Simplified gesture interface without training */}
+            {activeTab === 'default' && (
+              <>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+                  <CameraPreview theme={theme} />
+                </div>
 
-            {error && (
-              <div
-                className={`mb-4 p-4 border rounded-lg ${
-                  theme === 'dark'
-                    ? 'bg-red-500/20 border-red-500/50 text-red-400'
-                    : 'bg-red-50 border-red-200 text-red-700'
-                }`}
-              >
-                {error}
-              </div>
+                {error && (
+                  <div
+                    className={`mb-4 p-4 border rounded-lg ${
+                      theme === 'dark'
+                        ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                        : 'bg-red-50 border-red-200 text-red-700'
+                    }`}
+                  >
+                    {error}
+                  </div>
+                )}
+
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                    <Loader2
+                      size={48}
+                      className={`${
+                        theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'
+                      } animate-spin`}
+                    />
+                    <p
+                      className={`text-lg font-medium ${
+                        theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'
+                      }`}
+                    >
+                      {t('gestures.loading', {
+                        defaultValue: 'Loading gestures...',
+                      })}
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className={`border rounded-xl overflow-hidden backdrop-blur-sm ${
+                      theme === 'dark'
+                        ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50'
+                        : 'bg-white/50 border-gray-200/50'
+                    }`}
+                  >
+                    <div className="max-h-[calc(100vh-360px)] overflow-y-auto">
+                      <table className="w-full">
+                        <thead className="sticky top-0 z-10">
+                          <tr
+                            className={`border-b ${
+                              theme === 'dark'
+                                ? 'bg-gray-700/50 border-gray-600'
+                                : 'bg-gray-50 border-gray-200'
+                            }`}
+                          >
+                            <th
+                              className={`px-6 py-4 text-left text-sm font-semibold ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}
+                            >
+                              {t('gestures.columnId', { defaultValue: 'ID' })}
+                            </th>
+                            <th
+                              className={`px-6 py-4 text-left text-sm font-semibold ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}
+                            >
+                              {t('gestures.poseLabel', {
+                                defaultValue: 'Pose Label',
+                              })}
+                            </th>
+                            <th
+                              className={`px-6 py-4 text-left text-sm font-semibold ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}
+                            >
+                              {t('gestures.columnType', { defaultValue: 'Type' })}
+                            </th>
+                            <th
+                              className={`px-6 py-4 text-left text-sm font-semibold ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}
+                            >
+                              {t('gestures.columnInstruction', {
+                                defaultValue: 'Instruction',
+                              })}
+                            </th>
+                            <th
+                              className={`px-6 py-4 text-center text-sm font-semibold ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}
+                            >
+                              {t('gestures.columnActions', {
+                                defaultValue: 'Training',
+                              })}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredGestures.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan="5"
+                                className={`px-6 py-12 text-center ${
+                                  theme === 'dark'
+                                    ? 'text-gray-400'
+                                    : 'text-gray-500'
+                                }`}
+                              >
+                                {t('gestures.empty', {
+                                  defaultValue: 'No gestures found',
+                                })}
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredGestures.map((gesture) => (
+                              <tr
+                                key={`${gesture.pose_label}-${gesture.instance_id}`}
+                                className={`border-b transition-colors ${
+                                  theme === 'dark'
+                                    ? 'border-gray-700/50 hover:bg-gray-800/30'
+                                    : 'border-gray-100 hover:bg-gray-50'
+                                }`}
+                              >
+                                <td
+                                  className={`px-6 py-4 ${
+                                    theme === 'dark'
+                                      ? 'text-gray-300'
+                                      : 'text-gray-700'
+                                  }`}
+                                >
+                                  {String(gesture.instance_id).padStart(3, '0')}
+                                </td>
+                                <td
+                                  className={`px-6 py-4 font-medium capitalize ${
+                                    theme === 'dark'
+                                      ? 'text-white'
+                                      : 'text-gray-900'
+                                  }`}
+                                >
+                                  {gesture.pose_label}
+                                </td>
+                                <td
+                                  className={`px-6 py-4 ${
+                                    theme === 'dark'
+                                      ? 'text-gray-300'
+                                      : 'text-gray-700'
+                                  }`}
+                                >
+                                  {gesture.gesture_type === 'static'
+                                    ? t('gestures.typeStatic', { defaultValue: 'Static' })
+                                    : t('gestures.typeDynamic', { defaultValue: 'Dynamic' })}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMLPractice(gesture.pose_label)}
+                                      className={`px-4 py-2 rounded font-medium transition-all ${
+                                        theme === 'dark'
+                                          ? 'bg-blue-800 text-blue-300 hover:bg-blue-700'
+                                          : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                                      }`}
+                                    >
+                                      🎯 Practice Gesture
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  <button
+                                    onClick={() => openInstructionModal(gesture)}
+                                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                                      theme === 'dark'
+                                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-cyan-500/40'
+                                        : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:shadow-cyan-400/40'
+                                    }`}
+                                  >
+                                    {t('gestures.trainButton', {
+                                      defaultValue: 'View instruction',
+                                    })}
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                <Loader2
-                  size={48}
-                  className={`${
-                    theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'
-                  } animate-spin`}
-                />
-                <p
-                  className={`text-lg font-medium ${
-                    theme === 'dark' ? 'text-cyan-500' : 'text-blue-500'
-                  }`}
-                >
-                  {t('gestures.loading', {
-                    defaultValue: 'Loading gestures...',
-                  })}
-                </p>
-              </div>
-            ) : (
+            {activeTab === 'custom' && (
               <div
                 className={`border rounded-xl overflow-hidden backdrop-blur-sm ${
                   theme === 'dark'
@@ -693,7 +898,15 @@ const Gestures = () => {
                     : 'bg-white/50 border-gray-200/50'
                 }`}
               >
-                <div className="max-h-[calc(100vh-360px)] overflow-y-auto">
+                <div className="p-4 text-gray-300">
+                  <h3 className="text-lg font-semibold text-white mb-2">Customize Your Gestures</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    Here you can provide your own samples for existing gestures. Click 'Customize' to open the recording window.
+                    <br />
+                    Once you have collected all your custom samples, click 'Request Customization' to submit them for approval.
+                  </p>
+                </div>
+                <div className="max-h-[calc(100vh-420px)] overflow-y-auto">
                   <table className="w-full">
                     <thead className="sticky top-0 z-10">
                       <tr
@@ -708,64 +921,35 @@ const Gestures = () => {
                             theme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}
                         >
-                          {t('gestures.columnId', { defaultValue: 'ID' })}
-                        </th>
-                        <th
-                          className={`px-6 py-4 text-left text-sm font-semibold ${
-                            theme === 'dark' ? 'text-white' : 'text-gray-900'
-                          }`}
-                        >
-                          {t('gestures.poseLabel', {
-                            defaultValue: 'Pose Label',
-                          })}
-                        </th>
-                        <th
-                          className={`px-6 py-4 text-left text-sm font-semibold ${
-                            theme === 'dark' ? 'text-white' : 'text-gray-900'
-                          }`}
-                        >
-                          {t('gestures.columnType', { defaultValue: 'Type' })}
-                        </th>
-                        <th
-                          className={`px-6 py-4 text-left text-sm font-semibold ${
-                            theme === 'dark' ? 'text-white' : 'text-gray-900'
-                          }`}
-                        >
-                          {t('gestures.columnInstruction', {
-                            defaultValue: 'Instruction',
-                          })}
+                          Gesture Name
                         </th>
                         <th
                           className={`px-6 py-4 text-center text-sm font-semibold ${
                             theme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}
                         >
-                          {t('gestures.columnActions', {
-                            defaultValue: 'Training',
-                          })}
+                          Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredGestures.length === 0 ? (
+                      {labels.length === 0 ? (
                         <tr>
                           <td
-                            colSpan="4"
+                            colSpan="2"
                             className={`px-6 py-12 text-center ${
                               theme === 'dark'
                                 ? 'text-gray-400'
                                 : 'text-gray-500'
                             }`}
                           >
-                            {t('gestures.empty', {
-                              defaultValue: 'No gestures found',
-                            })}
+                            Loading gesture list...
                           </td>
                         </tr>
                       ) : (
-                        filteredGestures.map((gesture) => (
+                        labels.map((label) => (
                           <tr
-                            key={`${gesture.pose_label}-${gesture.instance_id}`}
+                            key={label}
                             className={`border-b transition-colors ${
                               theme === 'dark'
                                 ? 'border-gray-700/50 hover:bg-gray-800/30'
@@ -773,61 +957,27 @@ const Gestures = () => {
                             }`}
                           >
                             <td
-                              className={`px-6 py-4 ${
-                                theme === 'dark'
-                                  ? 'text-gray-300'
-                                  : 'text-gray-700'
-                              }`}
-                            >
-                              {String(gesture.instance_id).padStart(3, '0')}
-                            </td>
-                            <td
                               className={`px-6 py-4 font-medium capitalize ${
                                 theme === 'dark'
                                   ? 'text-white'
                                   : 'text-gray-900'
                               }`}
                             >
-                              {gesture.pose_label}
-                            </td>
-                            <td
-                              className={`px-6 py-4 ${
-                                theme === 'dark'
-                                  ? 'text-gray-300'
-                                  : 'text-gray-700'
-                              }`}
-                            >
-                              {gesture.gesture_type === 'static'
-                                ? t('gestures.typeStatic', { defaultValue: 'Static' })
-                                : t('gestures.typeDynamic', { defaultValue: 'Dynamic' })}
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleMLPractice(gesture.pose_label)}
-                                  className={`px-4 py-2 rounded font-medium transition-all ${
-                                    theme === 'dark'
-                                      ? 'bg-blue-800 text-blue-300 hover:bg-blue-700'
-                                      : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                                  }`}
-                                >
-                                  🎯 Practice Gesture
-                                </button>
-                              </div>
+                              {label.replace(/_/g, ' ')}
                             </td>
                             <td className="px-6 py-4 text-center">
                               <button
-                                onClick={() => openInstructionModal(gesture)}
+                                onClick={() => setCustomizingGesture(label)}
+                                disabled={customizedGestures.includes(label)}
                                 className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
-                                  theme === 'dark'
+                                  customizedGestures.includes(label)
+                                    ? 'bg-gray-500 text-gray-200 cursor-not-allowed'
+                                    : theme === 'dark'
                                     ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-cyan-500/40'
                                     : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:shadow-cyan-400/40'
                                 }`}
                               >
-                                {t('gestures.trainButton', {
-                                  defaultValue: 'View instruction',
-                                })}
+                                {customizedGestures.includes(label) ? 'Recorded' : '✨ Customize'}
                               </button>
                             </td>
                           </tr>
@@ -835,6 +985,15 @@ const Gestures = () => {
                       )}
                     </tbody>
                   </table>
+                </div>
+                <div className={`p-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} flex justify-end`}>
+                    <button
+                        onClick={handleSubmitCustomizationRequest}
+                        className="px-6 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-all disabled:bg-gray-500"
+                        disabled={customizedGestures.length === 0}
+                    >
+                        Request Customization {customizedGestures.length > 0 ? `(${customizedGestures.length})` : ''}
+                    </button>
                 </div>
               </div>
             )}
@@ -1003,12 +1162,6 @@ const Gestures = () => {
         t={t}
       />
 
-      {/* Removed training confirmation modal */}
-
-
-
-
-
       {/* ML Practice Component */}
       {showMLPractice && selectedPracticeGesture && (
         <GesturePracticeML
@@ -1020,11 +1173,21 @@ const Gestures = () => {
           }}
         />
       )}
+
+      {/* Gesture Customization Component */}
+      {customizingGesture && (
+        <GestureCustomization
+          gestureName={customizingGesture}
+          admin={admin}
+          theme={theme}
+          onCompleted={handleCustomizationCompleted}
+          onClose={() => setCustomizingGesture(null)}
+        />
+      )}
     </div>
   );
 };
 
-export default Gestures;
-
+export default AdminGestures;
 
 

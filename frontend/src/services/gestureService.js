@@ -121,3 +121,51 @@ export const cancelTrainingRun = async (runId) => {
   });
   return response.data;
 };
+
+export const customizeGesture = async (payload) => {
+  const response = await axios.post(`${API_URL}/customize/upload`, payload, {
+    headers: authHeaders(),
+  });
+  return response.data;
+};
+
+export const submitCustomizationRequest = async (payload) => {
+  const response = await axios.post(`${API_URL}/customize/request`, payload, {
+    headers: authHeaders(),
+  });
+  return response.data;
+};
+
+export const getCustomStatus = async () => {
+  const response = await axios.get(`${API_URL}/customize/status`, {
+    headers: authHeaders(),
+  });
+  return response.data;
+};
+
+export const fetchCustomizationRequests = async (status) => {
+  const params = status ? { status } : {};
+  const response = await axios.get(`${API_URL}/customize/requests`, {
+    params,
+    headers: authHeaders(),
+  });
+  return response.data;
+};
+
+export const approveCustomizationRequest = async (requestId) => {
+  const response = await axios.post(
+    `${API_URL}/customize/requests/${requestId}/approve`,
+    {},
+    { headers: authHeaders() }
+  );
+  return response.data;
+};
+
+export const rejectCustomizationRequest = async (requestId, reason) => {
+  const response = await axios.post(
+    `${API_URL}/customize/requests/${requestId}/reject`,
+    { reason },
+    { headers: authHeaders() }
+  );
+  return response.data;
+};

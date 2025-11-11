@@ -1,35 +1,51 @@
 const express = require('express');
 const router = express.Router();
 
+
 const gestureController = require('../controllers/gestureController');
+const customGestureUploadController = require('../controllers/customGestureUploadController');
+const customGestureRequestController = require('../controllers/customGestureRequestController');
 const gestureTrainingController = require('../controllers/gestureTrainingController');
-const authMiddleware = require('../middlewares/authMiddleware');
-
-router.use(
-  authMiddleware.protect,
-  authMiddleware.authorize('superadmin')
-);
-
-router.get('/', gestureController.listSamples);
-router.get('/labels', gestureController.listLabels);
-router.get('/stats', gestureController.stats);
-
 const gestureInferenceController = require('../controllers/gestureInferenceController');
 const gesturePracticeController = require('../controllers/gesturePracticeController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-router.get('/model-status', gestureTrainingController.getModelStatus);
-router.get('/model-info', gestureInferenceController.getModelInfo);
-router.get('/model-test', gestureInferenceController.testModel);
 
-// Practice session routes  
-router.post('/practice/start', gesturePracticeController.startPracticeSession);
-router.post('/practice/stop', gesturePracticeController.stopPracticeSession);
-router.get('/practice/status', gesturePracticeController.getSessionStatus);
-router.get('/practice/logs', gesturePracticeController.getSessionLogs);
 
-router.post('/training', gestureTrainingController.startTraining);
-router.get('/training', gestureTrainingController.listRuns);
-router.get('/training/:id', gestureTrainingController.getRun);
-router.delete('/training/:id', gestureTrainingController.cancelTraining);
+// Bảo vệ tất cả route bằng JWT
+router.use(authMiddleware.protect);
+
+// Các route chỉ cần quyền admin hoặc superadmin (xem và practice)
+const allowView = authMiddleware.authorize('admin', 'superadmin');
+
+router.get('/', allowView, gestureController.listSamples);
+router.get('/labels', allowView, gestureController.listLabels);
+router.get('/stats', allowView, gestureController.stats);
+router.get('/model-status', allowView, gestureTrainingController.getModelStatus);
+router.get('/model-info', allowView, gestureInferenceController.getModelInfo);
+router.get('/model-test', allowView, gestureInferenceController.testModel);
+
+// Route for gesture customization
+router.post('/customize', allowView, gestureController.customizeGesture);
+router.post('/customize/upload', allowView, customGestureUploadController.uploadCustomGesture);
+router.post('/customize/request', allowView, customGestureRequestController.submitCustomizationRequest);
+router.get('/customize/status', allowView, customGestureRequestController.getAdminStatus);
+router.get('/customize/requests', onlySuper, customGestureRequestController.listRequests);
+router.post('/customize/requests/:id/approve', onlySuper, customGestureRequestController.approveRequest);
+router.post('/customize/requests/:id/reject', onlySuper, customGestureRequestController.rejectRequest);
+
+// Practice session routes (cho phép cả admin và superadmin)
+router.post('/practice/start', allowView, gesturePracticeController.startPracticeSession);
+router.post('/practice/stop', allowView, gesturePracticeController.stopPracticeSession);
+router.get('/practice/status', allowView, gesturePracticeController.getSessionStatus);
+router.get('/practice/logs', allowView, gesturePracticeController.getSessionLogs);
+
+// Các route training chỉ cho superadmin
+const onlySuper = authMiddleware.authorize('superadmin');
+router.post('/training', onlySuper, gestureTrainingController.startTraining);
+router.get('/training', onlySuper, gestureTrainingController.listRuns);
+router.get('/training/:id', onlySuper, gestureTrainingController.getRun);
+router.delete('/training/:id', onlySuper, gestureTrainingController.cancelTraining);
+
 
 module.exports = router;

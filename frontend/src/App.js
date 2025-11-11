@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import ForgotPassword from './pages/ForgotPassword';
 import Gestures from './pages/Gestures';
+import AdminGestures from './pages/AdminGestures';
 
 // Protected Route Component for Role-Based Access
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -101,6 +102,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <UserList />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-gestures" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminGestures />
                 </ProtectedRoute>
               } 
             />

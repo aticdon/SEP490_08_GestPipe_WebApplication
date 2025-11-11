@@ -108,6 +108,21 @@ const GESTURE_TEMPLATES = {
   }
 };
 
+// Modern spinner component
+function ModernSpinner({ firstTime }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        <div className="mt-4 text-lg font-semibold text-white drop-shadow-lg">Recognizing...</div>
+        {firstTime && (
+          <div className="mt-2 text-sm text-gray-200 opacity-80">It may take a little longer to load the camera on your first visit.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   // Debug gesture name
   console.log('🎯 GesturePracticeMLFixed received gestureName:', gestureName);
@@ -135,44 +150,77 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   const [attemptHistory, setAttemptHistory] = useState([]); // Track each attempt with result and error
   const maxAttempts = 5;
   
+  // Loading state
+  const [loading, setLoading] = useState(true); // Show loading by default
+  const frameDrawCountRef = useRef(0);
+  // Detect first time user
+  const [firstTime, setFirstTime] = useState(false);
+  useEffect(() => {
+    if (!localStorage.getItem('hasVisitedPractice')) {
+      setFirstTime(true);
+      localStorage.setItem('hasVisitedPractice', '1');
+    }
+  }, []);
+  
+  // Demo loading handler (move this inside the component)
+  const startPractice = useCallback(() => {
+    setLoading(true);
+    setPracticeState('LOADING');
+    setTimeout(() => {
+      setLoading(false);
+      setPracticeState('PRACTICING');
+    }, 1500);
+  }, []);
+  
+  // Hide loading when camera/video is ready
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleReady = () => setLoading(false);
+    video.addEventListener('canplay', handleReady);
+    video.addEventListener('loadedmetadata', handleReady);
+    return () => {
+      video.removeEventListener('canplay', handleReady);
+      video.removeEventListener('loadedmetadata', handleReady);
+    };
+  }, []);
+  
+  // Helper: sleep for ms
+  function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
+
   // Helper function to handle attempt completion
-  const handleAttemptResult = useCallback((isCorrect, message, errorType = '') => {
-    console.log(`🎯 handleAttemptResult called - isCorrect: ${isCorrect}, message: ${message}`);
-    
-    // Update attempt count and check completion
+  const handleAttemptResult = useCallback(async (isCorrect, message, errorType = '') => {
+    // Show message (with reason if wrong)
+    let displayMsg = message;
+    let displayColor = isCorrect ? '#22d3ee' : '#f87171'; // cyan for correct, red for wrong
+    if (!isCorrect && errorType) {
+      displayMsg = `${message} (${errorType})`;
+    }
+    setStatusMessage(<span style={{color: displayColor, fontWeight: 600}}>{displayMsg}</span>);
+    setPracticeState('FEEDBACK');
+    await sleep(1000); // Show feedback 1s
+
     setAttemptCount(prev => {
       const newAttemptCount = prev + 1;
-      console.log(`📊 Attempt count: ${prev} -> ${newAttemptCount}`);
-      
-      // Check if we've reached max attempts
       if (newAttemptCount >= maxAttempts) {
-        console.log(`✅ Reached max attempts (${maxAttempts}), showing final result`);
         setShowFinalResult(true);
       } else {
-        // Only show message if not completed
-        setStatusMessage(message);
-        setTimeout(() => {
-          setPracticeState("IDLE");
-          practiceStateRef.current = "IDLE";
-        }, 2000);
+        setStatusMessage('');
+        setPracticeState('IDLE');
+        practiceStateRef.current = 'IDLE';
       }
-      
       return newAttemptCount;
     });
-    
-    // Update attempt history separately
+
     setAttemptHistory(prevHistory => {
       const newAttempt = {
-        attempt: prevHistory.length + 1, // Use history length instead of count
+        attempt: prevHistory.length + 1,
         result: isCorrect ? 'correct' : 'wrong',
         error: isCorrect ? '' : errorType,
-        message: message
+        message: displayMsg
       };
-      console.log(`📝 Adding to history:`, newAttempt);
       return [...prevHistory, newAttempt];
     });
-    
-    // Update stats
     if (isCorrect) {
       setAttemptStats(prev => ({ ...prev, correct: prev.correct + 1 }));
     } else {
@@ -572,6 +620,16 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     }
     
     canvasCtx.restore();
+    
+    // Hide loading spinner after 3 frames + ensure browser rendered
+    if (frameDrawCountRef.current < 3) {
+      frameDrawCountRef.current += 1;
+      if (frameDrawCountRef.current === 3) {
+        window.requestAnimationFrame(() => {
+          setTimeout(() => setLoading(false), 120);
+        });
+      }
+    }
   }, []);
   
   // Draw landmarks
@@ -949,6 +1007,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      {loading && <ModernSpinner firstTime={firstTime} />}
       <div className={`rounded-xl shadow-xl max-w-2xl w-full ${
         theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
       }`}>
@@ -990,7 +1049,6 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
             playsInline
             muted
           />
-          
           {/* Simple status */}
           <div className={`mt-4 p-3 rounded-lg text-center ${
             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'

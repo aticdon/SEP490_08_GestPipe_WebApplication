@@ -11,6 +11,7 @@ import { useTheme } from '../utils/ThemeContext';
 import Sidebar from '../components/Sidebar';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
+import GesturePracticeML from '../components/GesturePracticeML';
 
 const AdminList = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const AdminList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [togglingId, setTogglingId] = useState(null); // Track which admin is being toggled
+  const [showPractice, setShowPractice] = useState(false);
+  const [selectedGesture, setSelectedGesture] = useState('rotate_down'); // default gesture
 
   // Get admin info
   useEffect(() => {
@@ -306,6 +309,17 @@ const AdminList = () => {
                   {t('adminList.createNew')}
                 </button>
                 
+                <button
+                  onClick={() => setShowPractice(true)}
+                  className={`flex items-center gap-2 px-6 py-3 font-semibold rounded-lg transition-all shadow-lg ${
+                    theme === 'dark'
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-500 text-white hover:shadow-cyan-500/50'
+                      : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:shadow-cyan-400/50'
+                  }`}
+                >
+                  🎯 Practice Gestures
+                </button>
+
                 <div className="relative">
                   <select
                     value={filterStatus}
@@ -484,6 +498,43 @@ const AdminList = () => {
             </div>
           </main>
         </div>
+
+        {/* Modal chọn gesture và practice */}
+        {showPractice && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 w-full max-w-md relative">
+              <button
+                onClick={() => setShowPractice(false)}
+                className="absolute top-3 right-3 p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
+                <span className="text-xl">×</span>
+              </button>
+              <h2 className="text-xl font-bold mb-4 text-center text-cyan-600 dark:text-cyan-300">Practice Gestures (Admin)</h2>
+              <label className="block mb-2 font-medium">Select gesture:</label>
+              <select
+                value={selectedGesture}
+                onChange={e => setSelectedGesture(e.target.value)}
+                className="w-full mb-4 p-2 rounded border border-gray-300 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="rotate_down">Rotate Down</option>
+                <option value="rotate_left">Rotate Left</option>
+                <option value="rotate_right">Rotate Right</option>
+                <option value="rotate_up">Rotate Up</option>
+                <option value="zoom_in">Zoom In</option>
+                <option value="zoom_out">Zoom Out</option>
+                <option value="previous_slide">Previous Slide</option>
+                <option value="next_slide">Next Slide</option>
+                <option value="end">End</option>
+                <option value="home">Home</option>
+              </select>
+              <GesturePracticeML
+                gestureName={selectedGesture}
+                onClose={() => setShowPractice(false)}
+                theme={theme}
+              />
+            </div>
+          </div>
+        )}
 
       {/* Toast Container */}
       <ToastContainer

@@ -6,14 +6,15 @@ import LanguageSwitcher from './LanguageSwitcher';
 
 const pathToItem = {
   '/user-list': 'user',
+  '/admin-gestures': 'gestures',
 };
 
-const AdminSidebar = ({ theme, activeItem }) => {
+const AdminSidebar = ({ theme }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, i18n } = useTranslation();
 
-  const resolvedActive = activeItem || pathToItem[location.pathname] || null;
+  const resolvedActive = pathToItem[location.pathname] || null;
 
   const menuItems = [
     {
@@ -28,6 +29,7 @@ const AdminSidebar = ({ theme, activeItem }) => {
       id: 'gestures',
       label: t('userList.gesturesControl'),
       icon: Gamepad2,
+      path: '/admin-gestures',
     },
     {
       id: 'user',
@@ -124,7 +126,9 @@ const AdminSidebar = ({ theme, activeItem }) => {
   };
 
   const handleClick = (item) => {
-    if (item.path) navigate(item.path);
+    if (item.path) {
+      navigate(item.path);
+    }
   };
 
   return (
