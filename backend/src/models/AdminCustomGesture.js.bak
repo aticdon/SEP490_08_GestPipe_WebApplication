@@ -28,4 +28,12 @@ const AdminCustomGestureSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    lastRequestI
+    lastRequestId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CustomGestureRequest',
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model('AdminCustomGesture', AdminCustomGestureSchema);
