@@ -211,6 +211,7 @@ exports.login = async (req, res) => {
         email: admin.email,
         role: admin.role,
         accountStatus: admin.accountStatus,
+        gesture_request_status: admin.gesture_request_status,
         theme: admin.theme,
         uiLanguage: admin.uiLanguage,
         isFirstLogin: isUsingTempPassword,

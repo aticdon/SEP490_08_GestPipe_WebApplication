@@ -129,6 +129,14 @@ export const customizeGesture = async (payload) => {
   return response.data;
 };
 
+export const checkGestureConflict = async (sample) => {
+  const response = await axios.post(`${API_URL}/customize/check-conflict`, sample, {
+    headers: authHeaders(),
+    validateStatus: (status) => status < 500, // Accept 2xx, 3xx, 4xx but not 5xx
+  });
+  return response.data;
+};
+
 export const submitCustomizationRequest = async (payload) => {
   const response = await axios.post(`${API_URL}/customize/request`, payload, {
     headers: authHeaders(),

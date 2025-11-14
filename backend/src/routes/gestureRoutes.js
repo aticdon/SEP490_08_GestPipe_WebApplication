@@ -12,11 +12,13 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 
 
+
 // Bảo vệ tất cả route bằng JWT
 router.use(authMiddleware.protect);
 
-// Các route chỉ cần quyền admin hoặc superadmin (xem và practice)
+// Các middleware phân quyền
 const allowView = authMiddleware.authorize('admin', 'superadmin');
+const onlySuper = authMiddleware.authorize('superadmin');
 
 router.get('/', allowView, gestureController.listSamples);
 router.get('/labels', allowView, gestureController.listLabels);
@@ -27,6 +29,7 @@ router.get('/model-test', allowView, gestureInferenceController.testModel);
 
 // Route for gesture customization
 router.post('/customize', allowView, gestureController.customizeGesture);
+router.post('/customize/check-conflict', allowView, customGestureUploadController.checkGestureConflict);
 router.post('/customize/upload', allowView, customGestureUploadController.uploadCustomGesture);
 router.post('/customize/request', allowView, customGestureRequestController.submitCustomizationRequest);
 router.get('/customize/status', allowView, customGestureRequestController.getAdminStatus);
@@ -40,8 +43,8 @@ router.post('/practice/stop', allowView, gesturePracticeController.stopPracticeS
 router.get('/practice/status', allowView, gesturePracticeController.getSessionStatus);
 router.get('/practice/logs', allowView, gesturePracticeController.getSessionLogs);
 
+
 // Các route training chỉ cho superadmin
-const onlySuper = authMiddleware.authorize('superadmin');
 router.post('/training', onlySuper, gestureTrainingController.startTraining);
 router.get('/training', onlySuper, gestureTrainingController.listRuns);
 router.get('/training/:id', onlySuper, gestureTrainingController.getRun);

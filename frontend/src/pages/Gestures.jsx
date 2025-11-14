@@ -16,6 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import RoleBasedSidebar from '../components/RoleBasedSidebar';
 import CameraPreview from '../components/CameraPreview';
 import GesturePracticeML from '../components/GesturePracticeML';
+import GestureCustomization from '../components/GestureCustomization';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 import { useTheme } from '../utils/ThemeContext';
@@ -215,7 +216,7 @@ const buildInstruction = (gesture, t) => {
   return `${leftHand} ${rightHand} ${motion}`;
 };
 
-const Gestures = () => {
+const Gestures = ({ showCustomTab = false }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -242,6 +243,8 @@ const Gestures = () => {
   const [modelInfo, setModelInfo] = useState(null);
   const [showMLPractice, setShowMLPractice] = useState(false);
   const [selectedPracticeGesture, setSelectedPracticeGesture] = useState(null);
+  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'custom'
+  const [customizingGesture, setCustomizingGesture] = useState(null);
 
   useEffect(() => {
     const currentAdmin = authService.getCurrentUser();
@@ -652,6 +655,28 @@ const Gestures = () => {
               {/* Removed training section - not needed for current use case */}
             </div>
 
+            {/* Admin-only tabs: All / Custom */}
+            {showCustomTab && (
+              <div className="mb-4">
+                <div className="inline-flex rounded-lg overflow-hidden border" role="tablist">
+                  <button
+                    role="tab"
+                    onClick={() => setActiveTab('all')}
+                    className={`px-4 py-2 font-semibold ${activeTab === 'all' ? 'bg-cyan-500 text-white' : 'bg-white text-gray-700'}`}
+                  >
+                    {t('gestures.tabAll', { defaultValue: 'All' })}
+                  </button>
+                  <button
+                    role="tab"
+                    onClick={() => setActiveTab('custom')}
+                    className={`px-4 py-2 font-semibold ${activeTab === 'custom' ? 'bg-cyan-500 text-white' : 'bg-white text-gray-700'}`}
+                  >
+                    {t('gestures.tabCustom', { defaultValue: 'Custom' })}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Gesture List */}
             {/* Simplified gesture interface without training */}
 
@@ -667,6 +692,7 @@ const Gestures = () => {
               </div>
             )}
 
+            {/* If admin selected Custom tab, we still show the gesture list but switch row actions. */}
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 space-y-4">
                 <Loader2
@@ -801,35 +827,55 @@ const Gestures = () => {
                                 ? t('gestures.typeStatic', { defaultValue: 'Static' })
                                 : t('gestures.typeDynamic', { defaultValue: 'Dynamic' })}
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="flex gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleMLPractice(gesture.pose_label)}
-                                  className={`px-4 py-2 rounded font-medium transition-all ${
-                                    theme === 'dark'
-                                      ? 'bg-blue-800 text-blue-300 hover:bg-blue-700'
-                                      : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                                  }`}
-                                >
-                                  🎯 Practice Gesture
-                                </button>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-center">
-                              <button
-                                onClick={() => openInstructionModal(gesture)}
-                                className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
-                                  theme === 'dark'
-                                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-cyan-500/40'
-                                    : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:shadow-cyan-400/40'
-                                }`}
-                              >
-                                {t('gestures.trainButton', {
-                                  defaultValue: 'View instruction',
-                                })}
-                              </button>
-                            </td>
+                            {/** Replace Practice/Instruction with Customize in Custom tab */}
+                            {showCustomTab && activeTab === 'custom' ? (
+                              <td className="px-6 py-4 text-center" colSpan={2}>
+                                <div className="flex items-center justify-center gap-3">
+                                  <button
+                                    onClick={() => setCustomizingGesture(gesture)}
+                                    className={`px-4 py-2 rounded font-medium transition-all ${
+                                      theme === 'dark'
+                                        ? 'bg-green-600 text-white hover:bg-green-500'
+                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                    }`}
+                                  >
+                                    {t('gestures.customizeButton', { defaultValue: 'Customize' })}
+                                  </button>
+                                </div>
+                              </td>
+                            ) : (
+                              <>
+                                <td className="px-6 py-4">
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMLPractice(gesture.pose_label)}
+                                      className={`px-4 py-2 rounded font-medium transition-all ${
+                                        theme === 'dark'
+                                          ? 'bg-blue-800 text-blue-300 hover:bg-blue-700'
+                                          : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                                      }`}
+                                    >
+                                      🎯 Practice Gesture
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  <button
+                                    onClick={() => openInstructionModal(gesture)}
+                                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                                      theme === 'dark'
+                                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-cyan-500/40'
+                                        : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:shadow-cyan-400/40'
+                                    }`}
+                                  >
+                                    {t('gestures.trainButton', {
+                                      defaultValue: 'View instruction',
+                                    })}
+                                  </button>
+                                </td>
+                              </>
+                            )}
                           </tr>
                         ))
                       )}
@@ -1018,6 +1064,17 @@ const Gestures = () => {
             setShowMLPractice(false);
             setSelectedPracticeGesture(null);
           }}
+        />
+      )}
+
+      {/* Admin customization modal (per-gesture) */}
+      {customizingGesture && (
+        <GestureCustomization
+          gestureName={customizingGesture.pose_label || customizingGesture}
+          admin={admin}
+          onClose={() => setCustomizingGesture(null)}
+          onCompleted={() => setCustomizingGesture(null)}
+          theme={theme}
         />
       )}
     </div>

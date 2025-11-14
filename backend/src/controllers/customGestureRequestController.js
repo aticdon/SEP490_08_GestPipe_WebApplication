@@ -1,5 +1,6 @@
-const path = require(''path'');
-const fs = require(''fs/promises'');
+const Admin = require('../models/Admin');
+const path = require('path');
+const fs = require('fs/promises');
 
 const AdminCustomGesture = require('../models/AdminCustomGesture');
 const CustomGestureRequest = require('../models/CustomGestureRequest');
@@ -65,9 +66,13 @@ exports.submitCustomizationRequest = async (req, res) => {
       { upsert: true }
     );
 
+    // Update gesture_request_status to 'disabled' for this admin
+    await Admin.findByIdAndUpdate(adminId, { gesture_request_status: 'disabled' });
+
     return res.status(200).json({
-      message: 'Submitted for approval. Waiting for superadmin review.',
+      message: 'Đã gửi yêu cầu tuỳ chỉnh. Vui lòng chờ SuperAdmin duyệt.',
       requestId: requestDoc._id,
+      gesture_request_status: 'disabled',
     });
   } catch (error) {
     console.error('[submitCustomizationRequest] Error', error);

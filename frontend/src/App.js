@@ -66,7 +66,7 @@ function App() {
             <Route
               path="/gestures"
               element={
-                <ProtectedRoute allowedRoles={['superadmin']}>
+                <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                   <Gestures />
                 </ProtectedRoute>
               }

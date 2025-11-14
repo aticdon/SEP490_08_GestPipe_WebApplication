@@ -1,17 +1,12 @@
-const path = require(''path'');
-const fs = require(''fs/promises'');
+const path = require('path');
+const fs = require('fs/promises');
+const { execFile } = require('child_process');
+const util = require('util');
+const execFileAsync = util.promisify(execFile);
 
 const AdminCustomGesture = require('../models/AdminCustomGesture');
 
-const PIPELINE_CODE_DIR = path.resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  '..',
-  'hybrid_realtime_pipeline',
-  'code'
-);
+const PIPELINE_CODE_DIR = path.resolve(__dirname, '../../../..', 'hybrid_realtime_pipeline', 'code');
 
 const CSV_COLUMNS = [
   'instance_id',
@@ -37,6 +32,161 @@ const CSV_COLUMNS = [
   'delta_x',
   'delta_y',
 ];
+
+// Validation settings (match Python script defaults)
+const REQUIRED_SAMPLES = 5;
+const MIN_CONSISTENT_SAMPLES = 3;
+const SIMILARITY_THRESHOLD = 0.85; // 0..1
+
+const safeNumber = (v) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const cosineSimilarity01 = (ax, ay, bx, by) => {
+  const aNorm = Math.hypot(ax, ay);
+  const bNorm = Math.hypot(bx, by);
+  if (aNorm === 0 || bNorm === 0) return 0.0;
+  const cos = (ax * bx + ay * by) / (aNorm * bNorm);
+  // convert from [-1,1] to [0,1]
+  return (cos + 1) / 2;
+};
+
+const sampleFingerKeys = ['finger_thumb', 'finger_index', 'finger_middle', 'finger_ring', 'finger_pinky'];
+
+const convertSampleFormat = (sample) => {
+  // Convert from frontend format to internal format
+  const converted = {
+    finger_thumb: Number(sample.rightStates?.[0] ?? sample.finger_thumb ?? 0),
+    finger_index: Number(sample.rightStates?.[1] ?? sample.finger_index ?? 0),
+    finger_middle: Number(sample.rightStates?.[2] ?? sample.finger_middle ?? 0),
+    finger_ring: Number(sample.rightStates?.[3] ?? sample.finger_ring ?? 0),
+    finger_pinky: Number(sample.rightStates?.[4] ?? sample.finger_pinky ?? 0),
+    motion_x: Number(sample.deltaX ?? sample.motion_x ?? sample.delta_x ?? 0),
+    motion_y: Number(sample.deltaY ?? sample.motion_y ?? sample.delta_y ?? 0),
+  };
+  return converted;
+};
+
+const calcSampleSimilarity = (s1, s2) => {
+  // Convert samples to internal format
+  const c1 = convertSampleFormat(s1);
+  const c2 = convertSampleFormat(s2);
+
+  // finger similarity only: each matching finger adds 0.2
+  let fingerSim = 0;
+  for (const k of sampleFingerKeys) {
+    if (Number(c1[k]) === Number(c2[k])) fingerSim += 0.2;
+  }
+
+  // Only check finger consistency (ignore motion)
+  return fingerSim;
+};
+
+const validateSampleQuality = (samples) => {
+  // samples: array of objects with finger_* and motion_x/motion_y
+  if (!Array.isArray(samples) || samples.length < REQUIRED_SAMPLES) {
+    return { valid: false, message: `Need ${REQUIRED_SAMPLES - (samples.length || 0)} more samples` };
+  }
+
+  const n = samples.length;
+  // build similarity matrix
+  const sim = Array.from({ length: n }, () => Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) sim[i][j] = 1.0;
+      else sim[i][j] = calcSampleSimilarity(samples[i], samples[j]);
+    }
+  }
+
+  // find consistent groups: greedy grouping ensuring all pairs similar
+  const used = new Set();
+  const groups = [];
+  for (let i = 0; i < n; i++) {
+    if (used.has(i)) continue;
+    const group = [i];
+    used.add(i);
+    let added = true;
+    while (added) {
+      added = false;
+      for (let j = i + 1; j < n; j++) {
+        if (used.has(j)) continue;
+        // check if j is similar to ALL in group
+        const similarToAll = group.every((k) => sim[k][j] >= SIMILARITY_THRESHOLD);
+        if (similarToAll) {
+          group.push(j);
+          used.add(j);
+          added = true;
+        }
+      }
+    }
+    if (group.length >= MIN_CONSISTENT_SAMPLES) groups.push(group);
+  }  if (groups.length === 0) {
+    return { valid: false, message: 'No consistent group of samples found (need 3 similar samples).' };
+  }
+
+  // pick largest group
+  const best = groups.reduce((a, b) => (b.length > a.length ? b : a), groups[0]);
+  const consistentSamples = best.map((idx) => samples[idx]);
+  return { valid: true, consistentSamples, message: `Found ${consistentSamples.length} consistent samples` };
+};
+
+const getMotionDirection = (dx, dy, threshold = 0.01) => {
+  const absx = Math.abs(dx);
+  const absy = Math.abs(dy);
+  if (absx < threshold && absy < threshold) return 'static';
+  if (absx > absy) return dx > 0 ? 'right' : 'left';
+  return dy > 0 ? 'down' : 'up';
+};
+
+const checkGestureConflict = async (leftStates, rightStates, dx, dy) => {
+  // Force left states to [0,0,0,0,0] to match reference CSV format
+  const normalizedLeftStates = [0, 0, 0, 0, 0];
+  
+  // read reference CSV
+  const refPath = path.join(PIPELINE_CODE_DIR, 'training_results', 'gesture_data_compact.csv');
+  console.log('[checkGestureConflict] Reference path:', refPath);
+  try {
+    const text = await fs.readFile(refPath, 'utf-8');
+    console.log('[checkGestureConflict] Read reference data, length:', text.length);
+    const lines = text.trim().split(/\r?\n/).slice(1);
+    console.log('[checkGestureConflict] Reference lines:', lines.length);
+    for (const line of lines) {
+      const cols = line.split(',');
+      // columns include left_0..4 then right_0..4 then motion columns etc depending on CSV format
+      // attempt to read based on expected positions
+      const r_left = [
+        Number(cols[2] || 0),
+        Number(cols[3] || 0),
+        Number(cols[4] || 0),
+        Number(cols[5] || 0),
+        Number(cols[6] || 0),
+      ];
+      const r_right = [
+        Number(cols[7] || 0),
+        Number(cols[8] || 0),
+        Number(cols[9] || 0),
+        Number(cols[10] || 0),
+        Number(cols[11] || 0),
+      ];
+      const r_dx = safeNumber(cols[cols.length - 2]);
+      const r_dy = safeNumber(cols[cols.length - 1]);
+
+      if (
+        r_left.every((v, i) => Number(normalizedLeftStates[i]) === v) &&
+        r_right.every((v, i) => Number(rightStates[i]) === v)
+      ) {
+        // Same finger pattern = CONFLICT! (ignore direction)
+        return { conflict: true, message: `Conflict with existing gesture (same finger pattern)` };
+      }
+    }
+    return { conflict: false, message: 'No conflict' };
+  } catch (err) {
+    // if reference load fails, we treat as no conflict but log
+    console.warn('[checkGestureConflict] failed to read reference data', err.message);
+    return { conflict: false, message: 'Reference data unavailable' };
+  }
+};
 
 const sanitizeNumber = (value, defaultValue = 0) => {
   const parsed = Number(value);
@@ -76,8 +226,8 @@ const upsertAdminCustomGesture = async (adminId, gestureName) => {
 const samplesToCsvRows = (samples, gestureName) => {
   return samples.map((sample, idx) => {
     const poseLabel = sample.pose_label || gestureName;
-    const left = sample.left_finger_state || sample.left_fingers || [];
-    const right = sample.right_finger_state || sample.right_fingers || [];
+    const left = sample.leftStates || sample.left_finger_state || sample.left_fingers || [];
+    const right = sample.rightStates || sample.right_finger_state || sample.right_fingers || [];
 
     const getFinger = (arr, index) => {
       if (!Array.isArray(arr)) return 0;
@@ -105,8 +255,8 @@ const samplesToCsvRows = (samples, gestureName) => {
       sanitizeNumber(sample.motion_y_end ?? sample.motion?.end?.y),
       sanitizeNumber(sample.main_axis_x ?? sample.motion?.main_axis_x ?? sample.mainAxisX),
       sanitizeNumber(sample.main_axis_y ?? sample.motion?.main_axis_y ?? sample.mainAxisY),
-      sanitizeNumber(sample.delta_x ?? sample.motion?.delta_x ?? sample.deltaX),
-      sanitizeNumber(sample.delta_y ?? sample.motion?.delta_y ?? sample.deltaY),
+      sanitizeNumber(sample.deltaX ?? sample.delta_x ?? sample.motion?.delta_x ?? sample.motion_x_end ?? 0),
+      sanitizeNumber(sample.deltaY ?? sample.delta_y ?? sample.motion?.delta_y ?? sample.motion_y_end ?? 0),
     ];
   });
 };
@@ -144,12 +294,35 @@ const appendToMasterCsv = async (masterPath, rows) => {
   }
 };
 
+exports.checkGestureConflict = async (req, res) => {
+  try {
+    const { leftStates, rightStates, deltaX, deltaY } = req.body;
+
+    if (!Array.isArray(leftStates) || !Array.isArray(rightStates)) {
+      return res.status(400).json({ message: 'leftStates and rightStates must be arrays' });
+    }
+
+    console.log('[checkGestureConflict] Checking conflict for sample:', { leftStates, rightStates, deltaX, deltaY });
+    const conflict = await checkGestureConflict(leftStates, rightStates, deltaX || 0, deltaY || 0);
+    console.log('[checkGestureConflict] Result:', conflict);
+
+    if (conflict.conflict) {
+      return res.status(409).json({ conflict: true, message: conflict.message });
+    } else {
+      return res.status(200).json({ conflict: false, message: conflict.message });
+    }
+  } catch (error) {
+    console.error('[checkGestureConflict] Error', error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 exports.uploadCustomGesture = async (req, res) => {
   try {
     const { adminId, gestureName, samples } = req.body;
 
     if (!adminId || !gestureName) {
-      return res.status(400).json({ message: 'adminId và gestureName là b?t bu?c.' });
+      return res.status(400).json({ message: 'adminId vï¿½ gestureName lï¿½ b?t bu?c.' });
     }
 
     if (!Array.isArray(samples) || samples.length === 0) {
@@ -162,17 +335,46 @@ exports.uploadCustomGesture = async (req, res) => {
 
     const normalizedGesture = gestureName.trim();
     const gestureSlug = sanitizeName(normalizedGesture);
-    const csvRows = samplesToCsvRows(samples, normalizedGesture);
-    const { userDir, gestureDir } = await ensureUserDirs(adminId, gestureSlug);
 
+    // Check conflict FIRST using the first sample (before quality validation)
+    if (samples.length > 0) {
+      const firstSample = samples[0];
+      const leftStates = firstSample.leftStates || firstSample.left_finger_state || firstSample.left_fingers || [];
+      const rightStates = firstSample.rightStates || firstSample.right_finger_state || firstSample.right_fingers || [];
+      const dx = sanitizeNumber(firstSample.deltaX ?? firstSample.delta_x ?? firstSample.motion?.delta_x ?? firstSample.motion_x_end ?? 0);
+      const dy = sanitizeNumber(firstSample.deltaY ?? firstSample.delta_y ?? firstSample.motion?.delta_y ?? firstSample.motion_y_end ?? 0);
+
+      console.log('[uploadCustomGesture] Checking conflict early with first sample...');
+      const conflict = await checkGestureConflict(leftStates, rightStates, dx, dy);
+      console.log('[uploadCustomGesture] Early conflict result:', conflict);
+      if (conflict.conflict) {
+        console.log('[uploadCustomGesture] Returning 409 early conflict:', conflict.message);
+        return res.status(409).json({ message: 'Conflict detected', detail: conflict.message });
+      }
+    }
+
+    // Run sample quality validation
+    console.log('[uploadCustomGesture] Running quality validation...');
+    const quality = validateSampleQuality(samples);
+    console.log('[uploadCustomGesture] Quality result:', quality);
+    if (!quality.valid) {
+      console.log('[uploadCustomGesture] Returning 400 quality fail:', quality.message);
+      return res.status(400).json({ message: 'Quality check failed', detail: quality.message });
+    }
+
+    // Prepare dirs and files
+    const { userDir, gestureDir } = await ensureUserDirs(adminId, gestureSlug);
     const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, '');
     const rawFilePath = path.join(
       gestureDir,
       `gesture_data_custom_${adminId}_${gestureSlug}_${timestamp}.csv`
     );
+
+    // Save raw CSV with all uploaded samples (always keep raw copy)
+    const csvRowsAll = samplesToCsvRows(samples, normalizedGesture);
     await fs.writeFile(
       rawFilePath,
-      [CSV_COLUMNS.join(','), ...csvRows.map((row) => row.join(','))].join('\n'),
+      [CSV_COLUMNS.join(','), ...csvRowsAll.map((row) => row.join(','))].join('\n'),
       { encoding: 'utf-8' }
     );
     const rawFiles = await fs.readdir(gestureDir);
@@ -180,12 +382,44 @@ exports.uploadCustomGesture = async (req, res) => {
       `[uploadCustomGesture] Saved raw CSV -> ${rawFilePath}. Total files for ${gestureSlug}: ${rawFiles.length}`
     );
 
+    // Run Python validator on the saved CSV to get authoritative validation and consistent rows
+    const pythonScript = path.join(PIPELINE_CODE_DIR, 'collect_data_update.py');
+    const pythonCmd = process.env.PYTHON_BIN || 'python';
+    let pyResult = null;
+    try {
+      const args = [pythonScript, '--validate-csv', rawFilePath, '--pose-label', normalizedGesture];
+      console.log('[uploadCustomGesture] Spawning Python validator:', pythonCmd, args.join(' '));
+      // execFile will capture stdout/stderr; set timeout to 30s
+      const { stdout, stderr } = await execFileAsync(pythonCmd, args, { timeout: 30000, maxBuffer: 10 * 1024 * 1024 });
+      if (stderr) console.warn('[uploadCustomGesture][py] stderr:', stderr.toString());
+      pyResult = JSON.parse(stdout.toString());
+    } catch (err) {
+      console.error('[uploadCustomGesture] Python validator failed', err && err.message);
+      // If python fails, return 500 but keep raw file saved for manual inspection
+      return res.status(500).json({ message: 'Python validator error', error: err.message });
+    }
+
+    // If validator reports conflict, return 409
+    if (pyResult && pyResult.conflict) {
+      return res.status(409).json({ message: 'Conflict detected by Python validator', detail: pyResult.conflict_message, rawFile: rawFilePath });
+    }
+
+    // If validator reports invalid quality, return 400
+    if (pyResult && !pyResult.valid) {
+      return res.status(400).json({ message: 'Quality check failed (Python)', detail: pyResult.message, rawFile: rawFilePath });
+    }
+
+    // Otherwise, validator is OK. Append consistent rows (if any) to master CSV
     const masterCsvPath = path.join(userDir, `gesture_data_custom_${adminId}.csv`);
-    await appendToMasterCsv(masterCsvPath, csvRows);
+    const consistentRows = Array.isArray(pyResult.consistent_rows) ? pyResult.consistent_rows : [];
+    if (consistentRows.length > 0) {
+      await appendToMasterCsv(masterCsvPath, consistentRows);
+    }
     await upsertAdminCustomGesture(adminId, normalizedGesture);
 
     return res.status(200).json({
-      message: 'Raw custom gesture data uploaded successfully (training skipped).',
+      message: 'Custom gesture accepted and saved (validated by Python).',
+      validation: pyResult.message,
       rawFile: rawFilePath,
       masterFile: masterCsvPath,
     });
