@@ -324,10 +324,6 @@ exports.rejectRequests = async (req, res) => {
 // Reset all gestures to active (ready) status for testing
 exports.resetAllToActive = async (req, res) => {
   try {
-    console.log('🔄 resetAllToActive called');
-    console.log('📨 Request body:', req.body);
-    console.log('👤 Current admin:', req.admin?.id || req.admin?._id);
-    
     // Allow superadmin to reset gestures for other admins
     let targetAdminId = req.body.adminId || (req.admin.id || req.admin._id);
     
@@ -336,18 +332,13 @@ exports.resetAllToActive = async (req, res) => {
       targetAdminId = require('mongoose').Types.ObjectId(targetAdminId);
     }
     
-    console.log('🎯 Target adminId (after conversion):', targetAdminId);
-    
     // Find the target admin's gesture request document
     let request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
     
     // If not exists, create new one with default gestures
     if (!request) {
-      console.log('📝 Creating new AdminGestureRequest for adminId:', targetAdminId);
       request = await AdminGestureRequest.createForAdmin(targetAdminId);
     }
-    
-    console.log('📄 Final request:', request ? 'YES' : 'NO');
 
     // Reset all gestures to ready (active)
     let modifiedCount = 0;
