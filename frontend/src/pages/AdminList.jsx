@@ -12,6 +12,7 @@ import Sidebar from '../components/Sidebar';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 import GesturePracticeML from '../components/GesturePracticeML';
+import { resetAllGesturesToActive } from '../services/gestureService';
 
 const AdminList = () => {
   const navigate = useNavigate();
@@ -48,6 +49,20 @@ const AdminList = () => {
       authService.logout();
       navigate('/');
     }, 1000);
+  };
+
+  const handleResetToActive = async () => {
+    if (!admin) {
+      toast.error('Missing administrator information.');
+      return;
+    }
+
+    try {
+      const resp = await resetAllGesturesToActive();
+      toast.success(resp.message || 'All gestures reset to active.');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to reset gestures to active.');
+    }
   };
 
   const fetchAdmins = async () => {
@@ -510,6 +525,19 @@ const AdminList = () => {
                 <span className="text-xl">×</span>
               </button>
               <h2 className="text-xl font-bold mb-4 text-center text-cyan-600 dark:text-cyan-300">Practice Gestures (Admin)</h2>
+              
+              {/* Reset to Active button for superadmin */}
+              {admin?.role === 'superadmin' && (
+                <div className="mb-4">
+                  <button
+                    onClick={handleResetToActive}
+                    className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors"
+                  >
+                    🔄 Reset All Gestures to Active
+                  </button>
+                </div>
+              )}
+              
               <label className="block mb-2 font-medium">Select gesture:</label>
               <select
                 value={selectedGesture}
