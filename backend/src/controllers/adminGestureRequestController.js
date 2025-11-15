@@ -329,8 +329,14 @@ exports.resetAllToActive = async (req, res) => {
     console.log('👤 Current admin:', req.admin?.id || req.admin?._id);
     
     // Allow superadmin to reset gestures for other admins
-    const targetAdminId = req.body.adminId || (req.admin.id || req.admin._id);
-    console.log('🎯 Target adminId:', targetAdminId);
+    let targetAdminId = req.body.adminId || (req.admin.id || req.admin._id);
+    
+    // Convert string adminId to ObjectId if needed
+    if (typeof targetAdminId === 'string') {
+      targetAdminId = require('mongoose').Types.ObjectId(targetAdminId);
+    }
+    
+    console.log('🎯 Target adminId (after conversion):', targetAdminId);
     
     // Find the target admin's gesture request document
     let request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
