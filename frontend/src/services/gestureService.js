@@ -236,10 +236,10 @@ export const rejectGestureRequests = async (adminId) => {
   return response.data;
 };
 
-export const resetAllGesturesToActive = async () => {
+export const resetAllGesturesToActive = async (adminId = null) => {
   const response = await axios.post(
     `${API_URL}/admin-gesture-reset-active`,
-    {},
+    adminId ? { adminId } : {},
     { headers: authHeaders() }
   );
   return response.data;

@@ -32,7 +32,6 @@ import {
   submitGestureForApproval,
   deleteAllCustomedGestures,
   approveGestureRequests,
-  resetAllGesturesToActive,
   // Practice session functions removed
 } from '../services/gestureService';
 
@@ -420,24 +419,6 @@ const Gestures = ({ showCustomTab = false }) => {
       setGestureStatuses(response.data.requests || []);
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to submit for approval.');
-    }
-  };
-
-  const handleResetToActive = async () => {
-    if (!admin) {
-      toast.error('Missing administrator information.');
-      return;
-    }
-
-    try {
-      const resp = await resetAllGesturesToActive();
-      toast.success(resp.message || 'All gestures reset to active.');
-      
-      // Refresh statuses
-      const response = await getGestureStatuses();
-      setGestureStatuses(response.data.requests || []);
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to reset gestures to active.');
     }
   };
 
@@ -1028,12 +1009,6 @@ const Gestures = ({ showCustomTab = false }) => {
                         Submit for Approval
                       </button>
                     )}
-                    <button
-                      onClick={handleResetToActive}
-                      className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors"
-                    >
-                      Reset to Active
-                    </button>
                     {admin?.role === 'superadmin' && gestureStatuses.some(r => r.status !== 'blocked') && (
                       <button
                         onClick={handleDeleteAllCustomed}

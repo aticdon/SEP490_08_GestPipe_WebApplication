@@ -324,14 +324,15 @@ exports.rejectRequests = async (req, res) => {
 // Reset all gestures to active (ready) status for testing
 exports.resetAllToActive = async (req, res) => {
   try {
-    const adminId = req.admin.id || req.admin._id;
+    // Allow superadmin to reset gestures for other admins
+    const targetAdminId = req.body.adminId || (req.admin.id || req.admin._id);
 
-    // Find the admin's gesture request document
-    const request = await AdminGestureRequest.findOne({ adminId });
+    // Find the target admin's gesture request document
+    const request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
     if (!request) {
       return res.status(404).json({
         success: false,
-        message: 'No gesture requests found'
+        message: 'No gesture requests found for the specified admin'
       });
     }
 

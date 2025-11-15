@@ -11,7 +11,6 @@ import { useTheme } from '../utils/ThemeContext';
 import Sidebar from '../components/Sidebar';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
-import GesturePracticeML from '../components/GesturePracticeML';
 import { resetAllGesturesToActive } from '../services/gestureService';
 
 const AdminList = () => {
@@ -26,8 +25,8 @@ const AdminList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [togglingId, setTogglingId] = useState(null); // Track which admin is being toggled
-  const [showPractice, setShowPractice] = useState(false);
-  const [selectedGesture, setSelectedGesture] = useState('rotate_down'); // default gesture
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [selectedAdminId, setSelectedAdminId] = useState('');
 
   // Get admin info
   useEffect(() => {
@@ -51,15 +50,17 @@ const AdminList = () => {
     }, 1000);
   };
 
-  const handleResetToActive = async () => {
+  const handleResetToActive = async (targetAdminId = null) => {
     if (!admin) {
       toast.error('Missing administrator information.');
       return;
     }
 
     try {
-      const resp = await resetAllGesturesToActive();
+      const resp = await resetAllGesturesToActive(targetAdminId);
       toast.success(resp.message || 'All gestures reset to active.');
+      setShowResetModal(false);
+      setSelectedAdminId('');
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to reset gestures to active.');
     }
@@ -325,14 +326,14 @@ const AdminList = () => {
                 </button>
                 
                 <button
-                  onClick={() => setShowPractice(true)}
+                  onClick={() => setShowResetModal(true)}
                   className={`flex items-center gap-2 px-6 py-3 font-semibold rounded-lg transition-all shadow-lg ${
                     theme === 'dark'
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-500 text-white hover:shadow-cyan-500/50'
-                      : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:shadow-cyan-400/50'
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-500 text-white hover:shadow-green-500/50'
+                      : 'bg-gradient-to-r from-green-500 to-emerald-400 text-white hover:shadow-green-400/50'
                   }`}
                 >
-                  🎯 Practice Gestures
+                  🔄 Reset to Active
                 </button>
 
                 <div className="relative">
@@ -515,51 +516,42 @@ const AdminList = () => {
         </div>
 
         {/* Modal chọn gesture và practice */}
-        {showPractice && (
+        {/* Reset Gestures Modal */}
+        {showResetModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 w-full max-w-md relative">
               <button
-                onClick={() => setShowPractice(false)}
+                onClick={() => {
+                  setShowResetModal(false);
+                  setSelectedAdminId('');
+                }}
                 className="absolute top-3 right-3 p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
               >
                 <span className="text-xl">×</span>
               </button>
-              <h2 className="text-xl font-bold mb-4 text-center text-cyan-600 dark:text-cyan-300">Practice Gestures (Admin)</h2>
-              
-              {/* Reset to Active button for superadmin */}
-              {admin?.role === 'superadmin' && (
-                <div className="mb-4">
-                  <button
-                    onClick={handleResetToActive}
-                    className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors"
-                  >
-                    🔄 Reset All Gestures to Active
-                  </button>
-                </div>
-              )}
-              
-              <label className="block mb-2 font-medium">Select gesture:</label>
+              <h2 className="text-xl font-bold mb-4 text-center text-green-600 dark:text-green-300">Reset Gestures to Active</h2>
+
+              <label className="block mb-2 font-medium">Select Admin:</label>
               <select
-                value={selectedGesture}
-                onChange={e => setSelectedGesture(e.target.value)}
+                value={selectedAdminId}
+                onChange={e => setSelectedAdminId(e.target.value)}
                 className="w-full mb-4 p-2 rounded border border-gray-300 dark:bg-gray-700 dark:text-white"
               >
-                <option value="rotate_down">Rotate Down</option>
-                <option value="rotate_left">Rotate Left</option>
-                <option value="rotate_right">Rotate Right</option>
-                <option value="rotate_up">Rotate Up</option>
-                <option value="zoom_in">Zoom In</option>
-                <option value="zoom_out">Zoom Out</option>
-                <option value="previous_slide">Previous Slide</option>
-                <option value="next_slide">Next Slide</option>
-                <option value="end">End</option>
-                <option value="home">Home</option>
+                <option value="">Select an admin...</option>
+                {admins.map(adminItem => (
+                  <option key={adminItem._id} value={adminItem._id}>
+                    {adminItem.name} ({adminItem.email})
+                  </option>
+                ))}
               </select>
-              <GesturePracticeML
-                gestureName={selectedGesture}
-                onClose={() => setShowPractice(false)}
-                theme={theme}
-              />
+
+              <button
+                onClick={() => handleResetToActive(selectedAdminId)}
+                disabled={!selectedAdminId}
+                className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium text-sm transition-colors"
+              >
+                🔄 Reset All Gestures to Active
+              </button>
             </div>
           </div>
         )}
