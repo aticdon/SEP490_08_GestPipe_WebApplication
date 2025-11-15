@@ -28,6 +28,11 @@ import {
   getModelStatus,
   getModelInfo,
   testModel,
+  getGestureStatuses,
+  submitGestureForApproval,
+  deleteAllCustomedGestures,
+  approveGestureRequests,
+  resetAllGesturesToActive,
   // Practice session functions removed
 } from '../services/gestureService';
 
@@ -245,6 +250,13 @@ const Gestures = ({ showCustomTab = false }) => {
   const [selectedPracticeGesture, setSelectedPracticeGesture] = useState(null);
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'custom'
   const [customizingGesture, setCustomizingGesture] = useState(null);
+  const [gestureStatuses, setGestureStatuses] = useState([]);
+  const [gestureStatusesLoading, setGestureStatusesLoading] = useState(false);
+
+  const getGestureStatus = (poseLabel) => {
+    const gesture = gestureStatuses.find(g => g.gestureId === poseLabel);
+    return gesture ? gesture.status : 'ready';
+  };
 
   useEffect(() => {
     const currentAdmin = authService.getCurrentUser();
@@ -254,6 +266,26 @@ const Gestures = ({ showCustomTab = false }) => {
     }
     setAdmin(currentAdmin);
   }, [navigate]);
+
+  // Load gesture statuses when admin changes
+  useEffect(() => {
+    const loadGestureStatuses = async () => {
+      if (!admin) return;
+
+      try {
+        setGestureStatusesLoading(true);
+        const response = await getGestureStatuses();
+        setGestureStatuses(response.data.requests || []);
+      } catch (error) {
+        console.warn('Failed to load gesture statuses:', error);
+        setGestureStatuses([]);
+      } finally {
+        setGestureStatusesLoading(false);
+      }
+    };
+
+    loadGestureStatuses();
+  }, [admin]);
 
   useEffect(() => {
     const loadMetadata = async () => {
@@ -365,6 +397,69 @@ const Gestures = ({ showCustomTab = false }) => {
       authService.logout();
       navigate('/');
     }, 1000);
+  };
+
+  const handleSubmitForApproval = async () => {
+    if (!admin) {
+      toast.error('Missing administrator information.');
+      return;
+    }
+
+    const hasUnblockedGestures = gestureStatuses.some(r => r.status !== 'blocked');
+    if (!hasUnblockedGestures) {
+      toast.info('All gestures are already submitted for approval.');
+      return;
+    }
+
+    try {
+      const resp = await submitGestureForApproval();
+      toast.success(resp.message || 'Gestures submitted for approval.');
+      
+      // Refresh statuses
+      const response = await getGestureStatuses();
+      setGestureStatuses(response.data.requests || []);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to submit for approval.');
+    }
+  };
+
+  const handleResetToActive = async () => {
+    if (!admin) {
+      toast.error('Missing administrator information.');
+      return;
+    }
+
+    try {
+      const resp = await resetAllGesturesToActive();
+      toast.success(resp.message || 'All gestures reset to active.');
+      
+      // Refresh statuses
+      const response = await getGestureStatuses();
+      setGestureStatuses(response.data.requests || []);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to reset gestures to active.');
+    }
+  };
+
+  const handleDeleteAllCustomed = async () => {
+    if (!admin) {
+      toast.error('Missing administrator information.');
+      return;
+    }
+
+    const confirmed = window.confirm('Are you sure you want to delete all customed gestures and their data? This action cannot be undone.');
+    if (!confirmed) return;
+
+    try {
+      const resp = await deleteAllCustomedGestures();
+      toast.success(resp.message || 'All customed gestures deleted.');
+      
+      // Refresh statuses
+      const response = await getGestureStatuses();
+      setGestureStatuses(response.data.requests || []);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to delete gestures.');
+    }
   };
 
   const handleChangeLabel = (event) => {
@@ -652,7 +747,7 @@ const Gestures = ({ showCustomTab = false }) => {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
               <CameraPreview theme={theme} />
 
-              {/* Removed training section - not needed for current use case */}
+              {/* Removed Gesture Status Overview - now integrated in table */}
             </div>
 
             {/* Admin-only tabs: All / Custom */}
@@ -713,20 +808,20 @@ const Gestures = ({ showCustomTab = false }) => {
               </div>
             ) : (
               <div
-                className={`border rounded-xl overflow-hidden backdrop-blur-sm ${
+                className={`border-2 rounded-xl overflow-hidden backdrop-blur-sm shadow-xl ${
                   theme === 'dark'
-                    ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50'
-                    : 'bg-white/50 border-gray-200/50'
+                    ? 'bg-gradient-to-br from-gray-800/70 to-gray-900/70 border-gray-600/70'
+                    : 'bg-white/80 border-gray-300/70'
                 }`}
               >
                 <div className="max-h-[calc(100vh-360px)] overflow-y-auto">
                   <table className="w-full">
                     <thead className="sticky top-0 z-10">
                       <tr
-                        className={`border-b ${
+                        className={`border-b-2 ${
                           theme === 'dark'
-                            ? 'bg-gray-700/50 border-gray-600'
-                            : 'bg-gray-50 border-gray-200'
+                            ? 'bg-gray-700/80 border-gray-500'
+                            : 'bg-gray-100/90 border-gray-300'
                         }`}
                       >
                         <th
@@ -757,18 +852,20 @@ const Gestures = ({ showCustomTab = false }) => {
                             theme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}
                         >
-                          {t('gestures.columnInstruction', {
-                            defaultValue: 'Instruction',
-                          })}
+                          {activeTab === 'custom'
+                            ? t('gestures.columnStatus', { defaultValue: 'Status' })
+                            : t('gestures.columnInstruction', { defaultValue: 'Instruction' })
+                          }
                         </th>
                         <th
                           className={`px-6 py-4 text-center text-sm font-semibold ${
                             theme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}
                         >
-                          {t('gestures.columnActions', {
-                            defaultValue: 'Training',
-                          })}
+                          {activeTab === 'custom'
+                            ? t('gestures.columnCustom', { defaultValue: 'Custom' })
+                            : t('gestures.columnActions', { defaultValue: 'Training' })
+                          }
                         </th>
                       </tr>
                     </thead>
@@ -776,7 +873,7 @@ const Gestures = ({ showCustomTab = false }) => {
                       {filteredGestures.length === 0 ? (
                         <tr>
                           <td
-                            colSpan="4"
+                            colSpan="5"
                             className={`px-6 py-12 text-center ${
                               theme === 'dark'
                                 ? 'text-gray-400'
@@ -827,22 +924,59 @@ const Gestures = ({ showCustomTab = false }) => {
                                 ? t('gestures.typeStatic', { defaultValue: 'Static' })
                                 : t('gestures.typeDynamic', { defaultValue: 'Dynamic' })}
                             </td>
-                            {/** Replace Practice/Instruction with Customize in Custom tab */}
+                            {/** Replace Practice/Instruction with Status/Custom in Custom tab */}
                             {showCustomTab && activeTab === 'custom' ? (
-                              <td className="px-6 py-4 text-center" colSpan={2}>
-                                <div className="flex items-center justify-center gap-3">
+                              <>
+                                <td className="px-6 py-4">
+                                  <span
+                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                      getGestureStatus(gesture.pose_label) === 'ready'
+                                        ? theme === 'dark'
+                                          ? 'bg-green-900/30 text-green-300 border border-green-600'
+                                          : 'bg-green-50 text-green-700 border border-green-300'
+                                        : getGestureStatus(gesture.pose_label) === 'customed'
+                                        ? theme === 'dark'
+                                          ? 'bg-yellow-900/30 text-yellow-300 border border-yellow-600'
+                                          : 'bg-yellow-50 text-yellow-700 border border-yellow-300'
+                                        : getGestureStatus(gesture.pose_label) === 'blocked'
+                                        ? theme === 'dark'
+                                          ? 'bg-red-900/30 text-red-300 border border-red-600'
+                                          : 'bg-red-50 text-red-700 border border-red-300'
+                                        : theme === 'dark'
+                                        ? 'bg-gray-900/30 text-gray-300 border border-gray-600'
+                                        : 'bg-gray-50 text-gray-700 border border-gray-300'
+                                    }`}
+                                  >
+                                    {getGestureStatus(gesture.pose_label) || 'ready'}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-center">
                                   <button
                                     onClick={() => setCustomizingGesture(gesture)}
+                                    disabled={getGestureStatus(gesture.pose_label) === 'customed' || getGestureStatus(gesture.pose_label) === 'blocked'}
                                     className={`px-4 py-2 rounded font-medium transition-all ${
-                                      theme === 'dark'
+                                      getGestureStatus(gesture.pose_label) === 'customed'
+                                        ? theme === 'dark'
+                                          ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-600 cursor-not-allowed'
+                                          : 'bg-yellow-100 text-yellow-800 border border-yellow-400 cursor-not-allowed'
+                                        : getGestureStatus(gesture.pose_label) === 'blocked'
+                                        ? theme === 'dark'
+                                          ? 'bg-red-900/50 text-red-300 border border-red-600 cursor-not-allowed'
+                                          : 'bg-red-100 text-red-800 border border-red-400 cursor-not-allowed'
+                                        : theme === 'dark'
                                         ? 'bg-green-600 text-white hover:bg-green-500'
                                         : 'bg-green-100 text-green-700 hover:bg-green-200'
                                     }`}
                                   >
-                                    {t('gestures.customizeButton', { defaultValue: 'Customize' })}
+                                    {getGestureStatus(gesture.pose_label) === 'customed'
+                                      ? t('gestures.customizedButton', { defaultValue: 'Customized' })
+                                      : getGestureStatus(gesture.pose_label) === 'blocked'
+                                      ? t('gestures.submittedButton', { defaultValue: 'Submitted' })
+                                      : t('gestures.customizeButton', { defaultValue: 'Customize' })
+                                    }
                                   </button>
-                                </div>
-                              </td>
+                                </td>
+                              </>
                             ) : (
                               <>
                                 <td className="px-6 py-4">
@@ -882,6 +1016,34 @@ const Gestures = ({ showCustomTab = false }) => {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Action buttons for Custom tab */}
+                {showCustomTab && activeTab === 'custom' && (
+                  <div className="mt-4 flex gap-2 justify-center">
+                    {gestureStatuses.some(r => r.status !== 'blocked') && (
+                      <button
+                        onClick={handleSubmitForApproval}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
+                      >
+                        Submit for Approval
+                      </button>
+                    )}
+                    <button
+                      onClick={handleResetToActive}
+                      className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors"
+                    >
+                      Reset to Active
+                    </button>
+                    {admin?.role === 'superadmin' && gestureStatuses.some(r => r.status !== 'blocked') && (
+                      <button
+                        onClick={handleDeleteAllCustomed}
+                        className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors"
+                      >
+                        Delete All Customed
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -1073,7 +1235,16 @@ const Gestures = ({ showCustomTab = false }) => {
           gestureName={customizingGesture.pose_label || customizingGesture}
           admin={admin}
           onClose={() => setCustomizingGesture(null)}
-          onCompleted={() => setCustomizingGesture(null)}
+          onCompleted={async (gestureName) => {
+            setCustomizingGesture(null);
+            // Reload gesture statuses to reflect the updated status after customization
+            try {
+              const response = await getGestureStatuses();
+              setGestureStatuses(response.data.requests || []);
+            } catch (error) {
+              console.error('Failed to reload gesture statuses:', error);
+            }
+          }}
           theme={theme}
         />
       )}

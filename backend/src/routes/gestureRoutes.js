@@ -51,4 +51,16 @@ router.get('/training/:id', onlySuper, gestureTrainingController.getRun);
 router.delete('/training/:id', onlySuper, gestureTrainingController.cancelTraining);
 
 
+const adminGestureRequestController = require('../controllers/adminGestureRequestController');
+
+// Admin Gesture Request routes
+router.get('/admin-gesture-requests', allowView, adminGestureRequestController.getAdminGestureRequests);
+router.get('/admin-gesture-status', allowView, adminGestureRequestController.getGestureStatuses);
+router.post('/admin-gesture-request', allowView, adminGestureRequestController.createOrUpdateRequest);
+router.post('/admin-gesture-submit', allowView, adminGestureRequestController.submitForApproval);
+router.delete('/admin-gesture-delete', allowView, adminGestureRequestController.deleteAllCustomed);
+router.post('/admin-gesture-approve', onlySuper, adminGestureRequestController.approveRequests);
+router.post('/admin-gesture-reject', onlySuper, adminGestureRequestController.rejectRequests);
+router.post('/admin-gesture-reset-active', allowView, adminGestureRequestController.resetAllToActive);
+
 module.exports = router;

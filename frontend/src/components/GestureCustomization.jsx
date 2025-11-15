@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { X, Zap } from 'lucide-react';
-import { customizeGesture, checkGestureConflict, submitCustomizationRequest } from '../services/gestureService';
+import { customizeGesture, checkGestureConflict, getGestureStatuses, createOrUpdateGestureRequest } from '../services/gestureService';
 
 const REQUIRED_SAMPLES = 5;
 const MIN_FRAMES = 12;
@@ -119,6 +119,8 @@ function GestureCustomization({
   const [pendingGestures, setPendingGestures] = useState([]); // collected gestures in this session
   const [localGestureRequestStatus, setLocalGestureRequestStatus] = useState(gestureRequestStatusProp);
   const [localRequesting, setLocalRequesting] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false); // Track completion status
+  const [isGestureBlocked, setIsGestureBlocked] = useState(false); // Whether this specific gesture is blocked
 
   useEffect(() => {
     if (typeof setGestureRequestStatusProp === 'function') return;
@@ -145,13 +147,59 @@ function GestureCustomization({
     setSamples([]);
     setStatus('recording'); // Auto start recording
     setMessage('');
+    setIsCompleted(false); // Reset completion status
     setStatusMessage('Put two hands to record.');
     setIsUploading(false);
     setHasShownConflictError(false); // Reset conflict error flag
     recordingStateRef.current = 'WAIT';
     bufferRef.current = [];
     instanceCounterRef.current = 1;
-  }, [gestureName, admin]);
+
+    // Check if gesture is blocked
+    if (isGestureBlocked) {
+      setStatus('blocked');
+      setStatusMessage('This gesture is already customized or waiting for approval.');
+      setMessage('Cannot customize gesture');
+      return;
+    }
+
+    // Create AdminGestureRequest when starting recording
+    if (admin && gestureName && !isGestureBlocked) {
+      (async () => {
+        try {
+          await createOrUpdateGestureRequest({
+            adminId: admin?.id || admin?._id,
+            gestureId: gestureName,
+            status: 'customed'
+          });
+          console.log(`AdminGestureRequest created for gesture: ${gestureName}`);
+        } catch (error) {
+          console.warn('Failed to create AdminGestureRequest:', error);
+          // Don't block recording if this fails
+        }
+      })();
+    }
+  }, [gestureName, admin, isGestureBlocked]);
+
+  // Load gesture status for blocking logic
+  useEffect(() => {
+    const loadGestureStatus = async () => {
+      if (!admin) return;
+
+      try {
+        const response = await getGestureStatuses();
+        
+        // Check if this specific gesture is blocked or customed
+        const thisGestureRequest = response.data.requests?.find(r => r.gestureId === gestureName);
+        setIsGestureBlocked(thisGestureRequest?.status === 'blocked' || thisGestureRequest?.status === 'customed');
+      } catch (error) {
+        console.warn('Failed to load gesture status:', error);
+        setIsGestureBlocked(false); // Default to not blocked if API fails
+      }
+    };
+
+    loadGestureStatus();
+  }, [admin, gestureName]);
 
   // Auto-hide error after 1 second
   useEffect(() => {
@@ -181,40 +229,37 @@ function GestureCustomization({
     [setGestureRequestStatusProp, gestureName]
   );
 
+  const handleStartNewRecording = useCallback(async () => {
+    setIsCompleted(false);
+    setStatus('recording');
+    setMessage('');
+    setStatusMessage('Put two hands to record.');
+    setSamples([]);
+    setIsUploading(false);
+    setHasShownConflictError(false);
+    recordingStateRef.current = 'WAIT';
+    bufferRef.current = [];
+    instanceCounterRef.current = 1;
+
+    // Restart camera
+    if (cameraRef.current) {
+      try {
+        await cameraRef.current.start();
+      } catch (err) {
+        console.warn('Failed to restart camera:', err);
+      }
+    }
+  }, []);
+
   const handleCustomizationRequest = useCallback(async () => {
     if (typeof handleRequestCustomizationProp === 'function') {
       await handleRequestCustomizationProp();
       return;
     }
 
-    if (isRequesting || isChecking) return;
-
-    if (!admin) {
-      toast.error('Missing administrator information. Please sign in again.');
-      return;
-    }
-
-    setLocalRequesting(true);
-    try {
-      await submitCustomizationRequest({
-        gestureName,
-        adminId: admin?.id || admin?._id,
-      });
-      toast.success(`Request to customize ${gestureName} sent.`);
-      updateGestureRequestStatus('pending');
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to send customization request.');
-    } finally {
-      setLocalRequesting(false);
-    }
-  }, [
-    handleRequestCustomizationProp,
-    isRequesting,
-    isChecking,
-    admin,
-    gestureName,
-    updateGestureRequestStatus,
-  ]);
+    // Logic moved to main page - do nothing here
+    toast.info('Please use the Submit for Approval button on the main page.');
+  }, [handleRequestCustomizationProp]);
 
   const handleSampleCompleted = useCallback(
     async (sample) => {
@@ -285,6 +330,7 @@ function GestureCustomization({
               setSamples([]);
               setHasShownConflictError(false); // Reset conflict error flag for next gesture
               setStatusMessage('Ready — record next gesture or Request approval.');
+              setIsCompleted(true); // Mark as completed only after all success logic
             } catch (err) {
               const detail = err?.response?.data?.detail;
               const errorMessage = detail || err?.response?.data?.message || 'Failed to upload custom gesture samples.';
@@ -451,32 +497,17 @@ function GestureCustomization({
     handsRef.current?.onResults(onResults);
   }, [onResults]);
 
+  // Stop camera when gesture collection is completed
+  useEffect(() => {
+    console.log('[GestureCustomization] isCompleted changed:', isCompleted);
+    if (isCompleted && cameraRef.current) {
+      console.log('[GestureCustomization] Stopping camera due to completion');
+      cameraRef.current.stop();
+    }
+  }, [isCompleted]);
+
   const handleRemovePending = (name) => {
     setPendingGestures((prev) => prev.filter((p) => p.gestureName !== name));
-  };
-
-  const handleRequestApproval = async () => {
-    if (!admin) {
-      toast.error('Missing administrator information.');
-      return;
-    }
-    if (!pendingGestures.length) {
-      toast.info('No gestures recorded to request.');
-      return;
-    }
-    setLocalRequesting(true);
-    try {
-      const gestureList = pendingGestures.map((p) => p.gestureName);
-      const resp = await submitCustomizationRequest({ adminId: admin?.id || admin?._id, gestures: gestureList });
-      toast.success(resp?.message || 'Request sent.');
-      updateGestureRequestStatus('pending');
-      // after submit, clear pending list
-      setPendingGestures([]);
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to submit customization request.');
-    } finally {
-      setLocalRequesting(false);
-    }
   };
 
   return (
@@ -493,6 +524,20 @@ function GestureCustomization({
           {loading && status === 'idle' && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 z-10 rounded-lg">
               <p>Loading Camera...</p>
+            </div>
+          )}
+          {status === 'blocked' && (
+            <div className="absolute inset-0 flex items-center justify-center bg-red-900 bg-opacity-90 z-10 rounded-lg">
+              <div className="text-center text-white">
+                <div className="text-2xl font-bold mb-4">🚫 Gesture Unavailable</div>
+                <p className="mb-6">This gesture is already customized or waiting for admin approval. You cannot customize it at this time.</p>
+                <button
+                  onClick={onClose}
+                  className="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold text-white"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
           <canvas
@@ -540,15 +585,6 @@ function GestureCustomization({
                   </li>
                 ))}
               </ul>
-              <div className="mt-3 flex justify-end">
-                <button
-                  onClick={handleRequestApproval}
-                  disabled={localRequesting}
-                  className="px-4 py-2 bg-blue-600 rounded text-white font-semibold hover:bg-blue-700"
-                >
-                  Request Approval
-                </button>
-              </div>
             </div>
           )}
         </div>
