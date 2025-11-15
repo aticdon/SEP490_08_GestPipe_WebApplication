@@ -51,6 +51,9 @@ const AdminList = () => {
   };
 
   const handleResetToActive = async (targetAdminId = null) => {
+    console.log('🔍 handleResetToActive called with targetAdminId:', targetAdminId);
+    console.log('📋 Available admins:', admins.map(a => ({ id: a._id, name: a.name, email: a.email })));
+    
     if (!admin) {
       toast.error('Missing administrator information.');
       return;
@@ -58,10 +61,12 @@ const AdminList = () => {
 
     try {
       const resp = await resetAllGesturesToActive(targetAdminId);
+      console.log('✅ Reset response:', resp);
       toast.success(resp.message || 'All gestures reset to active.');
       setShowResetModal(false);
       setSelectedAdminId('');
     } catch (err) {
+      console.error('❌ Reset error:', err);
       toast.error(err?.response?.data?.message || 'Failed to reset gestures to active.');
     }
   };

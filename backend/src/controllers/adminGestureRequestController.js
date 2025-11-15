@@ -324,17 +324,24 @@ exports.rejectRequests = async (req, res) => {
 // Reset all gestures to active (ready) status for testing
 exports.resetAllToActive = async (req, res) => {
   try {
+    console.log('🔄 resetAllToActive called');
+    console.log('📨 Request body:', req.body);
+    console.log('👤 Current admin:', req.admin?.id || req.admin?._id);
+    
     // Allow superadmin to reset gestures for other admins
     const targetAdminId = req.body.adminId || (req.admin.id || req.admin._id);
-
+    console.log('🎯 Target adminId:', targetAdminId);
+    
     // Find the target admin's gesture request document
-    const request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
+    let request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
+    
+    // If not exists, create new one with default gestures
     if (!request) {
-      return res.status(404).json({
-        success: false,
-        message: 'No gesture requests found for the specified admin'
-      });
+      console.log('📝 Creating new AdminGestureRequest for adminId:', targetAdminId);
+      request = await AdminGestureRequest.createForAdmin(targetAdminId);
     }
+    
+    console.log('📄 Final request:', request ? 'YES' : 'NO');
 
     // Reset all gestures to ready (active)
     let modifiedCount = 0;
