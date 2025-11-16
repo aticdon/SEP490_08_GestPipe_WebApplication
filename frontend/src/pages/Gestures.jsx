@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -37,7 +37,9 @@ import {
   approveRequest,
   rejectRequest,
   submitForApproval,
-  getPendingRequests,
+  fetchCustomizationRequests,
+  approveCustomizationRequest,
+  rejectCustomizationRequest,
 } from '../services/gestureService';
 
 const LIMIT = 20;
@@ -344,8 +346,8 @@ const Gestures = ({ showCustomTab = false }) => {
 
       try {
         setRequestsLoading(true);
-        const response = await getPendingRequests();
-        setRequests(response.data || []);
+        const response = await fetchCustomizationRequests('pending');
+        setRequests(response || []);
       } catch (error) {
         console.warn('Failed to load pending requests:', error);
         setRequests([]);
@@ -419,8 +421,8 @@ const Gestures = ({ showCustomTab = false }) => {
 
     try {
       setRequestsLoading(true);
-      const response = await getPendingRequests();
-      setRequests(response.data || []);
+      const response = await fetchCustomizationRequests('pending');
+      setRequests(response || []);
     } catch (err) {
       console.error('Failed to load requests:', err);
       toast.error('Failed to load requests');
@@ -448,9 +450,9 @@ const Gestures = ({ showCustomTab = false }) => {
     }
   }, [admin?._id]);
 
-  // Load requests when tab changes to request
+  // Load requests when tab changes to request or requests
   useEffect(() => {
-    if (activeTab === 'request' && admin?.role === 'superadmin') {
+    if ((activeTab === 'request' || activeTab === 'requests') && admin?.role === 'superadmin') {
       loadRequests();
     } else if (activeTab === 'myrequests' && admin?.role === 'admin') {
       loadMyRequests();
@@ -625,6 +627,42 @@ const Gestures = ({ showCustomTab = false }) => {
     }
   };
 
+  // Customization request management functions
+  const handleApproveCustomizationRequest = async (requestId) => {
+    try {
+      setProcessingRequest(requestId);
+      await approveCustomizationRequest(requestId);
+      toast.success('Customization request approved successfully');
+      loadRequests(); // Reload requests
+    } catch (err) {
+      console.error('Failed to approve customization request:', err);
+      toast.error(err?.response?.data?.message || 'Failed to approve customization request');
+    } finally {
+      setProcessingRequest(null);
+    }
+  };
+
+  const handleRejectCustomizationRequest = async (requestId) => {
+    if (!rejectReason.trim()) {
+      toast.error('Please enter a reject reason');
+      return;
+    }
+
+    try {
+      setProcessingRequest(requestId);
+      await rejectCustomizationRequest(requestId, rejectReason.trim());
+      toast.success('Customization request rejected successfully');
+      setRejectRequestId(null);
+      setRejectReason('');
+      loadRequests(); // Reload requests
+    } catch (err) {
+      console.error('Failed to reject customization request:', err);
+      toast.error(err?.response?.data?.message || 'Failed to reject customization request');
+    } finally {
+      setProcessingRequest(null);
+    }
+  };
+
   const canGoPrev = pagination.page > 1;
   const canGoNext = pagination.page < pagination.pages;
 
@@ -765,8 +803,8 @@ const Gestures = ({ showCustomTab = false }) => {
                       <button
                         onClick={async () => {
                           try {
-                            const response = await getPendingRequests();
-                            setRequests(response.data || []);
+                            const response = await fetchCustomizationRequests('pending');
+                            setRequests(response || []);
                           } catch (error) {
                             console.error('Failed to load requests:', error);
                             toast.error('Failed to load pending requests');
@@ -905,8 +943,8 @@ const Gestures = ({ showCustomTab = false }) => {
               {/* Removed Gesture Status Overview - now integrated in table */}
             </div>
 
-            {/* Admin-only tabs: All / Custom / Request (superadmin only) */}
-            {showCustomTab && (
+            {/* Admin-only tabs: All / Custom / Request (superadmin only) / Requests (superadmin inline) */}
+            {(showCustomTab || admin?.role === 'superadmin') && (
               <div className="mb-4">
                 <div className="inline-flex rounded-lg overflow-hidden border" role="tablist">
                   <button
@@ -916,14 +954,16 @@ const Gestures = ({ showCustomTab = false }) => {
                   >
                     {t('gestures.tabAll', { defaultValue: 'All' })}
                   </button>
-                  <button
-                    role="tab"
-                    onClick={() => setActiveTab('custom')}
-                    className={`px-4 py-2 font-semibold ${activeTab === 'custom' ? 'bg-cyan-500 text-white' : 'bg-white text-gray-700'}`}
-                  >
-                    {t('gestures.tabCustom', { defaultValue: 'Custom' })}
-                  </button>
-                  {admin?.role === 'admin' && (
+                  {showCustomTab && (
+                    <button
+                      role="tab"
+                      onClick={() => setActiveTab('custom')}
+                      className={`px-4 py-2 font-semibold ${activeTab === 'custom' ? 'bg-cyan-500 text-white' : 'bg-white text-gray-700'}`}
+                    >
+                      {t('gestures.tabCustom', { defaultValue: 'Custom' })}
+                    </button>
+                  )}
+                  {admin?.role === 'admin' && showCustomTab && (
                     <button
                       role="tab"
                       onClick={() => setActiveTab('myrequests')}
@@ -932,13 +972,22 @@ const Gestures = ({ showCustomTab = false }) => {
                       My Requests
                     </button>
                   )}
-                  {admin?.role === 'superadmin' && (
+                  {admin?.role === 'superadmin' && showCustomTab && (
                     <button
                       role="tab"
                       onClick={() => setActiveTab('request')}
                       className={`px-4 py-2 font-semibold ${activeTab === 'request' ? 'bg-cyan-500 text-white' : 'bg-white text-gray-700'}`}
                     >
                       {t('gestures.tabRequest', { defaultValue: 'Request' })}
+                    </button>
+                  )}
+                  {admin?.role === 'superadmin' && (
+                    <button
+                      role="tab"
+                      onClick={() => setActiveTab('requests')}
+                      className={`px-4 py-2 font-semibold ${activeTab === 'requests' ? 'bg-cyan-500 text-white' : 'bg-white text-gray-700'}`}
+                    >
+                      Pending Requests
                     </button>
                   )}
                 </div>
@@ -1132,6 +1181,99 @@ const Gestures = ({ showCustomTab = false }) => {
                               </div>
                             )}
                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : activeTab === 'requests' ? (
+              // Pending Requests Tab (inline style)
+              <div className={`border-2 rounded-xl overflow-hidden backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-gray-800/70 to-gray-900/70 border-gray-600/70'
+                  : 'bg-white/80 border-gray-300/70'
+              }`}>
+                <div className="p-6">
+                  <h3 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Pending Gesture Requests
+                  </h3>
+
+                  {requestsLoading ? (
+                    <div className="flex items-center justify-center py-10">
+                      <Loader2 size={32} className="animate-spin text-cyan-500" />
+                      <span className="ml-2">Loading requests...</span>
+                    </div>
+                  ) : requests.length === 0 ? (
+                    <div className="text-center py-10 text-gray-500">
+                      No pending requests
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {requests.map((request) => (
+                        <div
+                          key={request._id}
+                          className={`p-4 rounded-lg border ${
+                            theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-300'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                {request.gestures?.join(', ') || 'No gestures specified'}
+                              </h4>
+                              <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
+                                Requested by: {request.adminId?.email || 'Unknown'}
+                              </p>
+                              <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Created: {new Date(request.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex space-x-2 ml-4">
+                              <button
+                                onClick={() => handleApproveCustomizationRequest(request._id)}
+                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => setRejectRequestId(request._id)}
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                          {rejectRequestId === request._id && (
+                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                              <textarea
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                placeholder="Reason for rejection..."
+                                className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md ${
+                                  theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+                                }`}
+                                rows={3}
+                              />
+                              <div className="flex space-x-2 mt-2">
+                                <button
+                                  onClick={() => handleRejectCustomizationRequest(request._id)}
+                                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                >
+                                  Confirm Reject
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setRejectRequestId(null);
+                                    setRejectReason('');
+                                  }}
+                                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -1340,7 +1482,7 @@ const Gestures = ({ showCustomTab = false }) => {
                                           : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
                                       }`}
                                     >
-                                      🎯 Practice Gesture
+                                      ?? Practice Gesture
                                     </button>
                                   </div>
                                 </td>
@@ -1593,189 +1735,75 @@ const Gestures = ({ showCustomTab = false }) => {
         />
       )}
 
-      {/* Superadmin Pending Requests Modal */}
-      {admin?.role === 'superadmin' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`relative w-full max-w-4xl mx-4 rounded-lg shadow-xl ${
-            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-          } max-h-[80vh] overflow-hidden`}>
-            <div className={`px-6 py-4 border-b ${
-              theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'
-            }`}>
-              <div className="flex items-center justify-between">
-                <h2 className={`text-xl font-bold ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}>
-                  Pending Gesture Requests
-                </h2>
-                <button
-                  onClick={() => setRequests([])}
-                  className={`p-2 rounded-lg hover:bg-gray-200 ${
-                    theme === 'dark' ? 'hover:bg-gray-700 text-gray-400' : 'text-gray-600'
-                  }`}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {requestsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="animate-spin" size={24} />
-                  <span className="ml-2">Loading requests...</span>
-                </div>
-              ) : requests.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className={`text-lg ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    No pending requests
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {requests.map((request) => (
-                    <div
-                      key={request._id}
-                      className={`p-4 rounded-lg border ${
-                        theme === 'dark'
-                          ? 'bg-gray-700 border-gray-600'
-                          : 'bg-gray-50 border-gray-200'
-                      }`}
+      {/* Superadmin Pending Requests Section */}
+      {admin?.role === 'superadmin' && requests.length > 0 && activeTab !== 'requests' && (
+        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Pending Gesture Requests
+          </h3>
+          <div className="space-y-4">
+            {requests.map((request) => (
+              <div
+                key={request._id}
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900 dark:text-white">
+                      {request.gestures?.join(', ') || 'No gestures specified'}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      Requested by: {request.adminId?.email || 'Unknown'}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      Created: {new Date(request.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex space-x-2 ml-4">
+                    <button
+                      onClick={() => handleApproveCustomizationRequest(request._id)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className={`font-semibold ${
-                              theme === 'dark' ? 'text-white' : 'text-gray-900'
-                            }`}>
-                              {request.adminId?.fullName || 'Unknown Admin'}
-                            </h3>
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              theme === 'dark'
-                                ? 'bg-yellow-900/30 text-yellow-300 border border-yellow-600'
-                                : 'bg-yellow-50 text-yellow-700 border border-yellow-300'
-                            }`}>
-                              {request.status}
-                            </span>
-                          </div>
-                          <p className={`text-sm mb-2 ${
-                            theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                          }`}>
-                            Email: {request.adminId?.email || 'N/A'}
-                          </p>
-                          <div className="mb-3">
-                            <p className={`text-sm font-medium mb-1 ${
-                              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                            }`}>
-                              Requested Gestures:
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {request.gestures?.map((gesture, index) => (
-                                <span
-                                  key={index}
-                                  className={`px-2 py-1 text-xs rounded ${
-                                    theme === 'dark'
-                                      ? 'bg-blue-900/30 text-blue-300 border border-blue-600'
-                                      : 'bg-blue-50 text-blue-700 border border-blue-300'
-                                  }`}
-                                >
-                                  {gesture}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <p className={`text-xs ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                          }`}>
-                            Submitted: {new Date(request.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => handleApproveRequest(request._id, request.adminId?._id)}
-                            disabled={processingRequest === request._id}
-                            className={`px-4 py-2 rounded font-medium text-sm transition-colors ${
-                              processingRequest === request._id
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-green-600 hover:bg-green-700 text-white'
-                            }`}
-                          >
-                            {processingRequest === request._id ? (
-                              <Loader2 className="animate-spin inline mr-1" size={14} />
-                            ) : null}
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => {
-                              const reason = prompt('Enter rejection reason:');
-                              if (reason) {
-                                handleRejectRequest(request._id, reason);
-                              }
-                            }}
-                            disabled={processingRequest === request._id}
-                            className={`px-4 py-2 rounded font-medium text-sm transition-colors ${
-                              processingRequest === request._id
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-red-600 hover:bg-red-700 text-white'
-                            }`}
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => setRejectRequestId(request._id)}
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`p-6 rounded-lg shadow-xl max-w-md w-full mx-4 ${
-            theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-          }`}>
-            <h3 className="text-lg font-semibold mb-4">Reject Request</h3>
-            <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-              Please provide a reason for rejecting this gesture request:
-            </p>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Enter rejection reason..."
-              className={`w-full p-3 border rounded-lg resize-none ${
-                theme === 'dark'
-                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-              }`}
-              rows={4}
-              autoFocus
-            />
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                onClick={closeRejectModal}
-                className={`px-4 py-2 rounded-lg ${
-                  theme === 'dark'
-                    ? 'bg-gray-600 hover:bg-gray-500 text-white'
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                }`}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRejectSubmit}
-                disabled={!rejectReason.trim() || processingRequest === rejectRequestId}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {processingRequest === rejectRequestId ? 'Rejecting...' : 'Reject'}
-              </button>
-            </div>
+                {rejectRequestId === request._id && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <textarea
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder="Reason for rejection..."
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      rows={3}
+                    />
+                    <div className="flex space-x-2 mt-2">
+                      <button
+                        onClick={() => handleRejectCustomizationRequest(request._id)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                      >
+                        Confirm Reject
+                      </button>
+                      <button
+                        onClick={() => {
+                          setRejectRequestId(null);
+                          setRejectReason('');
+                        }}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -1784,6 +1812,4 @@ const Gestures = ({ showCustomTab = false }) => {
 };
 
 export default Gestures;
-
-
 

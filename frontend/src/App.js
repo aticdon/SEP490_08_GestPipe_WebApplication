@@ -108,7 +108,7 @@ function App() {
             <Route 
               path="/admin-gestures" 
               element={
-                <ProtectedRoute allowedRoles={['admin']}>
+                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                   <AdminGestures />
                 </ProtectedRoute>
               } 
