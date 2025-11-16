@@ -75,10 +75,22 @@ exports.protect = async (req, res, next) => {
 // Authorize specific roles (Admin, SuperAdmin)
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.admin.role)) {
+    const userRole = req.admin.role;
+    console.log('[authorize] User role:', userRole);
+    console.log('[authorize] User role type:', typeof userRole);
+    console.log('[authorize] Allowed roles:', roles);
+    console.log('[authorize] Allowed roles type:', typeof roles);
+    console.log('[authorize] Roles array:', JSON.stringify(roles));
+    console.log('[authorize] Check includes:', roles.includes(userRole));
+
+    // Try different checks
+    const isAuthorized = roles.some(role => role === userRole);
+    console.log('[authorize] Manual check with some():', isAuthorized);
+
+    if (!isAuthorized) {
       return res.status(403).json({
         success: false,
-        message: `Role '${req.admin.role}' is not authorized to access this route`
+        message: `Role '${userRole}' is not authorized to access this route`
       });
     }
     next();

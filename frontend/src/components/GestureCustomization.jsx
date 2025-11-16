@@ -116,6 +116,8 @@ function GestureCustomization({
   const [samples, setSamples] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('Put two hands to record.');
+  const [tempMessage, setTempMessage] = useState(null); // Temporary message to show for 1s
+  const [tempMessageType, setTempMessageType] = useState(null); // 'error' or 'success'
   const [pendingGestures, setPendingGestures] = useState([]); // collected gestures in this session
   const [localGestureRequestStatus, setLocalGestureRequestStatus] = useState(gestureRequestStatusProp);
   const [localRequesting, setLocalRequesting] = useState(false);
@@ -143,12 +145,23 @@ function GestureCustomization({
   const instanceCounterRef = useRef(1);
   const prevLeftFistRef = useRef(false);
 
+  // Clear temporary messages after 1 second
+  useEffect(() => {
+    if (tempMessage) {
+      const timer = setTimeout(() => {
+        setTempMessage(null);
+        setTempMessageType(null);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [tempMessage]);
+
   useEffect(() => {
     setSamples([]);
     setStatus('recording'); // Auto start recording
     setMessage('');
     setIsCompleted(false); // Reset completion status
-    setStatusMessage('Put two hands to record.');
+    setStatusMessage('Ready to record.');
     setIsUploading(false);
     setHasShownConflictError(false); // Reset conflict error flag
     recordingStateRef.current = 'WAIT';
@@ -274,10 +287,8 @@ function GestureCustomization({
         });
 
         if (conflictResult.conflict) {
-          setStatus('error');
-          setMessage('Conflict detected: ' + conflictResult.message);
-          setShowError(true); // Force show error
-          setTimeout(() => setShowError(false), 1000); // Auto hide after 1s
+          setTempMessage('Conflict detected: ' + conflictResult.message);
+          setTempMessageType('error');
           setStatusMessage('Conflict detected. Please try a different gesture.');
           return; // Don't add the conflicting sample
         }
@@ -288,7 +299,7 @@ function GestureCustomization({
 
       setSamples((prev) => {
         const updated = [...prev, sample];
-        setStatusMessage(`Collected ${updated.length}/${REQUIRED_SAMPLES} samples`);
+        setStatusMessage(`${updated.length}/${REQUIRED_SAMPLES}`);
         if (updated.length >= REQUIRED_SAMPLES && !uploadingRef.current) {
           uploadingRef.current = true;
           setIsUploading(true);
@@ -303,8 +314,9 @@ function GestureCustomization({
                 samples: updated,
               });
               const successMsg = resp?.message || 'Uploaded successfully.';
-              setStatus('success');
-              setMessage(successMsg + (resp?.validation ? ` (${resp.validation})` : ''));
+              setTempMessage('Uploaded successfully');
+              setTempMessageType('success');
+              toast.success(`Customization for ${gestureName} uploaded.`);
               toast.success(`Customization for ${gestureName} uploaded.`);
               if (onCompleted) {
                 onCompleted(gestureName);
@@ -428,7 +440,8 @@ function GestureCustomization({
         const buffer = bufferRef.current;
         recordingStateRef.current = 'WAIT';
         if (!buffer || buffer.length < MIN_FRAMES) {
-          setStatusMessage('Sample too short. Try again.');
+          setTempMessage('Sample too short. Try again.');
+          setTempMessageType('error');
           return;
         }
         const sample = buildSampleFromBuffer(
@@ -447,7 +460,8 @@ function GestureCustomization({
         });
         instanceCounterRef.current += 1;
         bufferRef.current = [];
-        setStatusMessage('Sample captured! Get ready for the next one.');
+        setTempMessage('Sample captured successfully!');
+        setTempMessageType('success');
         handleSampleCompleted(sample);
       }
 
@@ -548,8 +562,14 @@ function GestureCustomization({
             style={{ transform: 'scaleX(-1)' }}
           />
           <video ref={videoRef} className="hidden" autoPlay playsInline muted />
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-black/60 text-white text-sm">
-            {statusMessage}
+          <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-white text-sm ${
+            tempMessageType === 'error' 
+              ? 'bg-red-600/90' 
+              : tempMessageType === 'success'
+                ? 'bg-green-600/90'
+                : 'bg-black/60'
+          }`}>
+            {tempMessage || statusMessage}
           </div>
           {showError && (
             <div className="absolute bottom-16 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-red-900/90 text-red-100 text-sm max-w-xs text-center">

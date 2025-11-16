@@ -244,3 +244,61 @@ export const resetAllGesturesToActive = async (adminId = null) => {
   );
   return response.data;
 };
+
+// Admin Custom Gesture APIs
+const ADMIN_CUSTOM_GESTURE_API_URL = 'http://localhost:5000/api/admin-custom-gestures';
+
+export const submitForApproval = async (adminId, gestures) => {
+  const response = await axios.post(
+    `${ADMIN_CUSTOM_GESTURE_API_URL}/submit`,
+    { adminId, gestures },
+    { headers: authHeaders() }
+  );
+  return response.data;
+};
+
+export const getAdminCustomGestureStatus = async () => {
+  const response = await axios.get(
+    `${ADMIN_CUSTOM_GESTURE_API_URL}/status`,
+    { headers: authHeaders() }
+  );
+  return response.data;
+};
+
+export const getPendingRequests = async () => {
+  const response = await axios.get(
+    `${ADMIN_CUSTOM_GESTURE_API_URL}/pending`,
+    { headers: authHeaders() }
+  );
+  return response.data;
+};
+
+export const getAllRequests = async (status = null) => {
+  const params = status ? { status } : {};
+  const response = await axios.get(
+    `${ADMIN_CUSTOM_GESTURE_API_URL}/all`,
+    {
+      params,
+      headers: authHeaders()
+    }
+  );
+  return response.data;
+};
+
+export const approveRequest = async (requestId, adminId) => {
+  const response = await axios.put(
+    `${ADMIN_CUSTOM_GESTURE_API_URL}/approve/${requestId}`,
+    { adminId },
+    { headers: authHeaders() }
+  );
+  return response.data;
+};
+
+export const rejectRequest = async (requestId, rejectReason) => {
+  const response = await axios.put(
+    `${ADMIN_CUSTOM_GESTURE_API_URL}/reject/${requestId}`,
+    { rejectReason },
+    { headers: authHeaders() }
+  );
+  return response.data;
+};

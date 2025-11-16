@@ -15,8 +15,8 @@ const AdminCustomGestureSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['draft', 'submitted', 'approved', 'rejected', 'failed'],
-      default: 'draft',
+      enum: ['pending', 'accept', 'reject'],
+      default: 'pending',
     },
     artifactPaths: {
       compactCsv: String,
@@ -24,7 +24,7 @@ const AdminCustomGestureSchema = new mongoose.Schema(
       modelsDir: String,
       rawDataDir: String,
     },
-    rejectionReason: {
+    rejectReason: {
       type: String,
       default: '',
     },
@@ -33,7 +33,10 @@ const AdminCustomGestureSchema = new mongoose.Schema(
       ref: 'CustomGestureRequest',
     },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    collection: 'customgesturerequests'
+  }
 );
 
 module.exports = mongoose.model('AdminCustomGesture', AdminCustomGestureSchema);

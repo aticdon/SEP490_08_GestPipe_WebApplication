@@ -15,6 +15,7 @@ app.use(express.json());
 // Routes
 const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const adminCustomGestureRoutes = require('./src/routes/adminCustomGestureRoutes');
 const translationRoutes = require('./src/routes/translationRoutes');
 const gestureRoutes = require('./src/routes/gestureRoutes');
 const practiceRoutes = require('./src/routes/practiceRoutes');
@@ -22,6 +23,7 @@ const practiceRoutes = require('./src/routes/practiceRoutes');
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin-custom-gestures', adminCustomGestureRoutes);
 app.use('/api/translations', translationRoutes);
 app.use('/api/gestures', gestureRoutes);
 app.use('/api/practice', practiceRoutes);
