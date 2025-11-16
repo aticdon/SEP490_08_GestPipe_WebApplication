@@ -1,163 +1,73 @@
+// src/components/AdminSidebar.jsx
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Gamepad2, Users, Settings, Home } from 'lucide-react';
+// ===== THAY ĐỔI ICON Ở ĐÂY =====
+import { Gamepad2, User as UserIcon, Layers } from 'lucide-react'; // Bỏ Home, Users, Settings
 import LanguageSwitcher from './LanguageSwitcher';
 
-const pathToItem = {
-  '/user-list': 'user',
-};
-
-const AdminSidebar = ({ theme, activeItem }) => {
+const AdminSidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
   const navigate = useNavigate();
   const location = useLocation();
   const { t, i18n } = useTranslation();
 
-  const resolvedActive = activeItem || pathToItem[location.pathname] || null;
-
+  // ===== SỬA LẠI MENU ITEMS =====
   const menuItems = [
     {
-      id: 'home',
-      label: t('sidebar.home', {
-        defaultValue: i18n.language.startsWith('vi') ? 'Trang chủ' : 'Home',
-      }),
-      icon: Home,
-      path: '/user-list',
-    },
-    {
       id: 'gestures',
-      label: t('userList.gesturesControl'),
-      icon: Gamepad2,
+      label: t('sidebar.gestureController', { defaultValue: 'Gesture Controller' }), // Đồng bộ key
+      icon: Gamepad2, // Giữ icon này
+      path: '/gestures', 
     },
     {
       id: 'user',
-      label: t('userList.user'),
-      icon: Users,
+      label: t('sidebar.userManagement', { defaultValue: 'User Management' }), // Đồng bộ key
+      icon: UserIcon, // <-- ĐỔI ICON
       path: '/user-list',
     },
     {
       id: 'version',
-      label: t('userList.version'),
-      icon: Settings,
+      label: t('sidebar.version', { defaultValue: 'Version' }), // Đồng bộ key
+      icon: Layers, // <-- ĐỔI ICON
+      path: '/version-list', 
     },
   ];
-
-  const getButtonClasses = (itemId, isActive) => {
-    const base =
-      'w-full flex items-center gap-4 px-8 py-4 rounded-xl transition-all font-medium text-base';
-
-    if (itemId === 'home') {
-      if (theme === 'dark') {
-        return isActive
-          ? `${base} bg-slate-200 text-slate-900`
-          : `${base} bg-slate-900/40 text-slate-200 hover:bg-slate-800/60`;
-      }
-      return isActive
-        ? `${base} bg-slate-800 text-white`
-        : `${base} bg-white/70 text-slate-600 hover:bg-slate-200/80`;
-    }
-
-    if (theme === 'dark') {
-      if (itemId === 'gestures') {
-        return isActive
-          ? `${base} bg-violet-500/40 text-white shadow-lg shadow-violet-500/30`
-          : `${base} bg-slate-900/40 text-purple-200 hover:bg-slate-800/60`;
-      }
-      if (itemId === 'user') {
-        return isActive
-          ? `${base} bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-500/40`
-          : `${base} bg-slate-900/40 text-cyan-200 hover:bg-slate-800/60`;
-      }
-      return isActive
-        ? `${base} bg-slate-200 text-slate-900`
-        : `${base} bg-slate-900/40 text-slate-300 hover:bg-slate-800/60`;
-    }
-
-    // Light theme variants
-    if (itemId === 'gestures') {
-      return isActive
-        ? `${base} bg-violet-100 text-violet-700 shadow-md shadow-violet-200`
-        : `${base} bg-white/70 text-violet-500 hover:bg-violet-100/80`;
-    }
-    if (itemId === 'user') {
-      return isActive
-        ? `${base} bg-cyan-500 text-white shadow-lg shadow-cyan-400/40`
-        : `${base} bg-white/70 text-cyan-600 hover:bg-cyan-100/70`;
-    }
-    return isActive
-      ? `${base} bg-slate-200 text-slate-900`
-      : `${base} bg-white/70 text-slate-500 hover:bg-slate-200/80`;
-  };
-
-  const getIconClasses = (itemId, isActive) => {
-    if (itemId === 'home') {
-      if (theme === 'dark') {
-        return isActive ? 'text-slate-900' : 'text-slate-200';
-      }
-      return isActive ? 'text-white' : 'text-slate-500';
-    }
-    if (itemId === 'gestures') {
-      return isActive
-        ? theme === 'dark'
-          ? 'text-white'
-          : 'text-violet-700'
-        : theme === 'dark'
-        ? 'text-purple-300'
-        : 'text-violet-500';
-    }
-    if (itemId === 'user') {
-      return isActive
-        ? theme === 'dark'
-          ? 'text-slate-900'
-          : 'text-white'
-        : theme === 'dark'
-        ? 'text-cyan-300'
-        : 'text-cyan-500';
-    }
-    return isActive
-      ? theme === 'dark'
-        ? 'text-slate-900'
-        : 'text-slate-700'
-      : theme === 'dark'
-      ? 'text-slate-300'
-      : 'text-slate-400';
-  };
-
-  const handleClick = (item) => {
-    if (item.path) navigate(item.path);
-  };
+  // ==============================
 
   return (
-    <aside
-      className={`w-72 flex-shrink-0 flex flex-col backdrop-blur-sm border-r ${
-        theme === 'dark'
-          ? 'bg-[#0b1020]/95 border-slate-900'
-          : 'bg-slate-100/90 border-slate-200'
-      }`}
+    <aside 
+      className={`w-75 h-full flex flex-col flex-shrink-0
+                 bg-black/30 backdrop-blur-lg 
+                 border-r border-white/25 
+                 transition-all duration-300 ease-in-out`}
     >
-      <nav className="flex-1 pt-6 space-y-2">
+      <nav className="flex-1 pt-6 px-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = resolvedActive === item.id;
+          const isActive = location.pathname.startsWith(item.path); 
           return (
             <button
               key={item.id}
-              onClick={() => handleClick(item)}
-              className={getButtonClasses(item.id, isActive)}
+              onClick={() => {
+                if (item.path) navigate(item.path);
+              }}
+              className={`w-full flex items-center gap-4 px-6 py-3 rounded-lg 
+                          transition-colors duration-200 ease-in-out ${ 
+                isActive
+                  ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold' // Style Active
+                  : 'text-gray-200 hover:text-white hover:bg-white/10' // Style Inactive
+              }`}
             >
-              <Icon size={22} className={getIconClasses(item.id, isActive)} />
-              <span>{item.label}</span>
+              <Icon size={25} />
+              <span className="font-semibold text-base truncate">{item.label}</span> 
             </button>
           );
         })}
       </nav>
 
-      <div
-        className={`pb-8 px-8 flex justify-center border-t pt-6 ${
-          theme === 'dark' ? 'border-slate-800/60' : 'border-slate-200'
-        }`}
-      >
-        <LanguageSwitcher theme={theme} />
+      <div className="pb-6 flex gap-3 justify-start px-11">
+        <LanguageSwitcher theme="dark" /> 
       </div>
     </aside>
   );

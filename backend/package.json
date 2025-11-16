@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed:superadmin": "node src/seeds/createSuperAdmin.js",
-    "seed:gestures": "node src/seeds/seedGestures.js"
+    "seed:gestures": "node src/seeds/seedGestures.js",
+    "seed:users": "node src/seeds/seedUsers.js",
+    "seed:all": "npm run seed:superadmin && npm run seed:gestures && npm run seed:users"
   },
   "keywords": [],
   "author": "",

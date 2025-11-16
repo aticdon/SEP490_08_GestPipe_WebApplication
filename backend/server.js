@@ -18,13 +18,19 @@ const adminRoutes = require('./src/routes/adminRoutes');
 const translationRoutes = require('./src/routes/translationRoutes');
 const gestureRoutes = require('./src/routes/gestureRoutes');
 const practiceRoutes = require('./src/routes/practiceRoutes');
+const dashboardRoutes = require('./src/routes/dashboardRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const versionRoutes = require('./src/routes/versionRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/translations', translationRoutes);
 app.use('/api/gestures', gestureRoutes);
 app.use('/api/practice', practiceRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/versions', versionRoutes);
 
 // Simple route for testing
 app.get('/', (req, res) => {

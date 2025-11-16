@@ -8,13 +8,12 @@ const LanguageSwitcher = () => {
   const { language, changeLanguage } = useLanguage();
   const { theme } = useTheme();
 
+
   return (
-    <div className={`p-4 border-t flex gap-2 justify-center ${
-      theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
-    }`}>
+    <div className="flex gap-2">
       <button
         onClick={() => changeLanguage('vi')}
-        className={`w-10 h-10 rounded-lg overflow-hidden border-2 transition-all ${
+        className={`w-7 h-7 rounded-lg overflow-hidden border-2 transition-all duration-200 ease-in-out ${ // 👈 THÊM VÀO ĐÂY
           language === 'vi' 
             ? 'border-cyan-400 scale-110' 
             : 'border-transparent opacity-60 hover:opacity-100'
@@ -25,7 +24,7 @@ const LanguageSwitcher = () => {
       </button>
       <button
         onClick={() => changeLanguage('en')}
-        className={`w-10 h-10 rounded-lg overflow-hidden border-2 transition-all ${
+        className={`w-7 h-7 rounded-lg overflow-hidden border-2 transition-all duration-200 ease-in-out ${ // 👈 THÊM VÀO ĐÂY
           language === 'en' 
             ? 'border-cyan-400 scale-110' 
             : 'border-transparent opacity-60 hover:opacity-100'
