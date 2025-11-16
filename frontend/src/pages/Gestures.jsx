@@ -40,6 +40,7 @@ import {
   fetchCustomizationRequests,
   approveCustomizationRequest,
   rejectCustomizationRequest,
+  getAdminGestureSamples,
 } from '../services/gestureService';
 
 const LIMIT = 20;
@@ -628,11 +629,23 @@ const Gestures = ({ showCustomTab = false }) => {
   };
 
   // Customization request management functions
-  const handleApproveCustomizationRequest = async (requestId) => {
+  const handleApproveCustomizationRequest = async (requestId, adminId) => {
     try {
       setProcessingRequest(requestId);
       await approveCustomizationRequest(requestId);
       toast.success('Customization request approved successfully');
+
+      // Load AdminGestureSamples to verify data was saved
+      try {
+        const samplesResponse = await getAdminGestureSamples(adminId);
+        console.log('AdminGestureSamples loaded:', samplesResponse);
+        if (samplesResponse.success && samplesResponse.count > 0) {
+          toast.success(`Saved ${samplesResponse.count} gesture samples to database`);
+        }
+      } catch (samplesError) {
+        console.warn('Could not load AdminGestureSamples:', samplesError);
+      }
+
       loadRequests(); // Reload requests
     } catch (err) {
       console.error('Failed to approve customization request:', err);
@@ -1231,7 +1244,7 @@ const Gestures = ({ showCustomTab = false }) => {
                             </div>
                             <div className="flex space-x-2 ml-4">
                               <button
-                                onClick={() => handleApproveCustomizationRequest(request._id)}
+                                onClick={() => handleApproveCustomizationRequest(request._id, request.adminId)}
                                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                               >
                                 Approve
@@ -1761,7 +1774,7 @@ const Gestures = ({ showCustomTab = false }) => {
                   </div>
                   <div className="flex space-x-2 ml-4">
                     <button
-                      onClick={() => handleApproveCustomizationRequest(request._id)}
+                      onClick={() => handleApproveCustomizationRequest(request._id, request.adminId)}
                       className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                     >
                       Approve

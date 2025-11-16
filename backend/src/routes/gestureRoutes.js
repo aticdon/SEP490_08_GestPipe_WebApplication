@@ -36,6 +36,7 @@ router.get('/customize/status', allowView, customGestureRequestController.getAdm
 router.get('/customize/requests', onlySuper, customGestureRequestController.listRequests);
 router.post('/customize/requests/:id/approve', onlySuper, customGestureRequestController.approveRequest);
 router.post('/customize/requests/:id/reject', onlySuper, customGestureRequestController.rejectRequest);
+router.get('/customize/samples/:adminId', onlySuper, customGestureRequestController.getAdminGestureSamples);
 
 // Practice session routes (cho phép cả admin và superadmin)
 router.post('/practice/start', allowView, gesturePracticeController.startPracticeSession);

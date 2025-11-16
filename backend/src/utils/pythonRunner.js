@@ -1,11 +1,12 @@
 const { spawn } = require('child_process');
 
-const PYTHON_BIN = process.env.PYTHON_BIN || 'python';
+// Use absolute path to Python executable
+const PYTHON_BIN = process.env.PYTHON_BIN || 'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python311\\python.exe';
 
 const runPythonScript = (scriptName, args, workingDir) => {
   return new Promise((resolve, reject) => {
     console.log(
-      `[runPythonScript] Spawning: ${PYTHON_BIN} ${scriptName} ${args.join(' ')} in ${workingDir}`
+      `[runPythonScript] PYTHON_BIN: ${PYTHON_BIN}, Spawning: ${PYTHON_BIN} ${scriptName} ${args.join(' ')} in ${workingDir}`
     );
 
     const pythonProcess = spawn(PYTHON_BIN, [scriptName, ...args], {
@@ -13,7 +14,11 @@ const runPythonScript = (scriptName, args, workingDir) => {
       env: {
         ...process.env,
         PYTHONIOENCODING: 'utf-8',
+        PYTHONUTF8: '1',  // Force UTF-8 mode
+        PATH: process.env.PATH,  // Ensure PATH is included
       },
+      // Remove shell to spawn python directly
+      // shell: true,
     });
 
     let stdout = '';
