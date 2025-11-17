@@ -33,6 +33,11 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
+// Test route without auth
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Test route works!' });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

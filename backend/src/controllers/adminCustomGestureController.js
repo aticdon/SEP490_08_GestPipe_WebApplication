@@ -110,8 +110,8 @@ exports.approveRequest = async (req, res) => {
       return res.status(400).json({ message: `Cannot approve request with status ${request.status}` });
     }
 
-    // Update status to processing
-    request.status = 'processing';
+    // Update status to accept
+    request.status = 'accept';
     await request.save();
 
     try {
@@ -121,8 +121,8 @@ exports.approveRequest = async (req, res) => {
       const AdminGestureSamples = require('../models/AdminGestureSamples');
       const { runPythonScript } = require('../utils/pythonRunner');
 
-      // Use PIPELINE_ROOT from env
-      const PIPELINE_ROOT = process.env.PIPELINE_ROOT || 'D:\\DO_AN\\python_mediapipe\\hybrid_realtime_pipeline';
+      // Use PIPELINE_ROOT from env or resolve relative path
+      const PIPELINE_ROOT = process.env.PIPELINE_ROOT || path.resolve(__dirname, '../../../..', 'hybrid_realtime_pipeline');
       console.log('[approveRequest] process.env.PIPELINE_ROOT:', process.env.PIPELINE_ROOT);
       console.log('[approveRequest] PIPELINE_ROOT:', PIPELINE_ROOT);
       const PIPELINE_CODE_DIR = path.join(PIPELINE_ROOT, 'code');
@@ -234,12 +234,12 @@ exports.approveRequest = async (req, res) => {
       };
 
       const purgeRawData = async (adminId) => {
-        const userDir = path.join(PIPELINE_CODE_DIR, `user_${adminId}`);
+        const rawDataDir = path.join(PIPELINE_CODE_DIR, `user_${adminId}`, 'raw_data');
         try {
-          await fs.rm(userDir, { recursive: true, force: true });
-          console.log(`[purgeRawData] Cleaned up user directory: ${userDir}`);
+          await fs.rm(rawDataDir, { recursive: true, force: true });
+          console.log(`[purgeRawData] Cleaned up raw data directory: ${rawDataDir}`);
         } catch (error) {
-          console.warn(`[purgeRawData] Failed to clean up ${userDir}:`, error.message);
+          console.warn(`[purgeRawData] Failed to clean up ${rawDataDir}:`, error.message);
         }
       };
 
@@ -253,7 +253,7 @@ exports.approveRequest = async (req, res) => {
       await saveGestureSamples(adminId, artifactPaths.modelsDir);
 
       // Update request with success
-      request.status = 'approved';
+      request.status = 'accept';
       request.artifactPaths = artifactPaths;
       request.rejectReason = '';
       await request.save();
@@ -271,7 +271,7 @@ exports.approveRequest = async (req, res) => {
       console.error('[approveRequest] Pipeline failed', pipelineError);
       
       // Update request with failure
-      request.status = 'failed';
+      request.status = 'reject';
       request.rejectReason = pipelineError.message;
       await request.save();
 

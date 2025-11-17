@@ -76,16 +76,9 @@ exports.protect = async (req, res, next) => {
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     const userRole = req.admin.role;
-    console.log('[authorize] User role:', userRole);
-    console.log('[authorize] User role type:', typeof userRole);
-    console.log('[authorize] Allowed roles:', roles);
-    console.log('[authorize] Allowed roles type:', typeof roles);
-    console.log('[authorize] Roles array:', JSON.stringify(roles));
-    console.log('[authorize] Check includes:', roles.includes(userRole));
 
-    // Try different checks
+    // Check if user role is in allowed roles
     const isAuthorized = roles.some(role => role === userRole);
-    console.log('[authorize] Manual check with some():', isAuthorized);
 
     if (!isAuthorized) {
       return res.status(403).json({

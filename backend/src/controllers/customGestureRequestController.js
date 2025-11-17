@@ -1,6 +1,7 @@
 const Admin = require('../models/Admin');
 const path = require('path');
 const fs = require('fs/promises');
+const mongoose = require('mongoose');
 
 const AdminCustomGesture = require('../models/AdminCustomGesture');
 const CustomGestureRequest = require('../models/CustomGestureRequest');
@@ -10,6 +11,7 @@ const { runPythonScript } = require('../utils/pythonRunner');
 
 const PIPELINE_CODE_DIR = path.resolve(
   __dirname,
+  '..',
   '..',
   '..',
   '..',
@@ -27,12 +29,12 @@ const buildArtifactPaths = (adminId) => {
 };
 
 const purgeRawData = async (adminId) => {
-  const userDir = path.join(PIPELINE_CODE_DIR, `user_${adminId}`);
+  const rawDataDir = path.join(PIPELINE_CODE_DIR, `user_${adminId}`, 'raw_data');
   try {
-    await fs.rm(userDir, { recursive: true, force: true });
-    console.log(`[purgeRawData] Cleaned up user directory: ${userDir}`);
+    await fs.rm(rawDataDir, { recursive: true, force: true });
+    console.log(`[purgeRawData] Cleaned up raw data directory: ${rawDataDir}`);
   } catch (error) {
-    console.warn(`[purgeRawData] Failed to clean up ${userDir}:`, error.message);
+    console.warn(`[purgeRawData] Failed to clean up ${rawDataDir}:`, error.message);
   }
 };
 
@@ -339,7 +341,7 @@ exports.getAdminGestureSamples = async (req, res) => {
       return res.status(400).json({ message: 'Admin ID is required' });
     }
 
-    const samples = await AdminGestureSamples.find({ adminId })
+    const samples = await AdminGestureSamples.find({ adminId: mongoose.Types.ObjectId(adminId) })
       .sort({ pose_label: 1, instance_id: 1 })
       .lean();
 

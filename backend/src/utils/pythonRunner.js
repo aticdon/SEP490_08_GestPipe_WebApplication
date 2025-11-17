@@ -1,13 +1,40 @@
 const { spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
-// Use absolute path to Python executable
-const PYTHON_BIN = process.env.PYTHON_BIN || 'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python311\\python.exe';
+// Try to find Python executable
+let PYTHON_BIN = process.env.PYTHON_BIN;
+
+if (!PYTHON_BIN || !fs.existsSync(PYTHON_BIN)) {
+  // Try common Python installation paths
+  const possiblePaths = [
+    'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python311\\python.exe',
+    'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python312\\python.exe',
+    'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python313\\python.exe',
+    'python.exe', // Use PATH
+    'python3.exe' // Use PATH
+  ];
+
+  for (const testPath of possiblePaths) {
+    try {
+      if (fs.existsSync(testPath) || testPath.includes('python')) {
+        PYTHON_BIN = testPath;
+        break;
+      }
+    } catch (e) {
+      // Continue to next path
+    }
+  }
+
+  // Default fallback
+  PYTHON_BIN = PYTHON_BIN || 'python.exe';
+}
 
 const runPythonScript = (scriptName, args, workingDir) => {
   return new Promise((resolve, reject) => {
-    console.log(
-      `[runPythonScript] PYTHON_BIN: ${PYTHON_BIN}, Spawning: ${PYTHON_BIN} ${scriptName} ${args.join(' ')} in ${workingDir}`
-    );
+    // console.log(
+    //   `[runPythonScript] PYTHON_BIN: ${PYTHON_BIN}, Spawning: ${PYTHON_BIN} ${scriptName} ${args.join(' ')} in ${workingDir}`
+    // );
 
     const pythonProcess = spawn(PYTHON_BIN, [scriptName, ...args], {
       cwd: workingDir,
@@ -26,7 +53,7 @@ const runPythonScript = (scriptName, args, workingDir) => {
 
     pythonProcess.stdout.on('data', (data) => {
       stdout += data.toString();
-      console.log(`[${scriptName} STDOUT]: ${data.toString().trim()}`);
+      // console.log(`[${scriptName} STDOUT]: ${data.toString().trim()}`);
     });
 
     pythonProcess.stderr.on('data', (data) => {

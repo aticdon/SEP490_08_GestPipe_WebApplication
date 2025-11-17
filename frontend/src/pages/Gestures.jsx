@@ -267,6 +267,8 @@ const Gestures = ({ showCustomTab = false }) => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectRequestId, setRejectRequestId] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [approveRequestData, setApproveRequestData] = useState(null);
   const [myRequests, setMyRequests] = useState([]);
   const [myRequestsLoading, setMyRequestsLoading] = useState(false);
 
@@ -601,16 +603,24 @@ const Gestures = ({ showCustomTab = false }) => {
 
   // Request management functions
   const handleApproveRequest = async (requestId, adminId) => {
+    const request = requests.find(r => r._id === requestId);
+    setApproveRequestData({ requestId, adminId, request });
+    setShowApproveModal(true);
+  };
+
+  const confirmApproveRequest = async () => {
     try {
-      setProcessingRequest(requestId);
-      await approveRequest(requestId, adminId);
-      toast.success('Request approved successfully');
+      setProcessingRequest(approveRequestData.requestId);
+      setShowApproveModal(false);
+      await approveRequest(approveRequestData.requestId, approveRequestData.adminId);
+      toast.success(`Request approved successfully for gestures: ${approveRequestData.request.gestures?.join(', ')}`);
       loadRequests(); // Reload requests
     } catch (err) {
       console.error('Failed to approve request:', err);
       toast.error(err?.response?.data?.message || 'Failed to approve request');
     } finally {
       setProcessingRequest(null);
+      setApproveRequestData(null);
     }
   };
 
@@ -687,24 +697,121 @@ const Gestures = ({ showCustomTab = false }) => {
     );
   }
 
-  return (
-    <div
-      className="h-screen flex flex-col relative"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-      }}
-    >
-      <div
-        className={`absolute inset-0 ${
-          theme === 'dark' ? 'bg-gray-900/85' : 'bg-gray-50/85'
-        }`}
-      ></div>
+  // Approve Confirmation Modal
+  const ApproveModal = () => {
+    if (!showApproveModal || !approveRequestData) return null;
 
-      <div className="relative z-10 h-full flex flex-col">
+    const { request } = approveRequestData;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+        <div
+          className="absolute inset-0 bg-black/60"
+          onClick={() => setShowApproveModal(false)}
+          aria-hidden="true"
+        ></div>
+        <div
+          className={`relative w-full max-w-md rounded-2xl border ${
+            theme === 'dark'
+              ? 'bg-gray-900/95 border-gray-700 text-gray-100'
+              : 'bg-white border-gray-200 text-gray-900'
+          } shadow-2xl`}
+        >
+          <div
+            className={`flex items-start justify-between px-6 py-4 border-b ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+            }`}
+          >
+            <div>
+              <h2 className="text-xl font-semibold">Confirm Approval</h2>
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                Approve gesture request from {request.adminId?.fullName || 'Unknown Admin'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowApproveModal(false)}
+              className={`p-2 rounded-full transition-colors ${
+                theme === 'dark'
+                  ? 'hover:bg-gray-800 text-gray-300'
+                  : 'hover:bg-gray-100 text-gray-500'
+              }`}
+              aria-label="Close"
+            >
+              <X size={22} />
+            </button>
+          </div>
+
+          <div className="px-6 py-5 space-y-4">
+            <div>
+              <h3 className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                Requested Gestures:
+              </h3>
+              <div className="flex flex-wrap gap-1">
+                {request.gestures?.map((gesture, index) => (
+                  <span key={index} className={`px-2 py-1 rounded text-xs ${
+                    theme === 'dark' ? 'bg-gray-600 text-gray-200' : 'bg-gray-200 text-gray-700'
+                  }`}>
+                    {gesture}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              This will train ML models for these gestures and make them available in the system.
+            </p>
+          </div>
+
+          <div
+            className={`flex justify-end gap-3 px-6 py-4 border-t ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => setShowApproveModal(false)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                theme === 'dark'
+                  ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmApproveRequest}
+              disabled={processingRequest === request._id}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+            >
+              {processingRequest === request._id ? 'Approving...' : 'Approve'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <div
+        className="h-screen flex flex-col relative"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        <div
+          className={`absolute inset-0 ${
+            theme === 'dark' ? 'bg-gray-900/85' : 'bg-gray-50/85'
+          }`}
+        ></div>
+
+        <div className="relative z-10 h-full flex flex-col">
         <header
           className={`sticky top-0 z-50 ${
             theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'
@@ -1821,6 +1928,7 @@ const Gestures = ({ showCustomTab = false }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

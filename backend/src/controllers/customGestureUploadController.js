@@ -431,7 +431,17 @@ exports.uploadCustomGesture = async (req, res) => {
     let masterCsvPath = null;
     try {
       masterCsvPath = path.join(userDir, `gesture_data_custom_${adminId}.csv`);
-      const consistentRows = Array.isArray(pyResult.consistent_rows) ? pyResult.consistent_rows : [];
+      let consistentRows = Array.isArray(pyResult.consistent_rows) ? pyResult.consistent_rows : [];
+      
+      // If no validation results, use raw data from the uploaded CSV
+      if (consistentRows.length === 0) {
+        console.log('[uploadCustomGesture] No validation results, using raw CSV data');
+        // Read the uploaded CSV and convert to consistent format
+        const csvContent = await fs.readFile(rawFilePath, 'utf-8');
+        const lines = csvContent.trim().split(/\r?\n/).slice(1); // Skip header
+        consistentRows = lines.map(line => line.split(',').map(val => isNaN(val) ? val : parseFloat(val)));
+      }
+      
       if (consistentRows.length > 0) {
         await appendToMasterCsv(masterCsvPath, consistentRows);
       }
