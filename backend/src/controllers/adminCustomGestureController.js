@@ -1,6 +1,7 @@
 const AdminCustomGesture = require('../models/AdminCustomGesture');
 const AdminGestureRequest = require('../models/AdminGestureRequest');
 const Admin = require('../models/Admin');
+const adminGestureRequestController = require('./adminGestureRequestController');
 
 // Submit for approval - tạo record mới hoặc update existing
 exports.submitForApproval = async (req, res) => {
@@ -262,6 +263,16 @@ exports.approveRequest = async (req, res) => {
       // Clean up raw data
       await purgeRawData(adminId);
 
+      // Reset all gestures to active after successful approval
+      try {
+        console.log('[approveRequest] Resetting all gestures to active for admin:', adminId);
+        const modifiedCount = await adminGestureRequestController.resetGesturesToActive(adminId);
+        console.log(`[approveRequest] Successfully reset ${modifiedCount} gestures to active`);
+      } catch (resetError) {
+        console.error('[approveRequest] Failed to reset gestures to active:', resetError);
+        // Don't fail the approval if reset fails
+      }
+
       return res.json({
         success: true,
         message: 'Request approved and data prepared.',
@@ -309,6 +320,16 @@ exports.rejectRequest = async (req, res) => {
     request.status = 'reject';
     request.rejectReason = rejectReason;
     await request.save();
+
+    // Reset all gestures to active after rejection
+    try {
+      console.log('[rejectRequest] Resetting all gestures to active for admin:', request.adminId);
+      const modifiedCount = await adminGestureRequestController.resetGesturesToActive(request.adminId);
+      console.log(`[rejectRequest] Successfully reset ${modifiedCount} gestures to active`);
+    } catch (resetError) {
+      console.error('[rejectRequest] Failed to reset gestures to active:', resetError);
+      // Don't fail the rejection if reset fails
+    }
 
     return res.json({
       success: true,

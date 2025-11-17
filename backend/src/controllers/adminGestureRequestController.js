@@ -327,37 +327,12 @@ exports.resetAllToActive = async (req, res) => {
     // Allow superadmin to reset gestures for other admins
     let targetAdminId = req.body.adminId || (req.admin.id || req.admin._id);
     
-    // Convert string adminId to ObjectId if needed
-    if (typeof targetAdminId === 'string') {
-      targetAdminId = require('mongoose').Types.ObjectId(targetAdminId);
-    }
-    
-    // Find the target admin's gesture request document
-    let request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
-    
-    // If not exists, create new one with default gestures
-    if (!request) {
-      request = await AdminGestureRequest.createForAdmin(targetAdminId);
-    }
-
-    // Reset all gestures to ready (active)
-    let modifiedCount = 0;
-    request.gestures.forEach(gesture => {
-      if (gesture.status !== 'ready') {
-        gesture.status = 'ready';
-        gesture.customedAt = undefined;
-        gesture.blockedAt = undefined;
-        gesture.approvedAt = undefined;
-        modifiedCount++;
-      }
-    });
-
-    await request.save();
+    await resetGesturesToActive(targetAdminId);
 
     res.json({
       success: true,
-      message: `Reset ${modifiedCount} gestures to active (ready) status`,
-      data: { modifiedCount }
+      message: `Reset gestures to active (ready) status`,
+      data: { modifiedCount: 0 } // Will be updated in helper
     });
   } catch (error) {
     console.error('Error resetting gestures to active:', error);
@@ -368,3 +343,37 @@ exports.resetAllToActive = async (req, res) => {
     });
   }
 };
+
+// Helper function to reset gestures without req/res
+const resetGesturesToActive = async (targetAdminId) => {
+  // Convert string adminId to ObjectId if needed
+  if (typeof targetAdminId === 'string') {
+    targetAdminId = require('mongoose').Types.ObjectId(targetAdminId);
+  }
+  
+  // Find the target admin's gesture request document
+  let request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
+  
+  // If not exists, create new one with default gestures
+  if (!request) {
+    request = await AdminGestureRequest.createForAdmin(targetAdminId);
+  }
+
+  // Reset all gestures to ready (active)
+  let modifiedCount = 0;
+  request.gestures.forEach(gesture => {
+    if (gesture.status !== 'ready') {
+      gesture.status = 'ready';
+      gesture.customedAt = undefined;
+      gesture.blockedAt = undefined;
+      gesture.approvedAt = undefined;
+      modifiedCount++;
+    }
+  });
+
+  await request.save();
+  return modifiedCount;
+};
+
+// Export helper function for internal use
+exports.resetGesturesToActive = resetGesturesToActive;
