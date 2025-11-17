@@ -33,7 +33,13 @@ exports.getAdminGestureRequests = async (req, res) => {
 // Get gesture status for blocking logic
 exports.getGestureStatuses = async (req, res) => {
   try {
-    const adminId = req.admin.id || req.admin._id;
+    // Allow superadmin to get gestures of any admin by passing adminId query param
+    let adminId = req.admin.id || req.admin._id;
+    if (req.admin.role === 'superadmin' && req.query.adminId) {
+      adminId = req.query.adminId;
+    }
+    console.log('[getGestureStatuses] adminId from JWT:', req.admin.id || req.admin._id);
+    console.log('[getGestureStatuses] target adminId:', adminId);
 
     let request = await AdminGestureRequest.findOne({ adminId });
 
@@ -346,32 +352,72 @@ exports.resetAllToActive = async (req, res) => {
 
 // Helper function to reset gestures without req/res
 const resetGesturesToActive = async (targetAdminId) => {
-  // Convert string adminId to ObjectId if needed
-  if (typeof targetAdminId === 'string') {
-    targetAdminId = require('mongoose').Types.ObjectId(targetAdminId);
-  }
+  console.log('[resetGesturesToActive] Called with adminId:', targetAdminId, 'type:', typeof targetAdminId);
   
+  // Ensure targetAdminId is a valid ObjectId
+  if (typeof targetAdminId === 'string') {
+    try {
+      targetAdminId = require('mongoose').Types.ObjectId(targetAdminId);
+      console.log('[resetGesturesToActive] Converted string to ObjectId:', targetAdminId);
+    } catch (convertError) {
+      console.error('[resetGesturesToActive] Invalid ObjectId string:', targetAdminId, convertError);
+      throw new Error('Invalid adminId format');
+    }
+  } else if (!targetAdminId || !require('mongoose').Types.ObjectId.isValid(targetAdminId)) {
+    console.error('[resetGesturesToActive] Invalid adminId:', targetAdminId);
+    throw new Error('Invalid adminId');
+  }
+
+  console.log('[resetGesturesToActive] Looking for AdminGestureRequest with adminId:', targetAdminId);
+
   // Find the target admin's gesture request document
   let request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
-  
+
+  console.log('[resetGesturesToActive] Found request:', request ? 'YES' : 'NO');
+  if (request) {
+    console.log('[resetGesturesToActive] Request _id:', request._id);
+    console.log('[resetGesturesToActive] Request adminId:', request.adminId);
+    console.log('[resetGesturesToActive] Request gestures count:', request.gestures.length);
+    console.log('[resetGesturesToActive] Gesture statuses before reset:', request.gestures.map(g => `${g.gestureId}: ${g.status}`));
+  }
+
   // If not exists, create new one with default gestures
   if (!request) {
-    request = await AdminGestureRequest.createForAdmin(targetAdminId);
+    console.log('[resetGesturesToActive] Creating new request for admin');
+    try {
+      request = await AdminGestureRequest.createForAdmin(targetAdminId);
+      console.log('[resetGesturesToActive] Successfully created new request');
+    } catch (createError) {
+      console.error('[resetGesturesToActive] Failed to create new request:', createError);
+      throw createError;
+    }
   }
 
   // Reset all gestures to ready (active)
   let modifiedCount = 0;
-  request.gestures.forEach(gesture => {
+  console.log('[resetGesturesToActive] About to reset gestures. Current statuses:');
+  request.gestures.forEach((gesture, index) => {
+    console.log(`  [${index}] ${gesture.gestureId}: ${gesture.status}`);
     if (gesture.status !== 'ready') {
+      console.log(`    -> Resetting ${gesture.gestureId} from ${gesture.status} to ready`);
       gesture.status = 'ready';
       gesture.customedAt = undefined;
       gesture.blockedAt = undefined;
       gesture.approvedAt = undefined;
       modifiedCount++;
+    } else {
+      console.log(`    -> ${gesture.gestureId} already ready, skipping`);
     }
   });
 
-  await request.save();
+  console.log('[resetGesturesToActive] Modified count:', modifiedCount);
+  try {
+    await request.save();
+    console.log('[resetGesturesToActive] Successfully saved to database');
+  } catch (saveError) {
+    console.error('[resetGesturesToActive] Failed to save to database:', saveError);
+    throw saveError;
+  }
   return modifiedCount;
 };
 

@@ -29,6 +29,7 @@ import {
   getModelInfo,
   testModel,
   getGestureStatuses,
+  getGestureStatusesOfAdmin,
   submitGestureForApproval,
   deleteAllCustomedGestures,
   approveGestureRequests,
@@ -313,6 +314,38 @@ const Gestures = ({ showCustomTab = false }) => {
     return gesture ? gesture.status : 'ready';
   };
 
+  // Function to load gesture statuses - can be called from anywhere
+  const loadGestureStatuses = useCallback(async () => {
+    if (!admin) return;
+
+    try {
+      setGestureStatusesLoading(true);
+      const response = await getGestureStatuses();
+      setGestureStatuses(response.data.requests || []);
+    } catch (error) {
+      console.warn('Failed to load gesture statuses:', error);
+      setGestureStatuses([]);
+    } finally {
+      setGestureStatusesLoading(false);
+    }
+  }, [admin]);
+
+  // Function to load gesture statuses of a specific admin (for superadmin)
+  const loadGestureStatusesOfAdmin = useCallback(async (adminId) => {
+    if (!admin || admin.role !== 'superadmin') return;
+
+    try {
+      setGestureStatusesLoading(true);
+      const response = await getGestureStatusesOfAdmin(adminId);
+      setGestureStatuses(response.data.requests || []);
+    } catch (error) {
+      console.warn('Failed to load gesture statuses of admin:', error);
+      setGestureStatuses([]);
+    } finally {
+      setGestureStatusesLoading(false);
+    }
+  }, [admin]);
+
   useEffect(() => {
     const currentAdmin = authService.getCurrentUser();
     if (!currentAdmin) {
@@ -324,23 +357,8 @@ const Gestures = ({ showCustomTab = false }) => {
 
   // Load gesture statuses when admin changes
   useEffect(() => {
-    const loadGestureStatuses = async () => {
-      if (!admin) return;
-
-      try {
-        setGestureStatusesLoading(true);
-        const response = await getGestureStatuses();
-        setGestureStatuses(response.data.requests || []);
-      } catch (error) {
-        console.warn('Failed to load gesture statuses:', error);
-        setGestureStatuses([]);
-      } finally {
-        setGestureStatusesLoading(false);
-      }
-    };
-
     loadGestureStatuses();
-  }, [admin]);
+  }, [loadGestureStatuses]);
 
   // Load pending requests for superadmin
   useEffect(() => {
@@ -609,14 +627,21 @@ const Gestures = ({ showCustomTab = false }) => {
   };
 
   const confirmApproveRequest = async () => {
+    console.log('[FRONTEND] confirmApproveRequest called with:', approveRequestData);
     try {
       setProcessingRequest(approveRequestData.requestId);
       setShowApproveModal(false);
+      
+      console.log('[FRONTEND] Calling approveRequest API:', approveRequestData.requestId, approveRequestData.adminId);
       await approveRequest(approveRequestData.requestId, approveRequestData.adminId);
+      
+      console.log('[FRONTEND] approveRequest API success');
       toast.success(`Request approved successfully for gestures: ${approveRequestData.request.gestures?.join(', ')}`);
       loadRequests(); // Reload requests
+      // Also reload gesture statuses of the approved admin
+      loadGestureStatusesOfAdmin(approveRequestData.adminId);
     } catch (err) {
-      console.error('Failed to approve request:', err);
+      console.error('[FRONTEND] approveRequest API failed:', err);
       toast.error(err?.response?.data?.message || 'Failed to approve request');
     } finally {
       setProcessingRequest(null);
@@ -642,12 +667,16 @@ const Gestures = ({ showCustomTab = false }) => {
   const handleApproveCustomizationRequest = async (requestId, adminId) => {
     try {
       setProcessingRequest(requestId);
+      
+      // Ensure adminId is a string
+      const adminIdStr = typeof adminId === 'object' ? adminId._id || adminId : adminId;
+      
       await approveCustomizationRequest(requestId);
       toast.success('Customization request approved successfully');
 
       // Load AdminGestureSamples to verify data was saved
       try {
-        const samplesResponse = await getAdminGestureSamples(adminId);
+        const samplesResponse = await getAdminGestureSamples(adminIdStr);
         console.log('AdminGestureSamples loaded:', samplesResponse);
         if (samplesResponse.success && samplesResponse.count > 0) {
           toast.success(`Saved ${samplesResponse.count} gesture samples to database`);

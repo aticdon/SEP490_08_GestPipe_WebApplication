@@ -38,6 +38,29 @@ exports.submitForApproval = async (req, res) => {
       }
     ).populate('adminId', 'fullName email role');
 
+    // BLOCK ALL GESTURES when submitting for approval
+    console.log('[submitForApproval] Blocking all gestures for admin:', adminId);
+    try {
+      const gestureRequest = await AdminGestureRequest.findOne({ adminId });
+      if (gestureRequest) {
+        let blockedCount = 0;
+        gestureRequest.gestures.forEach(gesture => {
+          if (gesture.status !== 'blocked') {
+            gesture.status = 'blocked';
+            gesture.blockedAt = new Date();
+            blockedCount++;
+          }
+        });
+        await gestureRequest.save();
+        console.log(`[submitForApproval] Successfully blocked ${blockedCount} gestures`);
+      } else {
+        console.log('[submitForApproval] No AdminGestureRequest found for admin:', adminId);
+      }
+    } catch (blockError) {
+      console.error('[submitForApproval] Failed to block gestures:', blockError);
+      // Don't fail the submission if blocking fails
+    }
+
     // Update gesture_request_status của admin thành 'disabled'
     await Admin.findByIdAndUpdate(adminId, { gesture_request_status: 'disabled' });
 
@@ -48,6 +71,24 @@ exports.submitForApproval = async (req, res) => {
     });
   } catch (error) {
     console.error('[submitForApproval] Error', error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Get admin status - cho admin xem status của mình
+exports.getAdminStatus = async (req, res) => {
+  try {
+    const adminId = req.admin.id;
+    const requests = await AdminCustomGesture.find({ adminId })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    return res.json({
+      success: true,
+      data: requests,
+    });
+  } catch (error) {
+    console.error('[getAdminStatus] Error', error);
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -95,11 +136,13 @@ exports.getAllRequests = async (req, res) => {
 
 // Approve request
 exports.approveRequest = async (req, res) => {
+  console.log('[approveRequest] START - Called with id:', req.params.id, 'body:', req.body, 'user:', req.admin?.id);
   try {
     const { id } = req.params;
     const { adminId } = req.body;
 
     if (!adminId) {
+      console.log('[approveRequest] Missing adminId in request body');
       return res.status(400).json({ message: 'adminId is required.' });
     }
 
@@ -263,16 +306,6 @@ exports.approveRequest = async (req, res) => {
       // Clean up raw data
       await purgeRawData(adminId);
 
-      // Reset all gestures to active after successful approval
-      try {
-        console.log('[approveRequest] Resetting all gestures to active for admin:', adminId);
-        const modifiedCount = await adminGestureRequestController.resetGesturesToActive(adminId);
-        console.log(`[approveRequest] Successfully reset ${modifiedCount} gestures to active`);
-      } catch (resetError) {
-        console.error('[approveRequest] Failed to reset gestures to active:', resetError);
-        // Don't fail the approval if reset fails
-      }
-
       return res.json({
         success: true,
         message: 'Request approved and data prepared.',
@@ -287,6 +320,15 @@ exports.approveRequest = async (req, res) => {
       request.rejectReason = pipelineError.message;
       await request.save();
 
+      // Reset all gestures to active even if pipeline failed
+      try {
+        console.log('[approveRequest] Resetting all gestures to active after failed pipeline for admin:', adminId);
+        const modifiedCount = await adminGestureRequestController.resetGesturesToActive(adminId);
+        console.log(`[approveRequest] Successfully reset ${modifiedCount} gestures to active after pipeline failure`);
+      } catch (resetError) {
+        console.error('[approveRequest] Failed to reset gestures to active after pipeline failure:', resetError);
+      }
+
       return res.status(500).json({
         success: false,
         message: 'Failed to process customization request.',
@@ -295,14 +337,44 @@ exports.approveRequest = async (req, res) => {
         python_stderr: pipelineError.stderr,
       });
     }
+
+    // Reset all gestures to active after successful approval
+    try {
+      console.log('[approveRequest] Resetting all gestures to active after successful approval for admin:', adminId, 'type:', typeof adminId);
+      const modifiedCount = await adminGestureRequestController.resetGesturesToActive(adminId);
+      console.log(`[approveRequest] Successfully reset ${modifiedCount} gestures to active after successful approval`);
+    } catch (resetError) {
+      console.error('[approveRequest] Failed to reset gestures to active after successful approval:', resetError);
+      // Don't fail the approval if reset fails, but log it
+    }
+
+    console.log('[approveRequest] APPROVAL COMPLETED SUCCESSFULLY - Request ID:', id, 'Admin ID:', adminId);
+    return res.json({
+      success: true,
+      message: 'Request approved and data prepared.',
+      data: request,
+      artifacts: artifactPaths,
+    });
   } catch (error) {
     console.error('[approveRequest] Error', error);
+    
+    // Even if there's an error, try to reset gestures if we have adminId
+    if (adminId) {
+      try {
+        console.log('[approveRequest] Emergency reset after error for admin:', adminId);
+        await adminGestureRequestController.resetGesturesToActive(adminId);
+      } catch (emergencyResetError) {
+        console.error('[approveRequest] Emergency reset also failed:', emergencyResetError);
+      }
+    }
+    
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 // Reject request
 exports.rejectRequest = async (req, res) => {
+  console.log('[rejectRequest] START - Called with id:', req.params.id, 'user:', req.admin?.id);
   try {
     const { id } = req.params;
     const { rejectReason = 'Rejected by superadmin' } = req.body;
@@ -322,15 +394,17 @@ exports.rejectRequest = async (req, res) => {
     await request.save();
 
     // Reset all gestures to active after rejection
+    console.log('[rejectRequest] Request adminId:', request.adminId, 'type:', typeof request.adminId);
     try {
-      console.log('[rejectRequest] Resetting all gestures to active for admin:', request.adminId);
       const modifiedCount = await adminGestureRequestController.resetGesturesToActive(request.adminId);
       console.log(`[rejectRequest] Successfully reset ${modifiedCount} gestures to active`);
     } catch (resetError) {
       console.error('[rejectRequest] Failed to reset gestures to active:', resetError);
-      // Don't fail the rejection if reset fails
+      // Don't fail the rejection if reset fails, but this is critical - log it prominently
+      console.error('[rejectRequest] CRITICAL: Gestures may remain blocked after rejection!');
     }
 
+    console.log('[rejectRequest] REJECTION COMPLETED SUCCESSFULLY - Request ID:', id, 'Admin ID:', request.adminId);
     return res.json({
       success: true,
       message: 'Request rejected successfully.',
@@ -342,21 +416,8 @@ exports.rejectRequest = async (req, res) => {
   }
 };
 
-// Get status của admin hiện tại
-exports.getAdminStatus = async (req, res) => {
-  try {
-    const adminId = req.admin.id;
-
-    const customGesture = await AdminCustomGesture.findOne({ adminId })
-      .populate('adminId', 'fullName email role')
-      .lean();
-
-    return res.json({
-      success: true,
-      data: customGesture,
-    });
-  } catch (error) {
-    console.error('[getAdminStatus] Error', error);
-    return res.status(500).json({ message: 'Server error', error: error.message });
-  }
+// Test route
+exports.testReject = async (req, res) => {
+  console.log('[testReject] Called!');
+  return res.json({ success: true, message: 'Test reject called' });
 };

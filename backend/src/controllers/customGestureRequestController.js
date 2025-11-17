@@ -225,6 +225,7 @@ exports.getAdminStatus = async (req, res) => {
 };
 
 exports.approveRequest = async (req, res) => {
+  console.log('[customGestureRequestController.approveRequest] START - Request ID:', req.params.id, 'User:', req.admin?.id);
   const { id } = req.params;
   const requestDoc = await CustomGestureRequest.findById(id);
   if (!requestDoc) {
@@ -265,6 +266,17 @@ exports.approveRequest = async (req, res) => {
 
     // Re-enable gesture_request_status for this admin (they can request again in future)
     await Admin.findByIdAndUpdate(requestDoc.adminId, { gesture_request_status: 'enabled' });
+
+    // Reset all gestures to active after successful approval
+    console.log('[approveRequest] Resetting all gestures to active after successful approval for admin:', requestDoc.adminId);
+    try {
+      const adminGestureRequestController = require('./adminGestureRequestController');
+      const modifiedCount = await adminGestureRequestController.resetGesturesToActive(requestDoc.adminId);
+      console.log(`[approveRequest] Successfully reset ${modifiedCount} gestures to active`);
+    } catch (resetError) {
+      console.error('[approveRequest] Failed to reset gestures to active:', resetError);
+      // Don't fail the approval if reset fails
+    }
 
     return res.json({ message: 'Request approved and data prepared.', artifacts: artifactPaths });
   } catch (error) {

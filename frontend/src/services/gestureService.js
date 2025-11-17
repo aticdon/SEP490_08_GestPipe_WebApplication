@@ -201,6 +201,13 @@ export const getGestureStatuses = async () => {
   return response.data;
 };
 
+export const getGestureStatusesOfAdmin = async (adminId) => {
+  const response = await axios.get(`${API_URL}/admin-gesture-status?adminId=${adminId}`, {
+    headers: authHeaders(),
+  });
+  return response.data;
+};
+
 export const createOrUpdateGestureRequest = async (payload) => {
   const response = await axios.post(
     `${API_URL}/admin-gesture-request`,
@@ -294,11 +301,13 @@ export const getAllRequests = async (status = null) => {
 };
 
 export const approveRequest = async (requestId, adminId) => {
+  console.log('[GESTURESERVICE] approveRequest called with:', requestId, adminId);
   const response = await axios.put(
     `${ADMIN_CUSTOM_GESTURE_API_URL}/approve/${requestId}`,
     { adminId },
     { headers: authHeaders() }
   );
+  console.log('[GESTURESERVICE] approveRequest response:', response.data);
   return response.data;
 };
 

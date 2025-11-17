@@ -21,4 +21,7 @@ router.put('/approve/:id', protect, authorize('superadmin'), adminCustomGestureC
 // Reject request - chỉ superadmin
 router.put('/reject/:id', protect, authorize('superadmin'), adminCustomGestureController.rejectRequest);
 
+// Test route
+router.get('/test-reject', adminCustomGestureController.testReject);
+
 module.exports = router;
