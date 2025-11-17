@@ -176,7 +176,6 @@ const AdminList = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // (Bỏ useEffect của userDropdownRef)
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -195,12 +194,10 @@ const AdminList = () => {
   }, [showFilterDropdown]);
 
 
-  // (Bỏ return layout cũ)
-  
   return (
     // THÊM HIỆU ỨNG VÀO <main>
     <motion.main 
-      className="flex-1 overflow-hidden p-8 font-montserrat flex flex-col"
+      className="p-8 font-montserrat" // <-- SỬA LẠI: Chỉ p-8
       initial="initial"
       animate="animate"
       exit="exit"
@@ -278,96 +275,87 @@ const AdminList = () => {
       </div>
       
       {/* CONTAINER BẢNG (ĐỒNG BỘ STYLE) */}
-      <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden flex-1 flex flex-col">
+      <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl 
+                    overflow-hidden overflow-x-auto
+                    max-h-[75vh] overflow-y-auto 
+                    scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600">
         
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-full">
+          <div className="flex flex-col items-center justify-center h-96">
             <Loader2 size={48} className="text-cyan-500 animate-spin" />
             <p className="text-lg font-medium text-cyan-500 mt-4">{t('adminList.loading')}</p>
           </div>
-        ) : error ? ( // Thêm xử lý lỗi
-            <div className="flex flex-col items-center justify-center h-full">
+        ) : error ? ( 
+            <div className="flex flex-col items-center justify-center h-96">
               <p className="text-lg font-medium text-red-400">{error}</p>
             </div>
         ) : (
-          <>
-            {/* Div cho Header (Không cuộn) */}
-            <div className="flex-shrink-0">
-              <table className="w-full table-fixed">
-                <thead className="bg-gradient-table-header from-header-start-gray to-header-end-gray text-white">
-                  <tr>
-                    <th className="px-6 py-4 font-montserrat font-bold text-left text-sm w-[25%]">{t('adminList.name')}</th>
-                    <th className="px-6 py-4 font-montserrat font-bold text-left text-sm w-[25%]">{t('adminList.email')}</th>
-                    <th className="px-6 py-4 font-montserrat font-bold text-left text-sm w-[20%]">{t('adminList.phone')}</th>
-                    <th className="px-6 py-4 font-montserrat font-bold text-left text-sm w-[15%]">{t('adminList.createDate')}</th>
-                    <th className="px-6 py-4 font-montserrat font-bold text-left text-sm w-[10%]">{t('adminList.status')}</th>
-                    <th className="px-6 py-4 font-montserrat font-bold text-left text-sm w-[5%]">{t('adminList.action')}</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
+          <table className="w-full min-w-[900px] table-auto">
             
-            {/* Div cho Body (Sẽ cuộn) */}
-            <div className="overflow-y-auto flex-1
-                          scrollbar-thin scrollbar-track-transparent 
-                          scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500">
-              <table className="w-full table-fixed">
-                <tbody className="font-montserrat">
-                  {filteredAdmins.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-10 text-gray-400">
-                        {t('adminList.noAdmins')}
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredAdmins.map((admin, i) => (
-                      <tr 
-                        key={admin._id} 
-                        className={`border-b border-table-border-dark hover:bg-table-row-hover transition-colors
-                                    ${i % 2 === 0 ? 'bg-white/5' : 'bg-transparent'}`}
+            <thead className="sticky top-0 bg-gradient-table-header from-header-start-gray to-header-end-gray text-white z-10">
+              <tr>
+                {/* Bỏ % width, để table-auto tự tính */}
+                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm">{t('adminList.name')}</th>
+                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm">{t('adminList.email')}</th>
+                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.phone')}</th>
+                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.createDate')}</th>
+                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.status')}</th>
+                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.action')}</th>
+              </tr>
+            </thead>
+            
+            <tbody className="font-montserrat">
+              {filteredAdmins.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-10 text-gray-400">
+                    {t('adminList.noAdmins')}
+                  </td>
+                </tr>
+              ) : (
+                filteredAdmins.map((admin, i) => (
+                  <tr 
+                    key={admin._id} 
+                    className={`border-b border-table-border-dark hover:bg-table-row-hover transition-colors
+                                ${i % 2 === 0 ? 'bg-white/5' : 'bg-transparent'}`}
+                  >
+                    <td className="px-6 py-4 text-gray-200 text-sm truncate">{admin.fullName}</td>
+                    <td className="px-6 py-4 text-gray-200 text-sm truncate">{admin.email}</td>
+                    <td className="px-6 py-4 text-gray-200 text-sm whitespace-nowrap">{admin.phoneNumber || 'N/A'}</td>
+                    <td className="px-6 py-4 text-gray-200 text-sm whitespace-nowrap">{formatDate(admin.createdAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-4 py-1.5 rounded-xl text-xs font-semibold capitalize
+                        ${getStatusBadge(admin.accountStatus)}`}>
+                        {t(`adminList.${admin.accountStatus}`)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleToggleStatus(admin._id, admin.accountStatus)}
+                        disabled={togglingId === admin._id}
+                        className={`p-2 rounded-full text-white hover:opacity-80 transition
+                                   ${togglingId === admin._id ? 'cursor-not-allowed' : ''}
+                                   ${admin.accountStatus === 'active' 
+                                     ? 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500' // Nút Active (Unlock)
+                                     : 'bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-500' // Nút Inactive/Suspended (Lock)
+                                   }`}
+                        title={admin.accountStatus === 'active' ? t('alerts.suspendTitle') : t('alerts.activateTitle')}
                       >
-                        <td className="px-6 py-4 text-gray-200 text-sm truncate w-[25%]">{admin.fullName}</td>
-                        <td className="px-6 py-4 text-gray-200 text-sm truncate w-[25%]">{admin.email}</td>
-                        <td className="px-6 py-4 text-gray-200 text-sm w-[20%]">{admin.phoneNumber || 'N/A'}</td>
-                        <td className="px-6 py-4 text-gray-200 text-sm w-[15%]">{formatDate(admin.createdAt)}</td>
-                        <td className="px-6 py-4 w-[10%]">
-                          <span className={`px-4 py-1.5 rounded-xl text-xs font-semibold capitalize
-                            ${getStatusBadge(admin.accountStatus)}`}>
-                            {t(`adminList.${admin.accountStatus}`)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 w-[5%]">
-                          <button
-                            onClick={() => handleToggleStatus(admin._id, admin.accountStatus)}
-                            disabled={togglingId === admin._id}
-                            className={`p-2 rounded-full text-white hover:opacity-80 transition
-                                       ${togglingId === admin._id ? 'cursor-not-allowed' : ''}
-                                       ${admin.accountStatus === 'active' 
-                                         ? 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500' // Nút Active (Unlock)
-                                         : 'bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-500' // Nút Inactive/Suspended (Lock)
-                                       }`}
-                            title={admin.accountStatus === 'active' ? t('alerts.suspendTitle') : t('alerts.activateTitle')}
-                          >
-                            {togglingId === admin._id ? (
-                              <Loader2 size={18} className="animate-spin" />
-                            ) : admin.accountStatus === 'active' ? (
-                              <Unlock size={18} />
-                            ) : (
-                              <Lock size={18} />
-                            )}
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
+                        {togglingId === admin._id ? (
+                          <Loader2 size={18} className="animate-spin" />
+                        ) : admin.accountStatus === 'active' ? (
+                          <Unlock size={18} />
+                        ) : (
+                          <Lock size={18} />
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         )}
       </div>
-      
-      {/* (BỎ PHẦN STATS) */}
       
     </motion.main>
   );
