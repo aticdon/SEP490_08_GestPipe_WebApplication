@@ -1,4 +1,5 @@
 const AdminCustomGesture = require('../models/AdminCustomGesture');
+const AdminGestureRequest = require('../models/AdminGestureRequest');
 const Admin = require('../models/Admin');
 
 // Submit for approval - tạo record mới hoặc update existing
@@ -21,6 +22,16 @@ exports.submitForApproval = async (req, res) => {
       return res.status(400).json({ message: 'gestures array is required and cannot be empty.' });
     }
 
+    // BLOCK ALL GESTURES: Update AdminGestureRequest to set all gestures to 'blocked'
+    const gestureRequest = await AdminGestureRequest.findOne({ adminId });
+    if (gestureRequest) {
+      gestureRequest.gestures.forEach(gesture => {
+        gesture.status = 'blocked';
+        gesture.blockedAt = new Date();
+      });
+      await gestureRequest.save();
+    }
+
     // Tạo hoặc update record
     const customGesture = await AdminCustomGesture.findOneAndUpdate(
       { adminId },
@@ -40,7 +51,7 @@ exports.submitForApproval = async (req, res) => {
     await Admin.findByIdAndUpdate(adminId, { gesture_request_status: 'disabled' });
 
     return res.status(200).json({
-      message: 'Đã gửi yêu cầu phê duyệt thành công.',
+      message: 'Đã gửi yêu cầu phê duyệt thành công. Tất cả gestures đã bị khóa.',
       data: customGesture,
       gesture_request_status: 'disabled',
     });

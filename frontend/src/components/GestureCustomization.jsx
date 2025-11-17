@@ -202,6 +202,13 @@ function GestureCustomization({
       try {
         const response = await getGestureStatuses();
         
+        // Check if customization is globally blocked (when request is pending)
+        const canCustom = response.data.canCustom;
+        if (!canCustom) {
+          setIsGestureBlocked(true);
+          return;
+        }
+        
         // Check if this specific gesture is blocked or customed
         const thisGestureRequest = response.data.requests?.find(r => r.gestureId === gestureName);
         setIsGestureBlocked(thisGestureRequest?.status === 'blocked' || thisGestureRequest?.status === 'customed');
