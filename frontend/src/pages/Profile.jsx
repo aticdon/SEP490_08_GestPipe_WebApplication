@@ -1,46 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Bell, ChevronDown, User as UserIcon } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import adminService from '../services/adminService';
-import { useTheme } from '../utils/ThemeContext';
-import Sidebar from '../components/Sidebar';
-import AdminSidebar from '../components/AdminSidebar';
-import Logo from '../assets/images/Logo.png';
-import backgroundImage from '../assets/backgrounds/background.jpg';
+import { useTheme } from '../utils/ThemeContext'; // Vẫn giữ
+import { Loader2 } from 'lucide-react'; // Thêm Loader
+import { motion } from 'framer-motion'; // Thêm motion
+
+// (Bỏ import: Sun, Moon, Bell, ChevronDown, UserIcon, Sidebar, AdminSidebar, Logo, backgroundImage)
+
+// Hiệu ứng chuyển động
+const pageVariants = {
+  initial: { opacity: 0, x: "20px" },
+  animate: { opacity: 1, x: "0px" },
+  exit: { opacity: 0, x: "-20px" },
+  transition: { type: 'tween', ease: 'anticipate', duration: 0.3 }
+};
+
+// Component con cho các hàng thông tin
+const InfoRow = ({ label, value }) => {
+  const { theme } = useTheme();
+  return (
+    <tr>
+      <td className={`py-3 pr-6 font-semibold text-base align-top ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} style={{ width: '180px' }}>
+        {label}:
+      </td>
+      <td className={`py-3 text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+        {value}
+      </td>
+    </tr>
+  );
+};
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme(); // Bỏ toggleTheme
   const { t } = useTranslation();
-  const [admin, setAdmin] = useState(null);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  
+  // (Bỏ state layout: admin, showUserDropdown)
+  const [profileData, setProfileData] = useState(null); // Đổi tên state
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/');
-      return;
-    }
-
-    const adminData = localStorage.getItem('admin');
-    if (adminData) {
-      const parsedAdmin = JSON.parse(adminData);
-      // Fetch fresh data from API
-      fetchProfile(parsedAdmin._id || parsedAdmin.id);
-    }
-  }, [navigate]);
-
-  const fetchProfile = async (adminId) => {
+  // Lấy profile data
+  const fetchProfile = useCallback(async (adminId) => {
     try {
       setLoading(true);
       const response = await adminService.getProfile(adminId);
-      setAdmin(response.admin);
-      // Update localStorage with fresh data
+      setProfileData(response.admin);
+      // Cập nhật localStorage (rất tốt, để layout luôn có data mới nhất)
       localStorage.setItem('admin', JSON.stringify(response.admin));
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -48,303 +57,133 @@ const Profile = () => {
       // Fallback to localStorage data
       const adminData = localStorage.getItem('admin');
       if (adminData) {
-        setAdmin(JSON.parse(adminData));
+        setProfileData(JSON.parse(adminData));
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]); // Thêm t
 
-  const handleLogout = () => {
-    toast.info(t('notifications.logoutMessage'), {
-      position: "top-right",
-      autoClose: 1500,
-    });
-    
-    setTimeout(() => {
-      authService.logout();
+  // Check login và fetch data
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
       navigate('/');
-    }, 1000);
-  };
+      return;
+    }
+
+    const adminData = authService.getCurrentUser();
+    if (adminData) {
+      fetchProfile(adminData._id || adminData.id);
+    } else {
+      authService.logout(); // Failsafe
+      navigate('/');
+    }
+  }, [navigate, fetchProfile]);
+
+  // (Bỏ handleLogout)
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
+    return date.toLocaleDateString('vi-VN'); // Dùng format VN
   };
 
-  const formatDateTime = (dateString) => (dateString ? dateString : 'N/A');
+  // (Bỏ formatDateTime, dùng formatDate)
 
-  if (loading || !admin) {
+  if (loading || !profileData) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-cyan-primary text-xl">Loading...</div>
-      </div>
+      <motion.main 
+        className="flex-1 overflow-hidden p-8 font-montserrat flex flex-col items-center justify-center"
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        transition={pageVariants.transition}
+      >
+        <Loader2 size={48} className="text-cyan-500 animate-spin" />
+        <p className="text-lg font-medium text-cyan-500 mt-4">{t('profile.loading') || 'Loading Profile...'}</p>
+      </motion.main>
     );
   }
 
   return (
-    <div 
-      className="h-screen flex flex-col transition-colors duration-300 relative"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
+    // (Bỏ div layout)
+    <motion.main 
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex justify-center pt-10" // Tự cuộn
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+      transition={pageVariants.transition}
     >
-      {/* Background Overlay */}
-      <div className={`absolute inset-0 ${
-        theme === 'dark' ? 'bg-gray-900/85' : 'bg-gray-100/85'
-      }`}></div>
-      
-      {/* Content */}
-      <div className="relative z-10 h-full flex flex-col">
-        <ToastContainer theme={theme === 'dark' ? 'dark' : 'light'} />
+      <div className="w-full max-w-2xl">
+        {/* Profile Card (Style "kính mờ") */}
+        <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8 sm:p-10">
+          <h2 className="text-3xl font-bold text-center mb-8 text-white">
+            {t('profile.title')}
+          </h2>
 
-        {/* Header - Fixed Top */}
-        <header className={`sticky top-0 z-50 border-b transition-colors backdrop-blur-sm ${
-          theme === 'dark' 
-            ? 'bg-gray-800/50 border-gray-700' 
-            : 'bg-white/50 border-gray-200'
-        }`}>
-        <div className="px-6 py-4 flex items-center relative">
-          {/* Logo in Center */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <img src={Logo} alt="GestPipe" className="h-24" />
-          </div>
+          {/* Profile Info Table */}
+          <table className="w-full">
+            <tbody>
+              <InfoRow 
+                label={t('profile.name')} 
+                value={profileData.fullName || 'N/A'} 
+              />
+              <InfoRow 
+                label={t('profile.dateOfBirth')} 
+                value={formatDate(profileData.birthday)} 
+              />
+              <InfoRow 
+                label={t('profile.email')} 
+                value={profileData.email || 'N/A'} 
+              />
+              <InfoRow 
+                label={t('profile.phone')} 
+                value={profileData.phoneNumber || 'N/A'} 
+              />
+              <InfoRow 
+                label={t('profile.address')} 
+                value={profileData.province || 'N/A'} 
+              />
+              <InfoRow 
+                label={t('profile.role')} 
+                value={
+                  <span className="px-3 py-1 rounded-full bg-gray-700 text-gray-100 font-semibold text-sm capitalize">
+                    {profileData.role}
+                  </span>
+                } 
+              />
+              <InfoRow 
+                label={t('profile.createdAt')} 
+                value={formatDate(profileData.createdAt)} 
+              />
+            </tbody>
+          </table>
 
-          {/* Right Side Icons */}
-          <div className="flex items-center gap-3 ml-auto">
-            {/* Theme Toggle */}
+          {/* Action Buttons (Style mới) */}
+          <div className="flex gap-4 mt-8 justify-end">
             <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-lg transition-all hover:scale-110 ${
-                theme === 'dark'
-                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              onClick={() => navigate('/change-password')}
+              className="px-6 py-2 rounded-lg font-medium transition-all
+                         bg-gray-600 text-white hover:bg-gray-500"
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {t('profile.changePassword')}
             </button>
-
-            {/* Notification */}
-            <button className={`p-2 rounded-lg transition-all hover:scale-110 relative ${
-              theme === 'dark'
-                ? 'bg-gray-700 text-cyan-primary hover:bg-gray-600'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}>
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            <button
+              onClick={() => navigate('/edit-profile')}
+              className="px-6 py-2 rounded-lg font-medium transition-all
+                         bg-gradient-to-r from-blue-600 to-cyan-500 text-white
+                         hover:from-blue-500 hover:to-cyan-400"
+            >
+              {t('profile.edit')}
             </button>
-
-            {/* User Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 hover:bg-gray-600'
-                    : 'bg-gray-200 hover:bg-gray-300'
-                }`}
-              >
-                <div className="w-8 h-8 rounded-full bg-cyan-primary flex items-center justify-center text-white font-semibold">
-                  {admin.fullName?.charAt(0).toUpperCase()}
-                </div>
-                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                  {admin.fullName}
-                </span>
-                <ChevronDown size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
-              </button>
-
-              {showUserDropdown && (
-                <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-xl border z-50 ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 border-gray-700'
-                    : 'bg-white border-gray-200'
-                }`}>
-                  <button
-                    onClick={() => navigate('/profile')}
-                    className={`w-full text-left px-4 py-2 transition-colors ${
-                      theme === 'dark'
-                        ? 'text-cyan-primary hover:bg-gray-700'
-                        : 'text-cyan-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {t('profile.title')}
-                  </button>
-                  <button
-                    onClick={() => navigate('/change-password')}
-                    className={`w-full text-left px-4 py-2 transition-colors ${
-                      theme === 'dark'
-                        ? 'text-white hover:bg-gray-700'
-                        : 'text-gray-800 hover:bg-gray-100'
-                    }`}
-                  >
-                    {t('profile.changePassword')}
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-500/10 rounded-b-lg"
-                  >
-                    {t('common.logout')}
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
-      </header>
-
-      {/* Main Content with Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
-        {admin?.role === 'admin' ? (
-          <AdminSidebar theme={theme} />
-        ) : (
-          <Sidebar theme={theme} />
-        )}
-
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-4xl mx-auto">
-            {/* Profile Card */}
-            <div className={`rounded-2xl border p-10 backdrop-blur-sm ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-gray-700/50'
-                : 'bg-white/50 border-gray-200/50'
-            }`}>
-              <h2 className="text-3xl font-bold text-center mb-8 text-cyan-primary">
-                {t('profile.title')}
-              </h2>
-
-              {/* Profile Info Grid */}
-              <div className="space-y-6">
-                {/* Name */}
-                <div className="flex items-center">
-                  <label className={`w-48 font-semibold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {t('profile.name')}:
-                  </label>
-                  <span className={`text-lg ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {admin.fullName || 'N/A'}
-                  </span>
-                </div>
-
-                {/* Date of Birth */}
-                <div className="flex items-center">
-                  <label className={`w-48 font-semibold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {t('profile.dateOfBirth')}:
-                  </label>
-                  <span className={`text-lg ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {admin.birthday ? formatDate(admin.birthday) : 'N/A'}
-                  </span>
-                </div>
-
-                {/* Gmail */}
-                <div className="flex items-center">
-                  <label className={`w-48 font-semibold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {t('profile.email')}:
-                  </label>
-                  <span className={`text-lg ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {admin.email || 'N/A'}
-                  </span>
-                </div>
-
-                {/* Phone Number */}
-                <div className="flex items-center">
-                  <label className={`w-48 font-semibold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {t('profile.phone')}:
-                  </label>
-                  <span className={`text-lg ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {admin.phoneNumber || 'N/A'}
-                  </span>
-                </div>
-
-                {/* Address */}
-                <div className="flex items-center">
-                  <label className={`w-48 font-semibold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {t('profile.address')}:
-                  </label>
-                  <span className={`text-lg ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {admin.province || 'N/A'}
-                  </span>
-                </div>
-
-                {/* Role */}
-                <div className="flex items-center">
-                  <label className={`w-48 font-semibold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {t('profile.role')}:
-                  </label>
-                  <span className="text-lg">
-                    <span className="px-3 py-1 rounded-full bg-cyan-primary/20 text-cyan-primary font-semibold">
-                      {admin.role === 'superadmin' ? 'Super Admin' : 'Admin'}
-                    </span>
-                  </span>
-                </div>
-
-                {/* Create date */}
-                <div className="flex items-center">
-                  <label className={`w-48 font-semibold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {t('profile.createdAt')}:
-                  </label>
-                  <span className={`text-lg ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {formatDateTime(admin.createdAt)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-4 mt-8 justify-end">
-                <button
-                  onClick={() => navigate('/change-password')}
-                  className="px-6 py-2 rounded-lg bg-cyan-primary hover:bg-cyan-600 text-white font-medium transition-all"
-                >
-                  {t('profile.changePassword')}
-                </button>
-                <button
-                  onClick={() => navigate('/edit-profile')}
-                  className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                    theme === 'dark'
-                      ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                      : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                  }`}
-                >
-                  {t('profile.edit')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </main>
       </div>
-      </div>
-    </div>
+    </motion.main>
+    // (Bỏ div layout)
   );
 };
 
