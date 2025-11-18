@@ -63,6 +63,11 @@ const AdminSchema = new mongoose.Schema({
   province: {
     type: String,
     trim: true
+  },
+  gesture_request_status: {
+    type: String,
+    enum: ['enabled', 'disabled'],
+    default: 'enabled'
   }
   ,
   resetPasswordOTP: {

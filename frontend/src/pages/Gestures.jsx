@@ -162,6 +162,31 @@ const Gestures = () => {
     }
   }, [navigate]);
 
+  // Load gesture statuses when admin changes
+  useEffect(() => {
+    loadGestureStatuses();
+  }, [loadGestureStatuses]);
+
+  // Load pending requests for superadmin
+  useEffect(() => {
+    const loadPendingRequests = async () => {
+      if (!admin || admin.role !== 'superadmin') return;
+
+      try {
+        setRequestsLoading(true);
+        const response = await fetchCustomizationRequests('pending');
+        setRequests(response || []);
+      } catch (error) {
+        console.warn('Failed to load pending requests:', error);
+        setRequests([]);
+      } finally {
+        setRequestsLoading(false);
+      }
+    };
+
+    loadPendingRequests();
+  }, [admin]);
+
   useEffect(() => {
     const loadMetadata = async () => {
       try {

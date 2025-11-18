@@ -75,10 +75,15 @@ exports.protect = async (req, res, next) => {
 // Authorize specific roles (Admin, SuperAdmin)
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.admin.role)) {
+    const userRole = req.admin.role;
+
+    // Check if user role is in allowed roles
+    const isAuthorized = roles.some(role => role === userRole);
+
+    if (!isAuthorized) {
       return res.status(403).json({
         success: false,
-        message: `Role '${req.admin.role}' is not authorized to access this route`
+        message: `Role '${userRole}' is not authorized to access this route`
       });
     }
     next();

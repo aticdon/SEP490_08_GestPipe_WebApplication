@@ -320,17 +320,18 @@ exports.getProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      admin: {
-        _id: formattedAdmin._id,
-        fullName: formattedAdmin.fullName,
-        email: formattedAdmin.email,
-        birthday: formattedAdmin.birthday,
-        phoneNumber: formattedAdmin.phoneNumber,
-        province: formattedAdmin.province,
-        role: formattedAdmin.role,
-        createdAt: formattedAdmin.createdAt,
-        updatedAt: formattedAdmin.updatedAt
-      }
+        admin: {
+          _id: formattedAdmin._id,
+          fullName: formattedAdmin.fullName,
+          email: formattedAdmin.email,
+          birthday: formattedAdmin.birthday,
+          phoneNumber: formattedAdmin.phoneNumber,
+          province: formattedAdmin.province,
+          role: formattedAdmin.role,
+          gesture_request_status: formattedAdmin.gesture_request_status,
+          createdAt: formattedAdmin.createdAt,
+          updatedAt: formattedAdmin.updatedAt
+        }
     });
 
   } catch (error) {

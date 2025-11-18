@@ -15,6 +15,7 @@ app.use(express.json());
 // Routes
 const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const adminCustomGestureRoutes = require('./src/routes/adminCustomGestureRoutes');
 const translationRoutes = require('./src/routes/translationRoutes');
 const gestureRoutes = require('./src/routes/gestureRoutes');
 const practiceRoutes = require('./src/routes/practiceRoutes');
@@ -26,6 +27,7 @@ const versionRoutes = require('./src/routes/versionRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin-custom-gestures', adminCustomGestureRoutes);
 app.use('/api/translations', translationRoutes);
 app.use('/api/gestures', gestureRoutes);
 app.use('/api/practice', practiceRoutes);
@@ -35,6 +37,11 @@ app.use('/api/versions', versionRoutes);
 // Simple route for testing
 app.get('/', (req, res) => {
   res.send('API is running...');
+});
+
+// Test route without auth
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Test route works!' });
 });
 
 const PORT = process.env.PORT || 5000;

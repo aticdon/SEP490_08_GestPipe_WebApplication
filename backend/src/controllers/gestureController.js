@@ -111,3 +111,9 @@ exports.stats = async (_req, res) => {
     res.status(500).json({ message: 'Failed to compute gesture statistics' });
   }
 };
+
+exports.customizeGesture = async (req, res) => {
+  return res.status(410).json({
+    message: 'Legacy customization flow không còn hỗ trợ. Vui lòng sử dụng endpoint /api/gestures/customize/upload.',
+  });
+};

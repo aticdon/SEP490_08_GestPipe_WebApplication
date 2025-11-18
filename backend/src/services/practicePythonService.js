@@ -38,7 +38,7 @@ class PracticePythonService {
       // Handle Python output
       pythonProcess.stdout.on('data', (data) => {
         const output = data.toString().trim();
-        console.log(`Python output [${gestureId}]:`, output);
+        // console.log(`Python output [${gestureId}]:`, output);
         
         try {
           // Parse JSON messages from Python
@@ -69,7 +69,7 @@ class PracticePythonService {
       });
 
       pythonProcess.on('close', (code) => {
-        console.log(`Python process [${gestureId}] exited with code ${code}`);
+        // console.log(`Python process [${gestureId}] exited with code ${code}`);
         this.activeSessions.delete(sessionKey);
       });
 
