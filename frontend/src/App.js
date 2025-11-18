@@ -19,6 +19,7 @@ import EditProfile from './pages/EditProfile';
 import ForgotPassword from './pages/ForgotPassword';
 import Gestures from './pages/Gestures';
 import VersionList from './pages/VersionList'; 
+import AdminGestures from './pages/AdminGestures';
 
 // Protected Route Component (Giữ nguyên)
 const ProtectedRoute = ({ children, allowedRoles }) => {
