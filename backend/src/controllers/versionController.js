@@ -6,7 +6,7 @@ const Version = require('../models/Version'); // Adjust path as needed
 exports.getAllVersions = async (req, res) => {
   try {
     const versions = await Version.find({}, {
-      _id: 1, // THÊM DÒNG NÀY ĐỂ LẤY ID
+      _id: 1,
       name: 1,
       release_name: 1,
       release_date: 1,
@@ -16,7 +16,7 @@ exports.getAllVersions = async (req, res) => {
     }).sort({ release_date: -1 });
 
     const versionList = versions.map((v) => ({
-      id: v._id, // THÊM DÒNG NÀY ĐỂ FE NHẬN VỀ TRƯỜNG id 
+      id: v._id, 
       version: v.name,
       release_name: v.release_name,
       release_date: v.release_date,

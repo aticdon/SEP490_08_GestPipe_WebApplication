@@ -63,10 +63,8 @@ exports.verifyForgotPasswordOTP = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 const { sendMail } = require('../utils/mailer');
-// @desc    Send OTP for forgot password
-// @route   POST /api/auth/forgot-password
-// @access  Public
 exports.sendForgotPasswordOTP = async (req, res) => {
   try {
     const { email } = req.body;
