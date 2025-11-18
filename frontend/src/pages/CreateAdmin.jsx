@@ -1,25 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Bell, ChevronDown, Check } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
+import { Check, Plus, Loader2, ArrowLeft } from 'lucide-react'; // <-- THÊM ICON
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import adminService from '../services/adminService';
 import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
-import Sidebar from '../components/Sidebar';
-import Logo from '../assets/images/Logo.png';
-import backgroundImage from '../assets/backgrounds/background.jpg';
+import { motion } from 'framer-motion'; // <-- THÊM
+
+// (Bỏ import Sidebar, Logo, backgroundImage, Sun, Moon, Bell, ChevronDown)
+
+// Hiệu ứng chuyển động
+const pageVariants = {
+  initial: { opacity: 0, x: "20px" },
+  animate: { opacity: 1, x: "0px" },
+  exit: { opacity: 0, x: "-20px" },
+  transition: { type: 'tween', ease: 'anticipate', duration: 0.3 }
+};
 
 const CreateAdmin = () => {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme(); // Chỉ cần theme
   const { t } = useTranslation();
-  const [admin, setAdmin] = useState(() => {
-    const adminData = localStorage.getItem('admin');
-    return adminData ? JSON.parse(adminData) : null;
-  });
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  // (Bỏ state admin, showUserDropdown)
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   
@@ -30,7 +34,7 @@ const CreateAdmin = () => {
     province: ''
   });
 
-  // Danh sách 63 tỉnh/thành Việt Nam
+  // (Danh sách provinces giữ nguyên)
   const provinces = [
     'An Giang', 'Bà Rịa - Vũng Tàu', 'Bạc Liêu', 'Bắc Kạn', 'Bắc Giang', 
     'Bắc Ninh', 'Bến Tre', 'Bình Dương', 'Bình Định', 'Bình Phước', 
@@ -47,17 +51,15 @@ const CreateAdmin = () => {
     'Tuyên Quang', 'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái'
   ];
 
-  const handleLogout = () => {
-    toast.info(t('notifications.logoutMessage'), {
-      position: "top-right",
-      autoClose: 1500,
-    });
-    
-    setTimeout(() => {
-      authService.logout();
-      navigate('/');
-    }, 1000);
-  };
+  // Check login (vẫn cần để check role)
+  useEffect(() => {
+    const currentAdmin = authService.getCurrentUser();
+    if (!currentAdmin || !['superadmin'].includes(currentAdmin.role)) {
+      navigate('/user-list');
+    }
+  }, [navigate]);
+
+  // (Bỏ handleLogout)
 
   const handleChange = (e) => {
     setFormData({
@@ -69,7 +71,6 @@ const CreateAdmin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate
     if (!formData.email || !formData.fullName || !formData.phoneNumber || !formData.province) {
       toast.error(t('notifications.fillRequiredFields'));
       return;
@@ -104,299 +105,195 @@ const CreateAdmin = () => {
     });
   };
 
-  return (
-    <div 
-      className="h-screen flex flex-col transition-colors duration-300 relative"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Background Overlay */}
-      <div className={`absolute inset-0 ${
-        theme === 'dark' ? 'bg-gray-900/85' : 'bg-gray-100/85'
-      }`}></div>
-      
-      {/* Content */}
-      <div className="relative z-10 h-full flex flex-col">
-        <ToastContainer theme={theme === 'dark' ? 'dark' : 'light'} />
+  // Input style đồng bộ
+  const inputStyle = `w-full px-4 py-3 rounded-lg border 
+                      bg-gray-900/70 border-gray-700 text-white 
+                      placeholder:text-gray-500 focus:outline-none focus:border-cyan-400`;
+  
+  const labelStyle = `block text-sm font-medium mb-2 text-gray-300`;
 
-        {/* Header */}
-        <header className={`sticky top-0 z-50 border-b transition-colors backdrop-blur-sm ${
-          theme === 'dark' 
-            ? 'bg-gray-800/50 border-gray-700' 
-            : 'bg-white/50 border-gray-200'
-        }`}>
-          <div className="px-6 py-4 flex items-center relative">
-            {/* Logo in Center */}
-            <div className="absolute left-1/2 transform -translate-x-1/2">
-              <img src={Logo} alt="GestPipe" className="h-24" />
+  return (
+    // (Bỏ div layout cũ)
+    <motion.main 
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-start pt-10"
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+      transition={pageVariants.transition}
+    >
+      {/* Nút Back */}
+      <button
+        type="button"
+        aria-label="Back to admin list"
+        title="Back"
+        className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-lg border 
+                   border-white/20 bg-black/50 backdrop-blur-sm 
+                   text-gray-200 hover:text-white hover:border-cyan-400 
+                   focus:outline-none focus:border-cyan-400 transition"
+        onClick={() => navigate('/admin-list')}
+      >
+        <ArrowLeft size={18} />
+        Back
+      </button>
+
+      <div className="w-full max-w-2xl">
+        {!success ? (
+          /* Create Form */
+          <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8">
+            <h2 className="text-2xl font-bold mb-6 text-white">
+              {t('createAdmin.title')}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email */}
+              <div>
+                <label className={labelStyle}>
+                  {t('createAdmin.email')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="admin@example.com"
+                  className={inputStyle}
+                />
+              </div>
+
+              {/* Full Name */}
+              <div>
+                <label className={labelStyle}>
+                  {t('createAdmin.fullName')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  className={inputStyle}
+                />
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className={labelStyle}>
+                  {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="0123456789"
+                  className={inputStyle}
+                />
+              </div>
+
+              {/* Province */}
+              <div>
+                <label className={labelStyle}>
+                  {t('createAdmin.province')} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="province"
+                  value={formData.province}
+                  onChange={handleChange}
+                  className={`${inputStyle} appearance-none`}
+                >
+                  <option value="">{t('createAdmin.selectProvince')}</option>
+                  {provinces.map((province) => (
+                    <option key={province} value={province}>{province}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin-list')}
+                  className="flex-1 py-3 rounded-lg font-semibold transition-all 
+                             bg-gray-600 text-white hover:bg-gray-500"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg 
+                             hover:from-blue-500 hover:to-cyan-400
+                             transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <Loader2 size={20} className="mx-auto animate-spin" />
+                  ) : (
+                    t('createAdmin.createButton')
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          /* Success Message */
+          <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check size={40} className="text-white" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2 text-white">
+                {t('createAdmin.successTitle')}
+              </h2>
+              <p className="text-cyan-400">
+                {t('createAdmin.accountCreated')}
+              </p>
             </div>
 
-            {/* Right Side Icons */}
-            <div className="flex items-center gap-3 ml-auto">
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-all hover:scale-110 ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-
-              {/* Notification */}
-              <button className={`p-2 rounded-lg transition-all hover:scale-110 relative ${
-                theme === 'dark'
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}>
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
-              {/* User Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
-                    theme === 'dark'
-                      ? 'bg-gray-700 hover:bg-gray-600'
-                      : 'bg-gray-200 hover:bg-gray-300'
-                  }`}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {admin?.fullName?.charAt(0).toUpperCase() || 'A'}
-                  </div>
-                  <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-800'
-                  }`}>
-                    {admin?.fullName || 'Admin'}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`} />
-                </button>
-
-                {showUserDropdown && (
-                  <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-2 border ${
-                    theme === 'dark'
-                      ? 'bg-gray-800 border-gray-700'
-                      : 'bg-white border-gray-200'
-                  }`}>
-                    <button
-                      onClick={() => {
-                        setShowUserDropdown(false);
-                        navigate('/profile');
-                      }}
-                      className={`w-full text-left px-4 py-2 transition-colors ${
-                        theme === 'dark'
-                          ? 'text-gray-300 hover:bg-gray-700'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {t('profile.title')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowUserDropdown(false);
-                        navigate('/change-password');
-                      }}
-                      className={`w-full text-left px-4 py-2 transition-colors ${
-                        theme === 'dark'
-                          ? 'text-gray-300 hover:bg-gray-700'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {t('profile.changePassword')}
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className={`w-full text-left px-4 py-2 transition-colors ${
-                        theme === 'dark'
-                          ? 'text-red-400 hover:bg-gray-700'
-                          : 'text-red-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      {t('common.logout')}
-                    </button>
-                  </div>
-                )}
+            <div className="bg-gray-900/70 rounded-xl p-6 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm text-gray-400">{t('createAdmin.email')}</p>
+                  <p className="font-semibold text-white">{success.admin.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">{t('createAdmin.fullName')}</p>
+                  <p className="font-semibold text-white">{success.admin.fullName}</p>
+                </div>
               </div>
+              
+              <div className="bg-gray-800/50 rounded-lg p-4 mb-2">
+                <p className="text-sm text-gray-400 mb-2">{t('createAdmin.tempPassword')}</p>
+                <code className="block text-lg font-mono font-bold text-cyan-400">
+                  {/* Vẫn ẩn password cho an toàn */}
+                  {'*'.repeat(success?.temporaryPassword?.length || 10)}
+                </code>
+              </div>
+              <p className="text-xs text-gray-500">
+                ⚠️ {t('createAdmin.importantNote')}
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => navigate('/admin-list')}
+                className="flex-1 py-3 rounded-lg font-semibold transition-all 
+                           bg-gray-600 text-white hover:bg-gray-500"
+              >
+                {t('createAdmin.backToList')}
+              </button>
+              <button
+                onClick={handleFinish}
+                className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg 
+                           hover:from-blue-500 hover:to-cyan-400 transition-all"
+              >
+                {t('createAdmin.createAnother')}
+              </button>
             </div>
           </div>
-        </header>
-
-        {/* Main Content */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <Sidebar theme={theme} />
-
-          {/* Content Area */}
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-3xl mx-auto">
-              {!success ? (
-                /* Create Form */
-                <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} backdrop-blur-sm rounded-2xl border ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200/50'} p-8`}>
-                  <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    {t('createAdmin.title')}
-                  </h2>
-
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Email */}
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {t('createAdmin.email')} <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="admin@example.com"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400`}
-                      />
-                    </div>
-
-                    {/* Full Name */}
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {t('createAdmin.fullName')} <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        placeholder="John Doe"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400`}
-                      />
-                    </div>
-
-                    {/* Phone Number */}
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phoneNumber"
-                        value={formData.phoneNumber}
-                        onChange={handleChange}
-                        placeholder="0123456789"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400`}
-                      />
-                    </div>
-
-                    {/* Province */}
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {t('createAdmin.province')} <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="province"
-                        value={formData.province}
-                        onChange={handleChange}
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400`}
-                      >
-                        <option value="">{t('createAdmin.selectProvince')}</option>
-                        {provinces.map((province) => (
-                          <option key={province} value={province}>{province}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="flex gap-4 pt-4">
-                      <button
-                        type="button"
-                        onClick={() => navigate('/admin-list')}
-                        className={`flex-1 py-3 rounded-lg font-semibold transition-all ${
-                          theme === 'dark'
-                            ? 'bg-gray-700 text-white hover:bg-gray-600'
-                            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                        }`}
-                      >
-                        {t('common.cancel')}
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-cyan-400 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {loading ? t('createAdmin.creating') : t('createAdmin.createButton')}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              ) : (
-                /* Success Message */
-                <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} backdrop-blur-sm rounded-2xl border ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200/50'} p-8`}>
-                  <div className="text-center mb-6">
-                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Check size={40} className="text-white" />
-                    </div>
-                    <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {t('createAdmin.successTitle')}
-                    </h2>
-                    <p className="text-cyan-400">
-                      {t('createAdmin.accountCreated')}
-                    </p>
-                  </div>
-
-                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100/50'} rounded-xl p-6 mb-6`}>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t('createAdmin.email')}</p>
-                        <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{success.admin.email}</p>
-                      </div>
-                      <div>
-                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t('createAdmin.fullName')}</p>
-                        <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{success.admin.fullName}</p>
-                      </div>
-                    </div>
-                    
-                    <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} rounded-lg p-4 mb-2`}>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{t('createAdmin.tempPassword')}</p>
-                      <code className={`block text-lg font-mono font-bold ${theme === 'dark' ? 'text-cyan-400' : 'text-cyan-600'}`}>
-                        {success?.temporaryPassword ? '*'.repeat(success.temporaryPassword.length) : '********'}
-                      </code>
-                    </div>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
-                      ⚠️ {t('createAdmin.importantNote')}
-                    </p>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => navigate('/admin-list')}
-                      className={`flex-1 py-3 rounded-lg font-semibold transition-all ${
-                        theme === 'dark'
-                          ? 'bg-gray-700 text-white hover:bg-gray-600'
-                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                      }`}
-                    >
-                      {t('createAdmin.backToList')}
-                    </button>
-                    <button
-                      onClick={handleFinish}
-                      className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-cyan-400 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
-                    >
-                      {t('createAdmin.createAnother')}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </main>
-        </div>
+        )}
       </div>
-    </div>
+    </motion.main>
   );
 };
 

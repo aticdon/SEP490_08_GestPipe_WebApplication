@@ -1,3 +1,8 @@
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const Admin = require('../models/Admin');
+const { formatAdminDocument, formatDateTimeWithOffset } = require('../utils/dateFormatter');
+
 // @desc    Reset password after OTP verified
 // @route   POST /api/auth/reset-password
 // @access  Public
@@ -58,14 +63,12 @@ exports.verifyForgotPasswordOTP = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 const { sendMail } = require('../utils/mailer');
-// @desc    Send OTP for forgot password
-// @route   POST /api/auth/forgot-password
-// @access  Public
 exports.sendForgotPasswordOTP = async (req, res) => {
   try {
     const { email } = req.body;
-    console.log(`🔍 [ForgotPassword] Request OTP for: ${email}`);
+      console.log(`🔍 [ForgotPassword] Request OTP for: ${email}`);
     if (!email) {
       console.log('❌ [ForgotPassword] Missing email');
       return res.status(400).json({ success: false, message: 'Please provide email' });
@@ -121,10 +124,6 @@ exports.sendForgotPasswordOTP = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin');
-const { formatAdminDocument, formatDateTimeWithOffset } = require('../utils/dateFormatter');
 
 // Helper: Hash password using SHA256
 const hashPassword = (password) => {
