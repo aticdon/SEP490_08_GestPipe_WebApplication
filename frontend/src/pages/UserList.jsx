@@ -46,17 +46,6 @@ const formatDate = (date) => {
 };
 
 // === POPUP DETAIl
-const mapStatusDetail = (status) => {
-  switch (status) {
-    case "activeonline": return "Active Online";
-    case "activeoffline": return "Active Offline";
-    case "inactive": return "Inactive";
-    case "blocked": return "Blocked";
-    case "pending": return "Pending";
-    default: return status;
-  }
-};
-
 const InfoRow = ({ label, value }) => (
   <tr>
     <td
@@ -78,6 +67,17 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
   const popupRef = useRef();
   const [togglingLock, setTogglingLock] = useState(false);
   const { t } = useTranslation();
+
+  const mapStatusDetail = (status) => {
+    switch (status) {
+      case "activeonline": return t('userList.activeOnline');
+      case "activeoffline": return t('userList.activeOffline');
+      case "inactive": return t('userList.inactive');
+      case "blocked": return t('userList.blocked');
+      case "pending": return t('userList.pending');
+      default: return status;
+    }
+  };
 
   useEffect(() => {
     if (!show) return;
@@ -160,8 +160,8 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
                   <tr><InfoRow label={t('profile.email')} value={user.email} /></tr>
                   <tr><InfoRow label={t('profile.phone')} value={user.phoneNumber} /></tr>
                   <tr><InfoRow label={t('profile.address')} value={user.address} /></tr>
-                  <tr><InfoRow label="Company" value={user.company} /></tr>
-                  <tr><InfoRow label="Education" value={user.education} /></tr>
+                  <tr><InfoRow label={t('userList.company')} value={user.company} /></tr>
+                  <tr><InfoRow label={t('userList.education')} value={user.education} /></tr>
                   <tr><InfoRow label={t('profile.createdAt')} value={formatDate(user.createdDate)} /></tr>
                   <tr><InfoRow label={t('profile.status')} value={mapStatusDetail(user.status)} /></tr>
                 </tbody>
@@ -176,14 +176,14 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
                            hover:from-red-700 hover:to-red-800"
                 onClick={onClose}
               >
-                Close
+                {t('userList.close')}
               </button>
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full">
             <Loader2 size={48} className="text-cyan-500 animate-spin" />
-            <p className="text-lg font-medium text-cyan-500 mt-4">Loading User Details...</p>
+            <p className="text-lg font-medium text-cyan-500 mt-4">{t('userList.loadingUserDetails')}</p>
           </div>
         )}
       </motion.div>
@@ -242,19 +242,19 @@ const UserList = () => {
       }));
       setUsers(mapped);
     } catch {
-      toast.error("Failed to load users");
+      toast.error(t('userList.failedToLoadUsers'));
     }
   }, []);
 
   // LOCK / UNLOCK (VỚI POPUP KÍNH MỜ)
   const handleToggleLock = async (userId, isLocked) => {
     const swalConfig = {
-      title: isLocked ? "Unlock User?" : "Lock User?",
-      html: isLocked ? "Are you sure you want to unlock this user?" : "Are you sure you want to lock this user?",
+      title: isLocked ? t('userList.unlockUserTitle') : t('userList.lockUserTitle'),
+      html: isLocked ? t('userList.unlockConfirmText') : t('userList.lockConfirmText'),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: isLocked ? "Yes, unlock" : "Yes, lock",
-      cancelButtonText: "Cancel",
+      confirmButtonText: isLocked ? t('userList.yesUnlock') : t('userList.yesLock'),
+      cancelButtonText: t('userList.cancel'),
       confirmButtonColor: isLocked ? '#10b981' : '#ef4444',
       cancelButtonColor: '#6b7280',
       
@@ -278,14 +278,14 @@ const UserList = () => {
     try {
       if (isLocked) {
         await userService.unlockUser(userId);
-        toast.success("User unlocked");
+        toast.success(t('userList.userUnlocked'));
       } else {
         await userService.lockUser(userId);
-        toast.success("User locked");
+        toast.success(t('userList.userLocked'));
       }
       fetchUsers(); // Tải lại danh sách
     } catch {
-      toast.error("Failed to update status");
+      toast.error(t('userList.failedToUpdateStatus'));
     } finally {
       setTogglingId(null);
     }
@@ -299,7 +299,7 @@ const UserList = () => {
       const detail = await userService.fetchUserById(userId); 
       setSelectedUserDetail(detail);
     } catch {
-      toast.error("Cannot load user detail");
+      toast.error(t('userList.cannotLoadUserDetail'));
       setShowDetailPopup(false);
     }
     setLoadingPopup(false);
@@ -358,7 +358,7 @@ const UserList = () => {
                            focus:outline-none focus:border-cyan-400 transition"
               >
                 <span className="capitalize">
-                  {filterType === "all" ? "All Users" : (filterType === 'blocked' ? 'Locked' : filterType)}
+                  {filterType === "all" ? t('userList.allUsers') : (filterType === 'blocked' ? t('userList.locked') : filterType)}
                 </span>
                 <ChevronDown size={18} />
               </button>
@@ -378,7 +378,7 @@ const UserList = () => {
                       className="w-full text-left px-4 py-2 text-gray-200 
                                  hover:bg-white/10 capitalize transition-colors"
                     >
-                      {st === 'blocked' ? 'Locked' : st}
+                      {st === 'blocked' ? t('userList.locked') : st}
                     </button>
                   ))}
                 </div>
@@ -389,7 +389,7 @@ const UserList = () => {
               <input
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Search user..."
+                placeholder={t('userList.searchUser')}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/20 
                            bg-black/50 backdrop-blur-sm text-white 
                            font-montserrat text-sm placeholder:text-gray-500 
@@ -406,11 +406,11 @@ const UserList = () => {
             <table className="w-full table-fixed">
               <thead className="bg-gradient-table-header from-header-start-gray to-header-end-gray text-white">
                 <tr>
-                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[25%]">Email</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[25%]">Phone Number</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[20%]">Create Date</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-center text-sm w-[15%]">Status</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-center text-sm w-[20%]">Action</th>
+                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[25%]">{t('userList.email')}</th>
+                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[25%]">{t('userList.phoneNumber')}</th>
+                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[20%]">{t('userList.createDate')}</th>
+                  <th className="px-5 py-5 font-montserrat font-bold text-center text-sm w-[15%]">{t('userList.status')}</th>
+                  <th className="px-5 py-5 font-montserrat font-bold text-center text-sm w-[20%]">{t('userList.action')}</th>
                 </tr>
               </thead>
             </table>
@@ -436,7 +436,7 @@ const UserList = () => {
                     <td className="px-5 py-4 w-[15%] text-center">
                       <span className={`px-4 py-1.5 rounded-xl text-xs font-semibold capitalize
                         ${getStatusBadge(u.status)}`}>
-                        {u.status === "blocked" ? "Locked" : u.status}
+                        {u.status === "blocked" ? t('userList.locked') : u.status}
                       </span>
                     </td>
                     <td className="px-5 py-4 w-[20%] text-center">
@@ -448,7 +448,7 @@ const UserList = () => {
                           }}
                           className="p-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white 
                                      hover:from-blue-500 hover:to-cyan-400 transition"
-                          title="View Details"
+                          title={t('userList.viewDetails')}
                         >
                           <Eye size={18} />
                         </button>
@@ -464,7 +464,7 @@ const UserList = () => {
                                        ? "bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-500"
                                        : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500" 
                                      }`}
-                          title={u.isLocked ? "Unlock User" : "Lock User"}
+                          title={u.isLocked ? t('userList.unlockUser') : t('userList.lockUser')}
                         >
                           {togglingId === u.id ? <Loader2 size={18} className="animate-spin"/> : (u.isLocked ? <Lock size={18} /> : <Unlock size={18} />)}
                         </button>
@@ -476,7 +476,7 @@ const UserList = () => {
                 {getVisibleUsers().length === 0 && (
                   <tr>
                     <td colSpan={5} className="text-center py-10 text-gray-400">
-                      No users found
+                      {t('userList.noUsersFound')}
                     </td>
                   </tr>
                 )}
