@@ -29,7 +29,22 @@ const Dashboard = () => {
   // const [admin, setAdmin] = useState(null); // Bỏ
   const { theme } = useTheme(); // Bỏ toggleTheme
   // const [showUserDropdown, setShowUserDropdown] = useState(false); // Bỏ
-  const [activeTab, setActiveTab] = useState("User Overview");
+  const [activeTab, setActiveTab] = useState(t('dashboard.userOverview'));
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/');
+      return;
+    }
+
+    const adminData = authService.getCurrentUser();
+    if (!adminData || adminData.role !== 'superadmin') {
+      navigate('/user-list'); // Chỉ superadmin mới vào được dashboard
+      return;
+    }
+    // (Bỏ setAdmin)
+  }, [navigate]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -61,7 +76,7 @@ const Dashboard = () => {
     >
       {/* Tabs Navigation (Style "kính mờ") */}
       <div className="flex gap-3 mb-6 flex-shrink-0">
-        {["User Overview", "Gesture", "Version"].map((tab) => (
+        {[t('dashboard.userOverview'), t('dashboard.gesture'), t('dashboard.version')].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -81,9 +96,9 @@ const Dashboard = () => {
       {/* Tab Content */}
       {/* Thêm key để React re-render khi đổi tab */}
       <div key={activeTab}>
-        {activeTab === "User Overview" && <UserOverviewTab theme={theme} />}
-        {activeTab === "Gesture" && <GestureTab theme={theme} />}
-        {activeTab === "Version" && <VersionTab theme={theme} />}
+        {activeTab === t('dashboard.userOverview') && <UserOverviewTab theme={theme} />}
+        {activeTab === t('dashboard.gesture') && <GestureTab theme={theme} />}
+        {activeTab === t('dashboard.version') && <VersionTab theme={theme} />}
       </div>
       
     </motion.main>
@@ -95,6 +110,7 @@ const Dashboard = () => {
 // TAB 1: User Overview
 // ====================================================================
 const UserOverviewTab = ({ theme }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
 
@@ -107,7 +123,7 @@ const UserOverviewTab = ({ theme }) => {
         }
       } catch (err) {
         console.error("❌ Failed to fetch dashboard data:", err);
-        toast.error("Failed to load user overview data");
+        toast.error(t('dashboard.failedToLoadUserOverview'));
       } finally {
         setLoading(false);
       }
@@ -124,14 +140,14 @@ const UserOverviewTab = ({ theme }) => {
   }
 
   if (!stats) {
-    return <div className="text-center text-red-400">No data available</div>;
+    return <div className="text-center text-red-400">{t('dashboard.noDataAvailable')}</div>;
   }
 
   // === Chuẩn hóa dữ liệu để hiển thị ===
   const genderData = [
-    { name: "Male", value: parseFloat(stats.genderPercent.male || 0) },
-    { name: "Female", value: parseFloat(stats.genderPercent.female || 0) },
-    { name: "Other", value: parseFloat(stats.genderPercent.other || 0) },
+    { name: t('dashboard.male'), value: parseFloat(stats.genderPercent.male || 0) },
+    { name: t('dashboard.female'), value: parseFloat(stats.genderPercent.female || 0) },
+    { name: t('dashboard.other'), value: parseFloat(stats.genderPercent.other || 0) },
   ];
   const GENDER_COLORS = ["#00BFFF", "#FFFFFF", "#002E66"]; // Xanh, Trắng, Xanh đậm
 
@@ -155,31 +171,31 @@ const UserOverviewTab = ({ theme }) => {
       {/* === Tổng Users, Online Users === */}
       <div className="grid grid-rows-2 gap-6 lg:col-span-2">
         <div className="grid grid-cols-2 gap-6">
-          <ChartCard title="Total Users">
+          <ChartCard title={t('dashboard.totalUsers')}>
             <p className="text-4xl font-bold text-cyan-400">{stats.totalUsers}</p>
             <p className="text-sm text-green-500">
-              +{stats.growthRate}% Compared to last month
+              +{stats.growthRate}% {t('dashboard.comparedToLastMonth')}
             </p>
           </ChartCard>
-          <ChartCard title="Online Users">
+          <ChartCard title={t('dashboard.onlineUsers')}>
             <p className="text-4xl font-bold text-cyan-400">{stats.onlineUsers}</p>
           </ChartCard>
         </div>
 
         {/* Accuracy và Requests */}
         <div className="grid grid-cols-2 gap-6">
-          <ChartCard title="Accuracy Rate">
+          <ChartCard title={t('dashboard.accuracyRate')}>
             <p className="text-4xl font-bold text-cyan-400">96.1%</p>
           </ChartCard>
-          <ChartCard title="Total Requests">
+          <ChartCard title={t('dashboard.totalRequests')}>
             <p className="text-4xl font-bold text-cyan-400">115</p>
-            <p className="text-sm text-green-500">+56 Today</p>
+            <p className="text-sm text-green-500">+56 {t('dashboard.today')}</p>
           </ChartCard>
         </div>
       </div>
 
       {/* === Gender === */}
-      <ChartCard title="Gender" className="row-span-2">
+      <ChartCard title={t('dashboard.gender')} className="row-span-2">
         <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
@@ -218,7 +234,7 @@ const UserOverviewTab = ({ theme }) => {
 
       {/* === Occupation, Age, City === */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:col-span-3">
-        <ChartCard title="Occupation">
+        <ChartCard title={t('dashboard.occupation')}>
           <ul className="flex flex-col justify-center space-y-5">
             {occupationData.map(item => (
               <li key={item.name} className="flex justify-between text-base">
@@ -229,7 +245,7 @@ const UserOverviewTab = ({ theme }) => {
           </ul>
         </ChartCard>
 
-        <ChartCard title="Age">
+        <ChartCard title={t('dashboard.age')}>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart layout="vertical" data={ageData}>
               <XAxis type="number" hide />
@@ -247,7 +263,7 @@ const UserOverviewTab = ({ theme }) => {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Top Cities">
+        <ChartCard title={t('dashboard.topCities')}>
           <ul className="flex flex-col justify-center space-y-5">
             {cityData.map(item => (
               <li key={item.name} className="flex justify-between text-base">
@@ -265,9 +281,10 @@ const UserOverviewTab = ({ theme }) => {
 
 /* ================= GestureTab ================= */
 const GestureTab = ({ theme }) => {
+  const { t } = useTranslation();
   const allocationData = [
-    { name: "Default Gestures", value: 78 },
-    { name: "Custom User Gestures", value: 22 },
+    { name: t('dashboard.defaultGestures'), value: 78 },
+    { name: t('dashboard.customUserGestures'), value: 22 },
   ];
   const ALLOCATION_COLORS = ["#00BFFF", "#002E66"];
 
@@ -279,14 +296,14 @@ const GestureTab = ({ theme }) => {
     { name: "Previous", value: 40 },
   ];
 
-  const aiData = [{ name: 'Success', value: 92 }, { name: 'Fail', value: 8 }];
+  const aiData = [{ name: t('dashboard.success'), value: 92 }, { name: t('dashboard.fail'), value: 8 }];
   const AI_COLORS = ["#00BFFF", "#002E66"];
 
   return (
     <div className="flex flex-col gap-6">
       {/* === Hàng 1: Allocation & Top 5 Gestures === */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ChartCard title="Allocation Using Gestures">
+        <ChartCard title={t('dashboard.allocationUsingGestures')}>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie 
@@ -319,7 +336,7 @@ const GestureTab = ({ theme }) => {
           </div>
         </ChartCard>
 
-        <ChartCard title="Top 5 Gestures Change">
+        <ChartCard title={t('dashboard.top5GesturesChange')}>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart 
               layout="vertical" 
@@ -351,11 +368,11 @@ const GestureTab = ({ theme }) => {
       {/* === Hàng 2: Training & AI === */}
       <div className="flex justify-center">
         <div className="w-full md:w-1/2">
-          <ChartCard title="Training & AI">
+          <ChartCard title={t('dashboard.trainingAndAi')}>
             <div className="flex justify-between items-center">
               <div className="space-y-2 text-lg text-gray-200">
-                <p>Today: 15</p>
-                <p>This month: 150</p>
+                <p>{t('dashboard.today')}: 15</p>
+                <p>{t('dashboard.thisMonth')}: 150</p>
               </div>
               <div className="w-1/2 h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -375,7 +392,7 @@ const GestureTab = ({ theme }) => {
                 </ResponsiveContainer>
               </div>
             </div>
-            <p className="text-center text-cyan-400 font-semibold mt-2 text-lg">Success Rate: 92%</p>
+            <p className="text-center text-cyan-400 font-semibold mt-2 text-lg">{t('dashboard.successRate')}: 92%</p>
           </ChartCard>
         </div>
       </div>
@@ -385,6 +402,7 @@ const GestureTab = ({ theme }) => {
 
 /* ================= VersionTab ================= */
 const VersionTab = ({ theme }) => {
+  const { t } = useTranslation();
   const [versionData, setVersionData] = useState([]);
   const [recentUpdateData, setRecentUpdateData] = useState({
     latest_release: "",
@@ -403,7 +421,7 @@ const VersionTab = ({ theme }) => {
         }
       } catch (err) {
         console.error("Failed to fetch version data:", err);
-        toast.error("Failed to load version data");
+        toast.error(t('dashboard.failedToLoadVersion'));
       } finally {
         setLoading(false);
       }
@@ -422,23 +440,23 @@ const VersionTab = ({ theme }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
       {/* Version Adoption */}
-      <ChartCard title="Version Adoption">
+      <ChartCard title={t('dashboard.versionAdoption')}>
         <div className="flex flex-col divide-y divide-white/10">
           {versionData.length > 0 ? versionData.map((v,i)=>(
             <div key={i} className="flex justify-between py-2 text-sm font-medium">
               <span className="text-white">{v.version_name}</span>
               <span className="text-cyan-400">{v.user_count.toLocaleString()}</span>
             </div>
-          )) : <p className="text-gray-400">No version data</p>}
+          )) : <p className="text-gray-400">{t('dashboard.noVersionData')}</p>}
         </div>
       </ChartCard>
 
       {/* Recent Updates */}
-      <ChartCard title="Recent Updates">
+      <ChartCard title={t('dashboard.recentUpdates')}>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <span className="text-gray-300">Latest Release:</span>
+          <span className="text-gray-300">{t('dashboard.latestRelease')}:</span>
           <span className="text-cyan-400">{recentUpdateData.latest_release}</span>
-          <span className="text-gray-300">Release Date:</span>
+          <span className="text-gray-300">{t('dashboard.releaseDate')}:</span>
           <span className="text-cyan-400">
             {
               recentUpdateData.release_date ?
@@ -448,13 +466,13 @@ const VersionTab = ({ theme }) => {
               : ""
             }
           </span>
-          <span className="text-gray-300 col-span-2">New Features:</span>
+          <span className="text-gray-300 col-span-2">{t('dashboard.newFeatures')}:</span>
           <ul className="list-disc ml-5 text-cyan-400 space-y-1 col-span-2">
             {Array.isArray(recentUpdateData.new_features) && recentUpdateData.new_features.length > 0
               ? recentUpdateData.new_features.map((f,i)=>(
                   <li key={i}>+ {f}</li>
                 ))
-              : <li>No new features</li>}
+              : <li>{t('dashboard.noNewFeatures')}</li>}
           </ul>
         </div>
       </ChartCard>
