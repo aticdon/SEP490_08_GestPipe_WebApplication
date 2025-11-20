@@ -95,6 +95,17 @@ const EditProfile = () => {
       return;
     }
 
+    if (!formData.phoneNumber.trim()) {
+      toast.error('Phone number is required');
+      return;
+    }
+
+    // Check phone number format: exactly 10 digits
+    if (!/^\d{10}$/.test(formData.phoneNumber.trim())) {
+      toast.error('Phone number must be exactly 10 digits');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -259,8 +270,16 @@ const EditProfile = () => {
               </select>
             </div>
 
-            {/* Save Button */}
-            <div className="flex justify-end mt-8">
+            {/* Buttons */}
+            <div className="flex justify-end gap-4 mt-8">
+              <button
+                type="button"
+                onClick={() => navigate('/profile')}
+                className="px-8 py-3 rounded-lg font-medium transition-all
+                           bg-gray-600 text-white hover:bg-gray-500"
+              >
+                {t('common.cancel')}
+              </button>
               <button
                 type="submit"
                 disabled={loading}
