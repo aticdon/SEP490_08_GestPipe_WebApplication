@@ -1,12 +1,21 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 const connectDB = require('./src/config/db');
 
 // Connect to Database
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -44,6 +53,73 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Test route works!' });
 });
 
-const PORT = process.env.PORT || 5000;
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  // Handle gesture practice session start
+  socket.on('start-practice', (data) => {
+    console.log('Starting practice session:', data);
+    // Start Python process for gesture recognition
+    const { spawn } = require('child_process');
+    const pythonProcess = spawn('python', [
+      'd:/DO_AN/python_mediapipe/hybrid_realtime_pipeline/web_gesture_processor.py',
+      data.gestureName
+    ], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+    socket.pythonProcess = pythonProcess;
+
+    // Handle Python process output
+    pythonProcess.stdout.on('data', (data) => {
+      try {
+        const message = JSON.parse(data.toString().trim());
+        socket.emit('gesture-result', message);
+      } catch (e) {
+        console.log('Python output:', data.toString());
+      }
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      console.error('Python error:', data.toString());
+    });
+
+    pythonProcess.on('close', (code) => {
+      console.log(`Python process exited with code ${code}`);
+      socket.emit('practice-ended');
+    });
+
+    socket.emit('practice-started', { message: 'Practice session started' });
+  });
+
+  // Handle frame data from client
+  socket.on('frame', (data) => {
+    if (socket.pythonProcess && !socket.pythonProcess.killed) {
+      // Send frame data to Python process
+      const frameCommand = JSON.stringify({
+        type: 'frame',
+        data: data.frameData
+      });
+      socket.pythonProcess.stdin.write(frameCommand + '\n');
+    }
+  });
+
+  // Handle practice stop
+  socket.on('stop-practice', () => {
+    if (socket.pythonProcess) {
+      socket.pythonProcess.kill();
+      socket.pythonProcess = null;
+    }
+    socket.emit('practice-stopped');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+    if (socket.pythonProcess) {
+      socket.pythonProcess.kill();
+    }
+  });
+});
+
+const PORT = process.env.PORT || 5001;
+
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

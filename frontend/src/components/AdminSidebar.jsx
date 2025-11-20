@@ -20,6 +20,12 @@ const AdminSidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLay
       icon: Gamepad2, // Giữ icon này
       path: '/gestures', 
     },
+    // {
+    //   id: 'gesture-practice-ml',
+    //   label: t('sidebar.mlGesturePractice', { defaultValue: 'ML Gesture Practice' }),
+    //   icon: Gamepad2, // Sử dụng cùng icon
+    //   path: '/gesture-practice-ml',
+    // },
     {
       id: 'user',
       label: t('sidebar.userManagement', { defaultValue: 'User Management' }), // Đồng bộ key

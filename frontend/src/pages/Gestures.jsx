@@ -147,6 +147,9 @@ const Gestures = () => {
   const [modelInfo, setModelInfo] = useState(null);
   const [showMLPractice, setShowMLPractice] = useState(false);
   const [selectedPracticeGesture, setSelectedPracticeGesture] = useState(null);
+  const [admin, setAdmin] = useState(null);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  const [requests, setRequests] = useState([]);
   
   const labelDropdownRef = useRef();
   const typeDropdownRef = useRef();
@@ -160,12 +163,15 @@ const Gestures = () => {
       navigate('/');
       return;
     }
+    setAdmin(currentAdmin);
   }, [navigate]);
 
   // Load gesture statuses when admin changes
-  useEffect(() => {
-    loadGestureStatuses();
-  }, [loadGestureStatuses]);
+  const loadGestureStatuses = useCallback(async () => {
+    if (!admin) return;
+    // TODO: Implement gesture status loading if needed
+    console.log('Loading gesture statuses for admin:', admin.username);
+  }, [admin]);
 
   // Load pending requests for superadmin
   useEffect(() => {
@@ -174,8 +180,10 @@ const Gestures = () => {
 
       try {
         setRequestsLoading(true);
-        const response = await fetchCustomizationRequests('pending');
-        setRequests(response || []);
+        // TODO: Implement fetchCustomizationRequests if needed
+        // const response = await fetchCustomizationRequests('pending');
+        // setRequests(response || []);
+        setRequests([]);
       } catch (error) {
         console.warn('Failed to load pending requests:', error);
         setRequests([]);
@@ -186,6 +194,11 @@ const Gestures = () => {
 
     loadPendingRequests();
   }, [admin]);
+
+  // Load gesture statuses when admin changes
+  useEffect(() => {
+    loadGestureStatuses();
+  }, [loadGestureStatuses]);
 
   useEffect(() => {
     const loadMetadata = async () => {
