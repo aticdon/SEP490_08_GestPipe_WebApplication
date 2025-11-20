@@ -211,12 +211,21 @@ const ChangePassword = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-center pt-4">
+        {/* Buttons */}
+        <div className="flex justify-center gap-4 pt-4">
+          {!isFirstLogin && (
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="px-8 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition-all"
+            >
+              {t('common.cancel')}
+            </button>
+          )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-12 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg 
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg 
                        hover:from-blue-500 hover:to-cyan-400
                        transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
