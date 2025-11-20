@@ -1,134 +1,144 @@
 // Gesture database utility based on your CSV data
 export const GESTURE_DATABASE = {
-  'rotate_down': {
+  'end': {
     id: 1,
     left_finger: [0,0,0,0,0],
-    right_finger: [1,1,0,0,0],
-    motion_start: [0.624055, 0.451542],
-    motion_mid: [0.615109, 0.521483],
-    motion_end: [0.605445, 0.623617],
-    main_axis: [0,1],
-    delta: [-0.002614, 0.185558],
-    type: 'dynamic',
-    description: '🔄⬇️ Rotate hand downward - thumb and index extended, move down',
-    instruction: 'Extend thumb and index finger, then move hand downward'
+    right_finger: [0,0,0,0,1],
+    main_axis: [1,0],
+    delta: [-0.0001223981380462, 0.0],
+    type: 'static',
+    description: '✋ End - Pinky finger extended',
+    instruction: 'Extend only your pinky finger'
   },
-  'rotate_left': {
+  'end_present': {
     id: 2,
     left_finger: [0,0,0,0,0],
-    right_finger: [1,1,0,0,0],
-    motion_start: [0.700592, 0.521203],
-    motion_mid: [0.609221, 0.515263],
-    motion_end: [0.530381, 0.504322],
+    right_finger: [1,1,1,1,1],
     main_axis: [1,0],
-    delta: [-0.130413, -0.005325],
-    type: 'dynamic',
-    description: '🔄⬅️ Rotate hand leftward - thumb and index extended, move left',
-    instruction: 'Extend thumb and index finger, then move hand to the left'
-  },
-  'zoom_in': {
-    id: 3,
-    left_finger: [0,0,0,0,0],
-    right_finger: [1,1,1,0,0],
-    motion_start: [0.579149, 0.588623],
-    motion_mid: [0.594609, 0.479239],
-    motion_end: [0.593111, 0.427196],
-    main_axis: [0,1],
-    delta: [0.0, -0.168766],
-    type: 'dynamic',
-    description: '🤏 Zoom in - pinch with thumb, index, and middle finger',
-    instruction: 'Bring thumb, index, and middle finger together in pinching motion'
-  },
-  'rotate_right': {
-    id: 4,
-    left_finger: [0,0,0,0,0],
-    right_finger: [1,1,0,0,0],
-    motion_start: [0.519356, 0.513941],
-    motion_mid: [0.59543, 0.5103],
-    motion_end: [0.650029, 0.523184],
-    main_axis: [1,0],
-    delta: [0.117388, 0.04424],
-    type: 'dynamic',
-    description: '🔄➡️ Rotate hand rightward - thumb and index extended, move right',
-    instruction: 'Extend thumb and index finger, then move hand to the right'
-  },
-  'zoom_out': {
-    id: 5,
-    left_finger: [0,0,0,0,0],
-    right_finger: [1,1,1,0,0],
-    motion_start: [0.586247, 0.461246],
-    motion_mid: [0.583464, 0.54286],
-    motion_end: [0.574318, 0.653507],
-    main_axis: [0,1],
-    delta: [-0.062817, 0.191093],
-    type: 'dynamic',
-    description: '🖐️ Zoom out - spread thumb, index, and middle finger wide',
-    instruction: 'Spread thumb, index, and middle finger wide apart'
+    delta: [-0.1149142533540725, 0.0],
+    type: 'static',
+    description: '🎭 End Present - All fingers extended',
+    instruction: 'Extend all five fingers'
   },
   'home': {
-    id: 6,
+    id: 3,
     left_finger: [0,0,0,0,0],
     right_finger: [1,0,0,0,0],
-    motion_start: [0.589237, 0.487445],
-    motion_mid: [0.588898, 0.486901],
-    motion_end: [0.588259, 0.487556],
     main_axis: [1,0],
-    delta: [-0.002603, 0.002198],
+    delta: [4.1037797927856445e-05, 0.0],
     type: 'static',
-    description: '🏠 Home gesture - thumbs up with minimal motion',
-    instruction: 'Show thumbs up and hold steady'
+    description: '🏠 Home - Thumb extended',
+    instruction: 'Extend only your thumb'
   },
-  'rotate_up': {
+  'next_slide': {
+    id: 4,
+    left_finger: [0,0,0,0,0],
+    right_finger: [0,1,0,0,0],
+    main_axis: [1,0],
+    delta: [0.1894827485084533, 0.0],
+    type: 'dynamic',
+    description: '➡️ Next Slide - Index finger extended, move right',
+    instruction: 'Extend index finger and move hand to the right'
+  },
+  'previous_slide': {
+    id: 5,
+    left_finger: [0,0,0,0,0],
+    right_finger: [0,1,1,0,0],
+    main_axis: [1,0],
+    delta: [-0.2638420760631561, 0.0],
+    type: 'dynamic',
+    description: '⬅️ Previous Slide - Index and middle extended, move left',
+    instruction: 'Extend index and middle fingers, move hand to the left'
+  },
+  'rotate_down': {
+    id: 6,
+    left_finger: [0,0,0,0,0],
+    right_finger: [1,1,0,0,0],
+    main_axis: [0,1],
+    delta: [0.0, 0.2617712020874023],
+    type: 'dynamic',
+    description: '🔄⬇️ Rotate Down - Thumb and index extended, move down',
+    instruction: 'Extend thumb and index finger, move hand downward'
+  },
+  'rotate_left': {
     id: 7,
     left_finger: [0,0,0,0,0],
     right_finger: [1,1,0,0,0],
-    motion_start: [0.609287, 0.579126],
-    motion_mid: [0.61273, 0.484454],
-    motion_end: [0.611311, 0.393994],
-    main_axis: [0,1],
-    delta: [-0.093339, -0.186964],
+    main_axis: [1,0],
+    delta: [-0.2039719820022583, 0.0],
     type: 'dynamic',
-    description: '🔄⬆️ Rotate hand upward - thumb and index extended, move up',
-    instruction: 'Extend thumb and index finger, then move hand upward'
+    description: '🔄⬅️ Rotate Left - Thumb and index extended, move left',
+    instruction: 'Extend thumb and index finger, move hand to the left'
   },
-  'previous_slide': {
+  'rotate_right': {
+    id: 8,
+    left_finger: [0,0,0,0,0],
+    right_finger: [1,1,0,0,0],
+    main_axis: [1,0],
+    delta: [0.1992542743682861, 0.0],
+    type: 'dynamic',
+    description: '🔄➡️ Rotate Right - Thumb and index extended, move right',
+    instruction: 'Extend thumb and index finger, move hand to the right'
+  },
+  'rotate_up': {
     id: 9,
     left_finger: [0,0,0,0,0],
-    right_finger: [0,1,1,0,0],
-    motion_start: [0.673277, 0.505762],
-    motion_mid: [0.559976, 0.498925],
-    motion_end: [0.499317, 0.508579],
-    main_axis: [1,0],
-    delta: [-0.15216, -0.016298],
+    right_finger: [1,1,0,0,0],
+    main_axis: [0,1],
+    delta: [0.0, -0.2254938036203384],
     type: 'dynamic',
-    description: '👈 Previous slide - point left with index and middle finger',
-    instruction: 'Extend index and middle finger, point and move to the left'
+    description: '🔄⬆️ Rotate Up - Thumb and index extended, move up',
+    instruction: 'Extend thumb and index finger, move hand upward'
   },
-  'next_slide': {
+  'start_present': {
     id: 10,
     left_finger: [0,0,0,0,0],
-    right_finger: [0,1,1,0,0],
-    motion_start: [0.551511, 0.489961],
-    motion_mid: [0.628375, 0.486376],
-    motion_end: [0.695994, 0.489401],
+    right_finger: [1,1,1,1,1],
     main_axis: [1,0],
-    delta: [0.116381, 0.00673],
-    type: 'dynamic',
-    description: '👉 Next slide - point right with index and middle finger',
-    instruction: 'Extend index and middle finger, point and move to the right'
+    delta: [0.1158757507801055, 0.0],
+    type: 'static',
+    description: '🎬 Start Present - All fingers extended',
+    instruction: 'Extend all five fingers to start presentation'
   },
-  'end': {
+  'zoom_in': {
+    id: 11,
+    left_finger: [0,0,0,0,0],
+    right_finger: [1,1,1,0,0],
+    main_axis: [0,1],
+    delta: [0.0, -0.3583151251077652],
+    type: 'dynamic',
+    description: '🔍➕ Zoom In - Thumb, index, middle extended, move up',
+    instruction: 'Extend thumb, index, and middle fingers, move hand up to zoom in'
+  },
+  'zoom_in_slide': {
+    id: 12,
+    left_finger: [0,0,0,0,0],
+    right_finger: [0,1,1,0,0],
+    main_axis: [0,1],
+    delta: [0.0, -0.1667674928903579],
+    type: 'dynamic',
+    description: '📊➕ Zoom In Slide - Index and middle extended, move up',
+    instruction: 'Extend index and middle fingers, move hand up to zoom in slide'
+  },
+  'zoom_out': {
+    id: 13,
+    left_finger: [0,0,0,0,0],
+    right_finger: [1,1,1,0,0],
+    main_axis: [0,1],
+    delta: [0.0, 0.0709550380706787],
+    type: 'dynamic',
+    description: '🔍➖ Zoom Out - Thumb, index, middle extended, move down',
+    instruction: 'Extend thumb, index, and middle fingers, move hand down to zoom out'
+  },
+  'zoom_out_slide': {
     id: 14,
     left_finger: [0,0,0,0,0],
-    right_finger: [0,0,0,0,1],
-    motion_start: [0.616981, 0.431811],
-    motion_mid: [0.615352, 0.429471],
-    motion_end: [0.614736, 0.430074],
-    main_axis: [1,0],
-    delta: [-0.002566, -0.002014],
-    type: 'static',
-    description: '✊ End gesture - closed fist with pinky slightly extended',
-    instruction: 'Make a fist with only pinky slightly extended and hold steady'
+    right_finger: [0,1,1,0,0],
+    main_axis: [0,1],
+    delta: [0.0, 0.1899888962507248],
+    type: 'dynamic',
+    description: '📊➖ Zoom Out Slide - Index and middle extended, move down',
+    instruction: 'Extend index and middle fingers, move hand down to zoom out slide'
   }
 };
 

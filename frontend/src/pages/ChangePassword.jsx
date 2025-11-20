@@ -1,22 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Bell, ChevronDown, Eye, EyeOff } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
+import { Eye, EyeOff, Loader2 } from 'lucide-react'; // Bỏ các icon Header
+import { toast, ToastContainer } from 'react-toastify'; // Chỉ cần ToastContainer
 import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
-import Sidebar from '../components/Sidebar';
-import AdminSidebar from '../components/AdminSidebar';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
+import { motion } from 'framer-motion'; // Thêm motion
+
+// === IMPORT LAYOUT MỚI ===
+import AdminLayout from '../components/AdminLayout'; 
+
+// Hiệu ứng
+const pageVariants = {
+  initial: { opacity: 0, scale: 0.95 },
+  animate: { opacity: 1, scale: 1.0 },
+  transition: { type: 'tween', ease: 'anticipate', duration: 0.3 }
+};
 
 const ChangePassword = () => {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme(); // Bỏ toggleTheme
   const { t } = useTranslation();
+  
+  // (Bỏ state showUserDropdown)
   const [admin, setAdmin] = useState(null);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPasswords, setShowPasswords] = useState({
     old: false,
@@ -30,6 +40,7 @@ const ChangePassword = () => {
     confirmPassword: ''
   });
 
+  // Check login
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -37,23 +48,15 @@ const ChangePassword = () => {
       return;
     }
 
-    const adminData = localStorage.getItem('admin');
+    const adminData = authService.getCurrentUser();
     if (adminData) {
-      setAdmin(JSON.parse(adminData));
+      setAdmin(adminData);
+    } else {
+      navigate('/'); // Failsafe
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    toast.info(t('notifications.logoutMessage'), {
-      position: "top-right",
-      autoClose: 1500,
-    });
-    
-    setTimeout(() => {
-      authService.logout();
-      navigate('/');
-    }, 1000);
-  };
+  // (Bỏ handleLogout, AdminLayout sẽ tự lo)
 
   const handleChange = (e) => {
     setFormData({
@@ -72,17 +75,14 @@ const ChangePassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (!formData.oldPassword || !formData.newPassword || !formData.confirmPassword) {
       toast.error(t('notifications.fillAllFields'));
       return;
     }
-
     if (formData.newPassword.length < 6) {
       toast.error(t('notifications.passwordMinLength'));
       return;
     }
-
     if (formData.newPassword !== formData.confirmPassword) {
       toast.error(t('notifications.passwordsNotMatch'));
       return;
@@ -92,6 +92,11 @@ const ChangePassword = () => {
 
     try {
       await authService.changePassword(formData.oldPassword, formData.newPassword);
+      
+      // Cập nhật lại localStorage nếu đây là lần đầu login
+      if (admin.isFirstLogin) {
+        localStorage.setItem('admin', JSON.stringify({ ...admin, isFirstLogin: false }));
+      }
       
       toast.success(t('notifications.passwordChanged'));
       
@@ -110,366 +115,195 @@ const ChangePassword = () => {
   };
 
   if (!admin) {
-    return null;
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
   }
 
-  // Check if this is first login (mandatory password change)
+  // Check nếu là lần đầu login
   const isFirstLogin = admin.isFirstLogin === true;
 
-  return (
-    <div 
-      className="h-screen flex flex-col transition-colors duration-300 relative"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      {/* Background Overlay */}
-      <div className={`absolute inset-0 ${
-        theme === 'dark' ? 'bg-gray-900/85' : 'bg-gray-100/85'
-      }`}></div>
+  // Style input đồng bộ
+  const inputStyle = `w-full px-4 py-3 rounded-lg border 
+                      bg-gray-900/70 border-gray-700 text-white 
+                      placeholder:text-gray-500 focus:outline-none focus:border-cyan-400 pr-12`;
+  const labelStyle = `block text-sm font-medium mb-2 text-gray-300`;
+
+  // TÁCH FORM RA THÀNH COMPONENT RIÊNG
+  const ChangePasswordForm = () => (
+    <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8 sm:p-10 w-full max-w-lg">
+      <h2 className="text-3xl font-bold text-center mb-8 text-white">
+        {t('changePassword.title')}
+      </h2>
       
-      {/* Content */}
-      <div className="relative z-10 h-full flex flex-col">
-        <ToastContainer theme={theme === 'dark' ? 'dark' : 'light'} />
-
-        {/* Header - Only show if NOT first login */}
-        {!isFirstLogin && (
-        <header className={`sticky top-0 z-50 border-b transition-colors backdrop-blur-sm ${
-          theme === 'dark' 
-            ? 'bg-gray-800/50 border-gray-700' 
-            : 'bg-white/50 border-gray-200'
-        }`}>
-        <div className="px-6 py-4 flex items-center relative">
-          {/* Logo in Center */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <img src={Logo} alt="GestPipe" className="h-24" />
-          </div>
-
-          {/* Right Side Icons */}
-          <div className="flex items-center gap-3 ml-auto">
-            {/* Theme Toggle */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Old Password */}
+        <div>
+          <label className={labelStyle}>
+            {t('changePassword.oldPassword')}
+          </label>
+          <div className="relative">
+            <input
+              type={showPasswords.old ? "text" : "password"}
+              name="oldPassword"
+              value={formData.oldPassword}
+              onChange={handleChange}
+              placeholder="••••••••••"
+              className={inputStyle}
+            />
             <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-lg transition-all hover:scale-110 ${
-                theme === 'dark'
-                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              type="button"
+              onClick={() => togglePasswordVisibility('old')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition-colors"
             >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
+              {showPasswords.old ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
-
-            {/* Notification */}
-            <button className={`p-2 rounded-lg transition-all hover:scale-110 relative ${
-              theme === 'dark'
-                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}>
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-
-            {/* User Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 hover:bg-gray-600'
-                    : 'bg-gray-200 hover:bg-gray-300'
-                }`}
-              >
-                <div className="w-8 h-8 rounded-full bg-cyan-primary flex items-center justify-center text-white font-semibold">
-                  {admin?.fullName?.charAt(0).toUpperCase() || 'A'}
-                </div>
-                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                  {admin?.fullName || 'Admin'}
-                </span>
-                <ChevronDown size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
-              </button>
-
-              {showUserDropdown && (
-                <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-xl border z-50 ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 border-gray-700'
-                    : 'bg-white border-gray-200'
-                }`}>
-                  <button
-                    onClick={() => {
-                      setShowUserDropdown(false);
-                      navigate('/profile');
-                    }}
-                    className={`w-full text-left px-4 py-2 transition-colors ${
-                      theme === 'dark'
-                        ? 'text-cyan-primary hover:bg-gray-700'
-                        : 'text-cyan-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {t('profile.title')}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowUserDropdown(false);
-                      navigate('/change-password');
-                    }}
-                    className={`w-full text-left px-4 py-2 transition-colors ${
-                      theme === 'dark'
-                        ? 'text-white hover:bg-gray-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {t('profile.changePassword')}
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className={`w-full text-left px-4 py-2 transition-colors ${
-                      theme === 'dark'
-                        ? 'text-red-400 hover:bg-gray-700'
-                        : 'text-red-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {t('common.logout')}
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
-        </header>
-        )}
 
-        {/* Main Content - Different layout for first login vs normal */}
-        {isFirstLogin ? (
-          /* First Login - Centered Form Only */
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="max-w-2xl w-full">
-              {/* Logo */}
-              <div className="flex justify-center mb-8">
-                <img src={Logo} alt="GestPipe" className="h-32" />
-              </div>
-
-              {/* Warning Message */}
-              <div className={`mb-6 p-4 rounded-lg border ${
-                theme === 'dark'
-                  ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'
-                  : 'bg-yellow-50 border-yellow-300 text-yellow-800'
-              }`}>
-                <p className="text-center font-medium">
-                  ⚠️ {t('changePassword.firstLoginWarning') || 'This is your first login. You must change your password to continue.'}
-                </p>
-              </div>
-
-              {/* Change Password Form */}
-              <div className={`${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'} backdrop-blur-sm rounded-2xl border ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200/50'} p-8 shadow-2xl`}>
-                <h2 className="text-2xl font-bold mb-6 text-center text-cyan-primary">
-                  {t('changePassword.title')}
-                </h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Old Password */}
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('changePassword.oldPassword')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPasswords.old ? "text" : "password"}
-                        name="oldPassword"
-                        value={formData.oldPassword}
-                        onChange={handleChange}
-                        placeholder="••••••••••"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('old')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                      >
-                        {showPasswords.old ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* New Password */}
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('changePassword.newPassword')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPasswords.new ? "text" : "password"}
-                        name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleChange}
-                        placeholder="••••••"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('new')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                      >
-                        {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Confirm Password */}
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('changePassword.confirmPassword')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPasswords.confirm ? "text" : "password"}
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        placeholder="••••••••••"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('confirm')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                      >
-                        {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="flex justify-center pt-4">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full px-12 py-3 bg-gradient-to-r from-cyan-500 to-cyan-400 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? 'Changing Password...' : t('changePassword.submit')}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
+        {/* New Password */}
+        <div>
+          <label className={labelStyle}>
+            {t('changePassword.newPassword')}
+          </label>
+          <div className="relative">
+            <input
+              type={showPasswords.new ? "text" : "password"}
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleChange}
+              placeholder="••••••"
+              className={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => togglePasswordVisibility('new')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition-colors"
+            >
+              {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
-        ) : (
-          /* Normal Change Password - With Sidebar */
-        <div className="flex-1 flex overflow-hidden">
-          {/* Sidebar */}
-          {admin.role === 'admin' ? (
-            <AdminSidebar theme={theme} />
-          ) : (
-            <Sidebar theme={theme} />
+        </div>
+
+        {/* Confirm Password */}
+        <div>
+          <label className={labelStyle}>
+            {t('changePassword.confirmPassword')}
+          </label>
+          <div className="relative">
+            <input
+              type={showPasswords.confirm ? "text" : "password"}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="••••••••••"
+              className={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => togglePasswordVisibility('confirm')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition-colors"
+            >
+              {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-center gap-4 pt-4">
+          {!isFirstLogin && (
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="px-8 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition-all"
+            >
+              {t('common.cancel')}
+            </button>
           )}
-
-          {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-4xl mx-auto">
-              {/* Change Password Form */}
-              <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/50'} backdrop-blur-sm rounded-2xl border ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200/50'} p-12`}>
-                <h2 className="text-3xl font-bold text-center mb-8 text-cyan-primary">
-                  {t('changePassword.title')}
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  {/* Old Password */}
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('changePassword.oldPassword')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPasswords.old ? "text" : "password"}
-                        name="oldPassword"
-                        value={formData.oldPassword}
-                        onChange={handleChange}
-                        placeholder="••••••••••"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('old')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                      >
-                        {showPasswords.old ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* New Password */}
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('changePassword.newPassword')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPasswords.new ? "text" : "password"}
-                        name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleChange}
-                        placeholder="••••••"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('new')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                      >
-                        {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Re-enter Password */}
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('changePassword.confirmPassword')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPasswords.confirm ? "text" : "password"}
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        placeholder="••••••••••"
-                        className={`w-full px-4 py-3 ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => togglePasswordVisibility('confirm')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                      >
-                        {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Save Button */}
-                  <div className="flex justify-center pt-4">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-12 py-3 bg-gradient-to-r from-cyan-500 to-cyan-400 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? 'Saving...' : t('changePassword.submit')}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </main>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg 
+                       hover:from-blue-500 hover:to-cyan-400
+                       transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <Loader2 size={20} className="mx-auto animate-spin" />
+            ) : (
+              t('changePassword.submit')
+            )}
+          </button>
         </div>
-        )}
-      </div>
+      </form>
     </div>
+  );
+
+  // ====================================================================
+  // PHẦN RENDER CHÍNH
+  // ====================================================================
+  
+  if (isFirstLogin) {
+    // Trường hợp 1: Lần đầu login (KHÔNG CÓ LAYOUT)
+    return (
+      <div 
+        className="h-screen flex flex-col items-center justify-center p-8 relative"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        {/* Overlay và ToastContainer vẫn cần */}
+        <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-black/80' : 'bg-white/80'}`}></div>
+        {/* ===== LỖI ĐÃ SỬA: Mtheme -> theme ===== */}
+        <ToastContainer theme={theme === 'dark' ? 'dark' : 'light'} />
+        
+        <motion.div 
+          className="relative z-10 w-full max-w-2xl flex flex-col items-center"
+          initial="initial"
+          animate="animate"
+          variants={pageVariants}
+          transition={pageVariants.transition}
+        >
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <img src={Logo} alt="GestPipe" className="h-32" />
+          </div>
+
+          {/* Warning Message */}
+          <div className={`mb-6 p-4 rounded-lg border ${
+            theme === 'dark'
+              ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'
+              : 'bg-yellow-50 border-yellow-300 text-yellow-800'
+          }`}>
+            <p className="text-center font-medium">
+              ⚠️ {t('changePassword.firstLoginWarning') || 'This is your first login. You must change your password to continue.'}
+            </p>
+          </div>
+
+          {/* Form */}
+          <ChangePasswordForm />
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Trường hợp 2: Đổi mật khẩu bình thường (CÓ LAYOUT)
+  // Trang này được gọi từ <AdminLayoutRoute>
+  return (
+    <motion.main 
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex justify-center pt-10" // Tự cuộn
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+      transition={pageVariants.transition}
+    >
+      <ChangePasswordForm />
+    </motion.main>
   );
 };
 

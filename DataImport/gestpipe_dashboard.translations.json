@@ -1,0 +1,4992 @@
+[{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68801"
+  },
+  "language": "vi",
+  "category": "sidebar",
+  "key": "dashboard",
+  "value": "Tổng quan",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.220Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.220Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68802"
+  },
+  "language": "vi",
+  "category": "sidebar",
+  "key": "home",
+  "value": "Trang chủ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68803"
+  },
+  "language": "vi",
+  "category": "sidebar",
+  "key": "actions",
+  "value": "Thao tác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68804"
+  },
+  "language": "vi",
+  "category": "sidebar",
+  "key": "adminManagement",
+  "value": "Quản trị viên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68805"
+  },
+  "language": "vi",
+  "category": "sidebar",
+  "key": "userManagement",
+  "value": "Người dùng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68806"
+  },
+  "language": "vi",
+  "category": "sidebar",
+  "key": "version",
+  "value": "Phiên bản",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68807"
+  },
+  "language": "en",
+  "category": "sidebar",
+  "key": "dashboard",
+  "value": "Dashboard",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68808"
+  },
+  "language": "en",
+  "category": "sidebar",
+  "key": "home",
+  "value": "Home",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68809"
+  },
+  "language": "en",
+  "category": "sidebar",
+  "key": "actions",
+  "value": "Actions",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6880a"
+  },
+  "language": "en",
+  "category": "sidebar",
+  "key": "adminManagement",
+  "value": "Admin Management",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6880b"
+  },
+  "language": "en",
+  "category": "sidebar",
+  "key": "userManagement",
+  "value": "User Management",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6880c"
+  },
+  "language": "en",
+  "category": "sidebar",
+  "key": "version",
+  "value": "Version",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6880d"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "title",
+  "value": "Tổng quan",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6880e"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "userOverview",
+  "value": "Tổng quan người dùng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6880f"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "actions",
+  "value": "Thao tác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68810"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "version",
+  "value": "Phiên bản",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68811"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "title",
+  "value": "Dashboard",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68812"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "userOverview",
+  "value": "User Overview",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68813"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "actions",
+  "value": "Actions",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68814"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "version",
+  "value": "Version",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68815"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "totalUsers",
+  "value": "Tổng số người dùng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.221Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68816"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "comparedLastMonth",
+  "value": "+12% Compared to last month",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68817"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "onlineUsers",
+  "value": "Đang trực tuyến",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68818"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "accuracyRate",
+  "value": "Tỷ lệ chính xác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68819"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "customActions",
+  "value": "Lượt tùy chỉnh thao tác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6881a"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "todayCount",
+  "value": "+56 Today",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6881b"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "totalUsers",
+  "value": "Total Users",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6881c"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "comparedLastMonth",
+  "value": "+12% Compared to last month",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6881d"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "onlineUsers",
+  "value": "Online Users",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6881e"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "accuracyRate",
+  "value": "Accuracy Rate",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6881f"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "customActions",
+  "value": "Custom Actions",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68820"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "todayCount",
+  "value": "+56 Today",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68821"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "gender",
+  "value": "Giới tính",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68822"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "male",
+  "value": "Nam",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68823"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "female",
+  "value": "Nữ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68824"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "other",
+  "value": "Khác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68825"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "gender",
+  "value": "Gender",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68826"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "male",
+  "value": "Male",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68827"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "female",
+  "value": "Female",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68828"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "other",
+  "value": "Other",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68829"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "occupation",
+  "value": "Nghề nghiệp",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6882a"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "teacher",
+  "value": "Giáo viên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6882b"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "engineer",
+  "value": "Kỹ sư",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6882c"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "student",
+  "value": "Sinh viên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6882d"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "occupation",
+  "value": "Occupation",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6882e"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "teacher",
+  "value": "Teacher",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6882f"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "engineer",
+  "value": "Engineer",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68830"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "student",
+  "value": "Student",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68831"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "age",
+  "value": "Tuổi",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68832"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "age16_24",
+  "value": "16 - 24",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68833"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "age25_34",
+  "value": "25 - 34",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68834"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "age35_50",
+  "value": "35 - 50",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68835"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "age50plus",
+  "value": "50+",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68836"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "age",
+  "value": "Age",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68837"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "age16_24",
+  "value": "16 - 24",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68838"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "age25_34",
+  "value": "25 - 34",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68839"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "age35_50",
+  "value": "35 - 50",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6883a"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "age50plus",
+  "value": "50+",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6883b"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "cities",
+  "value": "Thành phố khác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6883c"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "hoChiMinh",
+  "value": "Hồ Chí Minh",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6883d"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "haNoi",
+  "value": "Hà Nội",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.222Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6883e"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "canTho",
+  "value": "Cần Thơ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6883f"
+  },
+  "language": "vi",
+  "category": "dashboard",
+  "key": "otherCity",
+  "value": "Thành phố khác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68840"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "cities",
+  "value": "Cities",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68841"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "hoChiMinh",
+  "value": "Ho Chi Minh",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68842"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "haNoi",
+  "value": "Ha Noi",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68843"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "canTho",
+  "value": "Can Tho",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68844"
+  },
+  "language": "en",
+  "category": "dashboard",
+  "key": "otherCity",
+  "value": "Other City",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68845"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "title",
+  "value": "Hồ sơ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68846"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "name",
+  "value": "Họ và tên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68847"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68848"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "phone",
+  "value": "Số điện thoại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68849"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "address",
+  "value": "Địa chỉ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6884a"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "role",
+  "value": "Vai trò",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6884b"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "dateOfBirth",
+  "value": "Ngày sinh",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6884c"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "createdAt",
+  "value": "Ngày tạo",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6884d"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "changePassword",
+  "value": "Đổi mật khẩu",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6884e"
+  },
+  "language": "vi",
+  "category": "profile",
+  "key": "edit",
+  "value": "Chỉnh sửa",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6884f"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "title",
+  "value": "Profile",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68850"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "name",
+  "value": "Full Name",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68851"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68852"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "phone",
+  "value": "Phone Number",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68853"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "address",
+  "value": "Address",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68854"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "role",
+  "value": "Role",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68855"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "dateOfBirth",
+  "value": "Date of Birth",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68856"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "createdAt",
+  "value": "Created At",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68857"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "changePassword",
+  "value": "Change Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68858"
+  },
+  "language": "en",
+  "category": "profile",
+  "key": "edit",
+  "value": "Edit",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68859"
+  },
+  "language": "vi",
+  "category": "changePassword",
+  "key": "title",
+  "value": "Đổi mật khẩu",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6885a"
+  },
+  "language": "vi",
+  "category": "changePassword",
+  "key": "oldPassword",
+  "value": "Mật khẩu cũ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6885b"
+  },
+  "language": "vi",
+  "category": "changePassword",
+  "key": "newPassword",
+  "value": "Mật khẩu mới",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6885c"
+  },
+  "language": "vi",
+  "category": "changePassword",
+  "key": "confirmPassword",
+  "value": "Nhập lại mật khẩu mới",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.223Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6885d"
+  },
+  "language": "vi",
+  "category": "changePassword",
+  "key": "submit",
+  "value": "Đổi mật khẩu",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6885e"
+  },
+  "language": "vi",
+  "category": "changePassword",
+  "key": "firstLoginWarning",
+  "value": "Đây là lần đăng nhập đầu tiên. Bạn phải đổi mật khẩu để tiếp tục.",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6885f"
+  },
+  "language": "en",
+  "category": "changePassword",
+  "key": "title",
+  "value": "Change Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68860"
+  },
+  "language": "en",
+  "category": "changePassword",
+  "key": "oldPassword",
+  "value": "Old Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68861"
+  },
+  "language": "en",
+  "category": "changePassword",
+  "key": "newPassword",
+  "value": "New Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68862"
+  },
+  "language": "en",
+  "category": "changePassword",
+  "key": "confirmPassword",
+  "value": "Re-enter New Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68863"
+  },
+  "language": "en",
+  "category": "changePassword",
+  "key": "submit",
+  "value": "Change Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68864"
+  },
+  "language": "en",
+  "category": "changePassword",
+  "key": "firstLoginWarning",
+  "value": "This is your first login. You must change your password to continue.",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68865"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "title",
+  "value": "Chỉnh sửa hồ sơ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68866"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "name",
+  "value": "Họ và tên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68867"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "birthday",
+  "value": "Ngày sinh",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68868"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68869"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "phone",
+  "value": "Số điện thoại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6886a"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "province",
+  "value": "Tỉnh/Thành phố",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6886b"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "save",
+  "value": "Lưu thay đổi",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6886c"
+  },
+  "language": "vi",
+  "category": "editProfile",
+  "key": "cancel",
+  "value": "Hủy",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6886d"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "title",
+  "value": "Edit Profile",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6886e"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "name",
+  "value": "Full Name",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6886f"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "birthday",
+  "value": "Birthday",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68870"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68871"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "phone",
+  "value": "Phone Number",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68872"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "province",
+  "value": "Province/City",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68873"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "save",
+  "value": "Save Changes",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.224Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68874"
+  },
+  "language": "en",
+  "category": "editProfile",
+  "key": "cancel",
+  "value": "Cancel",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.225Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.225Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68875"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "title",
+  "value": "Danh sách người dùng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.225Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.225Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68876"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "gesturesControl",
+  "value": "Điều khiển thao tác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68877"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "user",
+  "value": "Người dùng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68878"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "version",
+  "value": "Phiên bản",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68879"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "allUser",
+  "value": "Tất cả người dùng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6887a"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "online",
+  "value": "Trực tuyến",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6887b"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "offline",
+  "value": "Ngoại tuyến",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6887c"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "locked",
+  "value": "Đã khóa",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6887d"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "inactive",
+  "value": "Không hoạt động",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6887e"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "searchUser",
+  "value": "Tìm kiếm người dùng...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6887f"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "id",
+  "value": "ID",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68880"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "name",
+  "value": "Tên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68881"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "occupation",
+  "value": "Nghề nghiệp",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68882"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "createDate",
+  "value": "Ngày tạo",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68883"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "status",
+  "value": "Trạng thái",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68884"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "toggle",
+  "value": "Chuyển đổi",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.226Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68885"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "noUsers",
+  "value": "Không tìm thấy người dùng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68886"
+  },
+  "language": "vi",
+  "category": "userList",
+  "key": "loading",
+  "value": "Đang tải...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68887"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "title",
+  "value": "User List",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68888"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "gesturesControl",
+  "value": "Gestures Control",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68889"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "user",
+  "value": "User",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6888a"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "version",
+  "value": "Version",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6888b"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "allUser",
+  "value": "All User",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6888c"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "online",
+  "value": "Online",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6888d"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "offline",
+  "value": "Offline",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6888e"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "locked",
+  "value": "Locked",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6888f"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "inactive",
+  "value": "Inactive",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68890"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "searchUser",
+  "value": "Search User...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68891"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "id",
+  "value": "ID",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68892"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "name",
+  "value": "Name",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68893"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "occupation",
+  "value": "Occupation",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68894"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "createDate",
+  "value": "Create Date",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68895"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "status",
+  "value": "Status",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68896"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "toggle",
+  "value": "Toggle",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68897"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "noUsers",
+  "value": "No users found",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68898"
+  },
+  "language": "en",
+  "category": "userList",
+  "key": "loading",
+  "value": "Loading...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68899"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "title",
+  "value": "Danh sách quản trị viên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6889a"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "createNew",
+  "value": "Tạo mới",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6889b"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "allAdmins",
+  "value": "Tất cả quản trị viên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6889c"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "active",
+  "value": "Hoạt động",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6889d"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "inactive",
+  "value": "Chưa kích hoạt",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6889e"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "suspended",
+  "value": "Đã khóa",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6889f"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "searchAdmin",
+  "value": "Tìm kiếm quản trị viên...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a0"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "name",
+  "value": "Tên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a1"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a2"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "phone",
+  "value": "Số điện thoại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a3"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "province",
+  "value": "Tỉnh/Thành phố",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a4"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "createDate",
+  "value": "Ngày tạo",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a5"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "status",
+  "value": "Trạng thái",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a6"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "action",
+  "value": "Hành động",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a7"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "noAdmins",
+  "value": "Không tìm thấy quản trị viên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a8"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "loading",
+  "value": "Đang tải...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688a9"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "suspend",
+  "value": "Khóa tài khoản",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688aa"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "activate",
+  "value": "Kích hoạt",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ab"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "confirmSuspend",
+  "value": "Khóa tài khoản?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ac"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "confirmActivate",
+  "value": "Kích hoạt tài khoản?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ad"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "suspendMessage",
+  "value": "Bạn có chắc muốn khóa tài khoản quản trị viên này?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ae"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "activateMessage",
+  "value": "Bạn có chắc muốn kích hoạt tài khoản quản trị viên này?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688af"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "yes",
+  "value": "Đồng ý",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b0"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "no",
+  "value": "Hủy",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b1"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "success",
+  "value": "Thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b2"
+  },
+  "language": "vi",
+  "category": "adminList",
+  "key": "error",
+  "value": "Lỗi!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b3"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "title",
+  "value": "Admin List",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b4"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "createNew",
+  "value": "Create New",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b5"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "allAdmins",
+  "value": "All Admins",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.227Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b6"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "active",
+  "value": "Active",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b7"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "inactive",
+  "value": "Inactive",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b8"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "suspended",
+  "value": "Suspended",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688b9"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "searchAdmin",
+  "value": "Search admin...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ba"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "name",
+  "value": "Name",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688bb"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688bc"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "phone",
+  "value": "Phone",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688bd"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "province",
+  "value": "Province/City",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688be"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "createDate",
+  "value": "Create Date",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688bf"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "status",
+  "value": "Status",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c0"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "action",
+  "value": "Action",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c1"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "noAdmins",
+  "value": "No admins found",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c2"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "loading",
+  "value": "Loading...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c3"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "suspend",
+  "value": "Suspend",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c4"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "activate",
+  "value": "Activate",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c5"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "confirmSuspend",
+  "value": "Suspend Account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c6"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "confirmActivate",
+  "value": "Activate Account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c7"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "suspendMessage",
+  "value": "Are you sure you want to suspend this admin account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c8"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "activateMessage",
+  "value": "Are you sure you want to activate this admin account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688c9"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "yes",
+  "value": "Yes",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ca"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "no",
+  "value": "Cancel",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688cb"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "success",
+  "value": "Success!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688cc"
+  },
+  "language": "en",
+  "category": "adminList",
+  "key": "error",
+  "value": "Error!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688cd"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "title",
+  "value": "Tạo quản trị viên mới",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ce"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688cf"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "fullName",
+  "value": "Họ và tên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d0"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "phoneNumber",
+  "value": "Số điện thoại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d1"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "province",
+  "value": "Tỉnh/Thành phố",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d2"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "selectProvince",
+  "value": "Chọn tỉnh/thành phố",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d3"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "createButton",
+  "value": "Tạo tài khoản",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d4"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "creating",
+  "value": "Đang tạo...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d5"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "successTitle",
+  "value": "Tạo thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d6"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "accountCreated",
+  "value": "Tài khoản quản trị viên đã được tạo",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d7"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "tempPassword",
+  "value": "Mật khẩu tạm thời",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d8"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "copyPassword",
+  "value": "Sao chép mật khẩu",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688d9"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "copied",
+  "value": "Đã sao chép!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688da"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "important",
+  "value": "Quan trọng",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688db"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "importantNote",
+  "value": "Hãy sao chép mật khẩu này và gửi cho quản trị viên mới. Mật khẩu sẽ không hiển thị lại!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688dc"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "createAnother",
+  "value": "Tạo quản trị viên khác",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688dd"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "backToList",
+  "value": "Quay lại danh sách",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688de"
+  },
+  "language": "vi",
+  "category": "createAdmin",
+  "key": "fillAllFields",
+  "value": "Vui lòng điền đầy đủ thông tin bắt buộc",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688df"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "title",
+  "value": "Create New Admin",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.228Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e0"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "email",
+  "value": "Email",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e1"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "fullName",
+  "value": "Full Name",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e2"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "phoneNumber",
+  "value": "Phone Number",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e3"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "province",
+  "value": "Province/City",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e4"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "selectProvince",
+  "value": "Select province/city",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e5"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "createButton",
+  "value": "Create Account",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e6"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "creating",
+  "value": "Creating...",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e7"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "successTitle",
+  "value": "Success!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e8"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "accountCreated",
+  "value": "Admin account has been created",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688e9"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "tempPassword",
+  "value": "Temporary Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ea"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "copyPassword",
+  "value": "Copy Password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688eb"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "copied",
+  "value": "Copied!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ec"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "important",
+  "value": "Important",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ed"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "importantNote",
+  "value": "Please copy this password and send it to the new admin. It will not be shown again!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ee"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "createAnother",
+  "value": "Create Another Admin",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ef"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "backToList",
+  "value": "Back to List",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f0"
+  },
+  "language": "en",
+  "category": "createAdmin",
+  "key": "fillAllFields",
+  "value": "Please fill in all required fields",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f1"
+  },
+  "language": "vi",
+  "category": "common",
+  "key": "save",
+  "value": "Lưu",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f2"
+  },
+  "language": "vi",
+  "category": "common",
+  "key": "cancel",
+  "value": "Hủy",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f3"
+  },
+  "language": "vi",
+  "category": "common",
+  "key": "delete",
+  "value": "Xóa",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f4"
+  },
+  "language": "vi",
+  "category": "common",
+  "key": "edit",
+  "value": "Sửa",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f5"
+  },
+  "language": "vi",
+  "category": "common",
+  "key": "search",
+  "value": "Tìm kiếm",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f6"
+  },
+  "language": "vi",
+  "category": "common",
+  "key": "logout",
+  "value": "Đăng xuất",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f7"
+  },
+  "language": "en",
+  "category": "common",
+  "key": "save",
+  "value": "Save",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f8"
+  },
+  "language": "en",
+  "category": "common",
+  "key": "cancel",
+  "value": "Cancel",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688f9"
+  },
+  "language": "en",
+  "category": "common",
+  "key": "delete",
+  "value": "Delete",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688fa"
+  },
+  "language": "en",
+  "category": "common",
+  "key": "edit",
+  "value": "Edit",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688fb"
+  },
+  "language": "en",
+  "category": "common",
+  "key": "search",
+  "value": "Search",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688fc"
+  },
+  "language": "en",
+  "category": "common",
+  "key": "logout",
+  "value": "Logout",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688fd"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "logoutMessage",
+  "value": "Đang đăng xuất... Hẹn gặp lại! 👋",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688fe"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "profileUpdated",
+  "value": "Cập nhật hồ sơ thành công! 🎉",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead688ff"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "passwordChanged",
+  "value": "Đổi mật khẩu thành công! 🎉",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68900"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "adminCreated",
+  "value": "Tạo tài khoản quản trị viên thành công! 🎉",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68901"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "passwordCopied",
+  "value": "Đã sao chép mật khẩu! 📋",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68902"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "adminActivated",
+  "value": "Kích hoạt tài khoản quản trị viên thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68903"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "adminSuspended",
+  "value": "Tạm khóa tài khoản quản trị viên thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68904"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "userStatusUpdated",
+  "value": "Cập nhật trạng thái người dùng thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68905"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "logoutMessage",
+  "value": "Logging out... See you soon! 👋",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68906"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "profileUpdated",
+  "value": "Profile updated successfully! 🎉",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68907"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "passwordChanged",
+  "value": "Password changed successfully! 🎉",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68908"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "adminCreated",
+  "value": "Admin account created successfully! 🎉",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68909"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "passwordCopied",
+  "value": "Password copied to clipboard! 📋",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6890a"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "adminActivated",
+  "value": "Admin account activated successfully!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6890b"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "adminSuspended",
+  "value": "Admin account suspended successfully!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6890c"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "userStatusUpdated",
+  "value": "User status updated successfully!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.229Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6890d"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "nameRequired",
+  "value": "Tên là bắt buộc!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6890e"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "fillAllFields",
+  "value": "Vui lòng điền đầy đủ các trường",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6890f"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "passwordMinLength",
+  "value": "Mật khẩu mới phải có ít nhất 6 ký tự",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68910"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "passwordsNotMatch",
+  "value": "Mật khẩu mới không khớp",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68911"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "failedLoadProfile",
+  "value": "Không thể tải hồ sơ",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68912"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "failedLoadAdmins",
+  "value": "Không thể tải danh sách quản trị viên",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68913"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "failedUpdateProfile",
+  "value": "Cập nhật hồ sơ thất bại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68914"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "failedChangePassword",
+  "value": "Đổi mật khẩu thất bại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68915"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "failedCreateAdmin",
+  "value": "Tạo quản trị viên thất bại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68916"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "failedUpdateStatus",
+  "value": "Cập nhật trạng thái thất bại",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68917"
+  },
+  "language": "vi",
+  "category": "notifications",
+  "key": "fillRequiredFields",
+  "value": "Vui lòng điền đầy đủ các trường bắt buộc",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68918"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "nameRequired",
+  "value": "Name is required!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68919"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "fillAllFields",
+  "value": "Please fill in all fields",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6891a"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "passwordMinLength",
+  "value": "New password must be at least 6 characters",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6891b"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "passwordsNotMatch",
+  "value": "New passwords do not match",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6891c"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "failedLoadProfile",
+  "value": "Failed to load profile",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6891d"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "failedLoadAdmins",
+  "value": "Failed to load admins",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6891e"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "failedUpdateProfile",
+  "value": "Failed to update profile",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6891f"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "failedChangePassword",
+  "value": "Failed to change password",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68920"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "failedCreateAdmin",
+  "value": "Failed to create admin",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68921"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "failedUpdateStatus",
+  "value": "Failed to update admin status",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68922"
+  },
+  "language": "en",
+  "category": "notifications",
+  "key": "fillRequiredFields",
+  "value": "Please fill in all required fields",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68923"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "suspendTitle",
+  "value": "Tạm khóa tài khoản?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68924"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "activateTitle",
+  "value": "Kích hoạt tài khoản?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68925"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "suspendMessage",
+  "value": "Bạn có chắc chắn muốn <strong>tạm khóa</strong> tài khoản quản trị viên này không?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68926"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "activateMessage",
+  "value": "Bạn có chắc chắn muốn <strong>kích hoạt</strong> tài khoản quản trị viên này không?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68927"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "yesSuspend",
+  "value": "Có, tạm khóa!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68928"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "yesActivate",
+  "value": "Có, kích hoạt!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68929"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "cancel",
+  "value": "Hủy",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6892a"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "success",
+  "value": "Thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6892b"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "error",
+  "value": "Lỗi!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6892c"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "accountSuspended",
+  "value": "Tài khoản quản trị viên đã được <strong>tạm khóa</strong> thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6892d"
+  },
+  "language": "vi",
+  "category": "alerts",
+  "key": "accountActivated",
+  "value": "Tài khoản quản trị viên đã được <strong>kích hoạt</strong> thành công!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6892e"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "suspendTitle",
+  "value": "Suspend Account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead6892f"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "activateTitle",
+  "value": "Activate Account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68930"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "suspendMessage",
+  "value": "Are you sure you want to <strong>suspend</strong> this admin account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68931"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "activateMessage",
+  "value": "Are you sure you want to <strong>activate</strong> this admin account?",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68932"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "yesSuspend",
+  "value": "Yes, suspend!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68933"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "yesActivate",
+  "value": "Yes, activate!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68934"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "cancel",
+  "value": "Cancel",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.230Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68935"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "success",
+  "value": "Success!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68936"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "error",
+  "value": "Error!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68937"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "accountSuspended",
+  "value": "Admin account has been <strong>suspended</strong> successfully!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69005e2ffb61ac18ead68938"
+  },
+  "language": "en",
+  "category": "alerts",
+  "key": "accountActivated",
+  "value": "Admin account has been <strong>activated</strong> successfully!",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  },
+  "updatedAt": {
+    "$date": "2025-10-28T06:09:51.231Z"
+  }
+}]

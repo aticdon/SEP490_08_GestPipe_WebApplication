@@ -14,6 +14,10 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -23,16 +27,45 @@ const ForgotPassword = () => {
     setLoading(true);
     setMessage('');
     setError('');
+    setEmailError('');
+
+    // Client-side validation
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      setLoading(false);
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setEmailError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await authService.sendForgotPasswordOTP(email);
       if (res.success) {
         setStep(2);
         setMessage('OTP has been sent to your email. Please check your inbox.');
       } else {
-        setError(res.message || 'Failed to send OTP');
+        const errorData = res;
+        const errorType = errorData?.errorType;
+        
+        if (errorType === 'email_not_found') {
+          setEmailError(errorData.message || 'Email not found in system');
+        } else {
+          setError(errorData.message || 'Failed to send OTP');
+        }
       }
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to send OTP');
+      const errorData = err?.response?.data;
+      const errorType = errorData?.errorType;
+      
+      if (errorType === 'email_not_found') {
+        setEmailError(errorData.message || 'Email not found in system');
+      } else {
+        setError(errorData?.message || 'Failed to send OTP');
+      }
     }
     setLoading(false);
   };
@@ -43,16 +76,45 @@ const ForgotPassword = () => {
     setLoading(true);
     setMessage('');
     setError('');
+    setOtpError('');
+
+    // Client-side validation
+    if (!otp.trim()) {
+      setOtpError('OTP is required');
+      setLoading(false);
+      return;
+    }
+
+    if (!/^\d{6}$/.test(otp.trim())) {
+      setOtpError('Please enter a valid 6-digit OTP');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await authService.verifyForgotPasswordOTP(email, otp);
       if (res.success) {
         setStep(3);
         setMessage('OTP is valid. You can set a new password.');
       } else {
-        setError(res.message || 'Invalid or expired OTP');
+        const errorData = res;
+        const errorType = errorData?.errorType;
+        
+        if (errorType === 'otp_not_found' || errorType === 'invalid_otp' || errorType === 'otp_expired') {
+          setOtpError(errorData.message || 'Invalid or expired OTP');
+        } else {
+          setError(errorData.message || 'Failed to verify OTP');
+        }
       }
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to verify OTP');
+      const errorData = err?.response?.data;
+      const errorType = errorData?.errorType;
+      
+      if (errorType === 'otp_not_found' || errorType === 'invalid_otp' || errorType === 'otp_expired') {
+        setOtpError(errorData.message || 'Invalid or expired OTP');
+      } else {
+        setError(errorData?.message || 'Failed to verify OTP');
+      }
     }
     setLoading(false);
   };
@@ -63,16 +125,33 @@ const ForgotPassword = () => {
     setLoading(true);
     setMessage('');
     setError('');
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+    setPasswordError('');
+    setConfirmPasswordError('');
+
+    // Client-side validation
+    let hasErrors = false;
+
+    if (!newPassword.trim()) {
+      setPasswordError('New password is required');
+      hasErrors = true;
+    } else if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      hasErrors = true;
+    }
+
+    if (!confirmPassword.trim()) {
+      setConfirmPasswordError('Confirm password is required');
+      hasErrors = true;
+    } else if (newPassword.trim() && newPassword !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match');
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
       setLoading(false);
       return;
     }
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
+
     try {
       const res = await authService.resetForgotPassword(email, newPassword);
       if (res.success) {
@@ -124,15 +203,24 @@ const ForgotPassword = () => {
             </div>
           )}
           {step === 1 && (
-            <form onSubmit={handleSendOTP} className="space-y-5 flex flex-col items-center">
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-primary/50 transition-all"
-              />
+            <form onSubmit={handleSendOTP} noValidate className="space-y-5 flex flex-col items-center">
+              <div className="w-full">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={e => {
+                    setEmail(e.target.value);
+                    setEmailError(''); // Clear error when user types
+                  }}
+                  className={`w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                    emailError ? 'ring-2 ring-yellow-500' : 'focus:ring-cyan-primary/50'
+                  }`}
+                />
+                {emailError && (
+                  <p className="text-yellow-500 text-sm mt-1.5 ml-1">{emailError}</p>
+                )}
+              </div>
               <button
                 type="submit"
                 className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-primary text-white font-bold rounded-xl hover:shadow-lg hover:shadow-cyan-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"
@@ -143,15 +231,24 @@ const ForgotPassword = () => {
             </form>
           )}
           {step === 2 && (
-            <form onSubmit={handleVerifyOTP} className="space-y-5 flex flex-col items-center">
-              <input
-                type="text"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={e => setOtp(e.target.value)}
-                required
-                className="w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-primary/50 transition-all"
-              />
+            <form onSubmit={handleVerifyOTP} noValidate className="space-y-5 flex flex-col items-center">
+              <div className="w-full">
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={e => {
+                    setOtp(e.target.value);
+                    setOtpError(''); // Clear error when user types
+                  }}
+                  className={`w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                    otpError ? 'ring-2 ring-yellow-500' : 'focus:ring-cyan-primary/50'
+                  }`}
+                />
+                {otpError && (
+                  <p className="text-yellow-500 text-sm mt-1.5 ml-1">{otpError}</p>
+                )}
+              </div>
               <button
                 type="submit"
                 className="w-full py-3.5 bg-gradient-to-r from-green-600 to-cyan-primary text-white font-bold rounded-xl hover:shadow-lg hover:shadow-cyan-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"
@@ -162,25 +259,41 @@ const ForgotPassword = () => {
             </form>
           )}
           {step === 3 && (
-            <form onSubmit={handleResetPassword} className="space-y-5 flex flex-col items-center">
-              <input
-                type="password"
-                placeholder="New Password"
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-primary/50 transition-all"
-              />
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-primary/50 transition-all"
-              />
+            <form onSubmit={handleResetPassword} noValidate className="space-y-5 flex flex-col items-center">
+              <div className="w-full">
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={e => {
+                    setNewPassword(e.target.value);
+                    setPasswordError(''); // Clear error when user types
+                  }}
+                  className={`w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                    passwordError ? 'ring-2 ring-yellow-500' : 'focus:ring-cyan-primary/50'
+                  }`}
+                />
+                {passwordError && (
+                  <p className="text-yellow-500 text-sm mt-1.5 ml-1">{passwordError}</p>
+                )}
+              </div>
+              <div className="w-full">
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={e => {
+                    setConfirmPassword(e.target.value);
+                    setConfirmPasswordError(''); // Clear error when user types
+                  }}
+                  className={`w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                    confirmPasswordError ? 'ring-2 ring-yellow-500' : 'focus:ring-cyan-primary/50'
+                  }`}
+                />
+                {confirmPasswordError && (
+                  <p className="text-yellow-500 text-sm mt-1.5 ml-1">{confirmPasswordError}</p>
+                )}
+              </div>
               <button
                 type="submit"
                 className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-cyan-primary text-white font-bold rounded-xl hover:shadow-lg hover:shadow-cyan-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"

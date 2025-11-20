@@ -256,6 +256,29 @@ exports.updateProfile = async (req, res) => {
     const { id } = req.params;
     const { fullName, birthday, phoneNumber, province, uiLanguage } = req.body;
 
+    // Validation
+    if (!fullName || fullName.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Full name is required'
+      });
+    }
+
+    if (!phoneNumber || phoneNumber.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number is required'
+      });
+    }
+
+    // Validate phone number format: exactly 10 digits
+    if (!/^\d{10}$/.test(phoneNumber.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number must be exactly 10 digits'
+      });
+    }
+
     // Check if admin exists
     const admin = await Admin.findById(id);
     if (!admin) {
@@ -268,7 +291,7 @@ exports.updateProfile = async (req, res) => {
     // Update fields
     if (fullName) admin.fullName = fullName;
     if (birthday) admin.birthday = birthday;
-    if (phoneNumber) admin.phoneNumber = phoneNumber;
+    if (phoneNumber !== undefined && phoneNumber !== null && phoneNumber.trim() !== '') admin.phoneNumber = phoneNumber.trim();
     if (province) admin.province = province;
     if (uiLanguage) admin.uiLanguage = uiLanguage;
 
@@ -320,17 +343,18 @@ exports.getProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      admin: {
-        _id: formattedAdmin._id,
-        fullName: formattedAdmin.fullName,
-        email: formattedAdmin.email,
-        birthday: formattedAdmin.birthday,
-        phoneNumber: formattedAdmin.phoneNumber,
-        province: formattedAdmin.province,
-        role: formattedAdmin.role,
-        createdAt: formattedAdmin.createdAt,
-        updatedAt: formattedAdmin.updatedAt
-      }
+        admin: {
+          _id: formattedAdmin._id,
+          fullName: formattedAdmin.fullName,
+          email: formattedAdmin.email,
+          birthday: formattedAdmin.birthday,
+          phoneNumber: formattedAdmin.phoneNumber,
+          province: formattedAdmin.province,
+          role: formattedAdmin.role,
+          gesture_request_status: formattedAdmin.gesture_request_status,
+          createdAt: formattedAdmin.createdAt,
+          updatedAt: formattedAdmin.updatedAt
+        }
     });
 
   } catch (error) {

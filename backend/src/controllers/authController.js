@@ -1,3 +1,8 @@
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const Admin = require('../models/Admin');
+const { formatAdminDocument, formatDateTimeWithOffset } = require('../utils/dateFormatter');
+
 // @desc    Reset password after OTP verified
 // @route   POST /api/auth/reset-password
 // @access  Public
@@ -34,19 +39,19 @@ exports.verifyForgotPasswordOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
     if (!email || !otp) {
-      return res.status(400).json({ success: false, message: 'Please provide email and OTP' });
+      return res.status(400).json({ success: false, message: 'Email and OTP are required', errorType: 'missing_fields' });
     }
     const admin = await Admin.findOne({ email });
     if (!admin || !admin.resetPasswordOTP || !admin.resetPasswordOTPExpires) {
-      return res.status(400).json({ success: false, message: 'OTP not found or expired' });
+      return res.status(400).json({ success: false, message: 'OTP not found or expired', errorType: 'otp_not_found' });
     }
     // Check OTP and expiry
     const now = new Date();
     if (admin.resetPasswordOTP !== otp) {
-      return res.status(401).json({ success: false, message: 'Invalid OTP' });
+      return res.status(401).json({ success: false, message: 'Invalid OTP', errorType: 'invalid_otp' });
     }
     if (admin.resetPasswordOTPExpires < now) {
-      return res.status(401).json({ success: false, message: 'OTP expired' });
+      return res.status(401).json({ success: false, message: 'OTP expired', errorType: 'otp_expired' });
     }
     // Mark OTP as verified (optional: clear OTP)
     admin.resetPasswordOTP = null;
@@ -58,22 +63,20 @@ exports.verifyForgotPasswordOTP = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 const { sendMail } = require('../utils/mailer');
-// @desc    Send OTP for forgot password
-// @route   POST /api/auth/forgot-password
-// @access  Public
 exports.sendForgotPasswordOTP = async (req, res) => {
   try {
     const { email } = req.body;
-    console.log(`🔍 [ForgotPassword] Request OTP for: ${email}`);
+      console.log(`🔍 [ForgotPassword] Request OTP for: ${email}`);
     if (!email) {
       console.log('❌ [ForgotPassword] Missing email');
-      return res.status(400).json({ success: false, message: 'Please provide email' });
+      return res.status(400).json({ success: false, message: 'Email is required', errorType: 'email_required' });
     }
     const admin = await Admin.findOne({ email });
     if (!admin) {
       console.log(`❌ [ForgotPassword] Admin not found: ${email}`);
-      return res.status(404).json({ success: false, message: 'Admin not found' });
+      return res.status(404).json({ success: false, message: 'Email not found in system', errorType: 'email_not_found' });
     }
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -121,10 +124,6 @@ exports.sendForgotPasswordOTP = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin');
-const { formatAdminDocument, formatDateTimeWithOffset } = require('../utils/dateFormatter');
 
 // Helper: Hash password using SHA256
 const hashPassword = (password) => {
@@ -161,7 +160,8 @@ exports.login = async (req, res) => {
     if (!admin) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Email not found in system',
+        errorType: 'email_not_found'
       });
     }
 
@@ -183,7 +183,8 @@ exports.login = async (req, res) => {
     if (hashedPassword !== admin.password) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Incorrect password',
+        errorType: 'wrong_password'
       });
     }
 
@@ -211,6 +212,7 @@ exports.login = async (req, res) => {
         email: admin.email,
         role: admin.role,
         accountStatus: admin.accountStatus,
+        gesture_request_status: admin.gesture_request_status,
         theme: admin.theme,
         uiLanguage: admin.uiLanguage,
         isFirstLogin: isUsingTempPassword,
