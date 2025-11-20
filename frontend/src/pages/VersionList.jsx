@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Search as SearchIcon, Eye, Loader2 } from 'lucide-react';
@@ -31,6 +32,7 @@ const formatAccuracy = (acc) => {
 
 // ========= POPUP COMPONENT (Giữ nguyên) =========
 const VersionDetailPopup = ({ show, detail, onClose }) => {
+  const { t } = useTranslation();
   // ... (Code popup của bạn giữ nguyên, không cần sửa) ...
   const popupRef = useRef();
   useEffect(() => {
@@ -54,12 +56,12 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
       descriptionText = detail.description?.text || '-';
     }
     infoRows = [
-      { label: 'Release Name:', value: detail.releaseName },
-      { label: 'Version:', value: detail.version },
-      { label: 'Release Date:', value: formatDate(detail.releaseDate) },
-      { label: 'Number of Downloads:', value: formatNumber(detail.downloads) },
-      { label: 'Accuracy:', value: formatAccuracy(detail.accuracy) },
-      { label: 'Status:', value: detail.status },
+      { label: t('versionList.releaseName'), value: detail.releaseName },
+      { label: t('versionList.version'), value: detail.version },
+      { label: t('versionList.releaseDate'), value: formatDate(detail.releaseDate) },
+      { label: t('versionList.numberOfDownloads'), value: formatNumber(detail.downloads) },
+      { label: t('versionList.accuracy'), value: formatAccuracy(detail.accuracy) },
+      { label: t('versionList.status'), value: detail.status },
     ];
   }
 
@@ -107,7 +109,7 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
               ))}
               <div className="flex flex-row items-start pt-1">
                 <span className="font-bold text-base text-white mr-2" style={{ minWidth: 210 }}>
-                  Description:
+                  {t('versionList.description')}
                 </span>
                 <div
                   className="text-white text-base font-normal flex-1 
@@ -151,7 +153,7 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
               }}
               onClick={onClose}
             >
-              Close
+              {t('versionList.close')}
             </button>
           </>
         )}
@@ -172,6 +174,7 @@ const pageVariants = {
 // ================== MAIN COMPONENT ==================
 const VersionList = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [versions, setVersions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -199,7 +202,7 @@ const VersionList = () => {
       const data = await versionService.fetchAllVersions();
       setVersions(Array.isArray(data) ? data : data.versions || []);
     } catch {
-      toast.error("Failed to load versions");
+      toast.error(t('versionList.failedToLoadVersions'));
       setVersions([]);
     } finally {
       setLoading(false); 
@@ -212,7 +215,7 @@ const VersionList = () => {
       setSelectedVersionDetail(detail);
       setShowDetailPopup(true);
     } catch {
-      toast.error("Cannot load version detail");
+      toast.error(t('versionList.cannotLoadVersionDetail'));
     }
   };
 
@@ -244,7 +247,7 @@ const VersionList = () => {
             <input
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Search Version...." 
+              placeholder={t('versionList.searchVersion')} 
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/20 
                          bg-black/50 backdrop-blur-sm text-white 
                          font-montserrat text-sm placeholder:text-gray-500 
@@ -260,7 +263,7 @@ const VersionList = () => {
         {loading ? ( 
           <div className="flex flex-col items-center justify-center h-96">
             <Loader2 size={48} className="text-cyan-500 animate-spin" />
-            <p className="text-lg font-medium text-cyan-500 mt-4">Loading Versions...</p>
+            <p className="text-lg font-medium text-cyan-500 mt-4">{t('versionList.loadingVersions')}</p>
           </div>
         ) : (
           // Bọc bảng trong div cuộn (cho cả ngang và dọc)
@@ -275,13 +278,13 @@ const VersionList = () => {
               <thead className="sticky top-0 bg-gradient-table-header from-header-start-gray to-header-end-gray text-white z-10">
                 <tr>
                   {/* Bỏ % width, để table-auto tự tính */}
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">Version</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm">Release Name</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">Release Date</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">Downloads</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">Accuracy</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">Status</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">Action</th>
+                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.versionHeader')}</th>
+                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm">{t('versionList.releaseNameHeader')}</th>
+                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.releaseDateHeader')}</th>
+                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.downloadsHeader')}</th>
+                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.accuracyHeader')}</th>
+                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.statusHeader')}</th>
+                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.actionHeader')}</th>
                 </tr>
               </thead>
               
@@ -290,7 +293,7 @@ const VersionList = () => {
                 {getVisibleVersions().length === 0 ? (
                   <tr>
                     <td colSpan={7} className="text-center py-10 text-gray-400 font-montserrat">
-                      No versions found
+                      {t('versionList.noVersionsFound')}
                     </td>
                   </tr>
                 ) : (
@@ -324,7 +327,7 @@ const VersionList = () => {
                           onClick={() => handleShowDetail(v._id || v.id)}
                           className="p-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white 
                                      hover:from-blue-500 hover:to-cyan-400 transition"
-                          title="View details"
+                          title={t('versionList.viewDetails')}
                         >
                           <Eye size={18} />
                         </button>
