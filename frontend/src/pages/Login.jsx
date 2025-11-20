@@ -37,6 +37,29 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({ email: '', password: '', general: '' });
+
+    // Client-side validation
+    const newErrors = { email: '', password: '', general: '' };
+    let hasErrors = false;
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+      hasErrors = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = 'Please enter a valid email address';
+      hasErrors = true;
+    }
+
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required';
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -72,14 +95,31 @@ const Login = () => {
       }, 1000);
       
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Invalid username or password';
+      const errorData = err.response?.data;
+      const errorType = errorData?.errorType;
+      const errorMessage = errorData?.message || 'Login failed';
       
-      // Show general error message at the bottom
-      setErrors({ 
-        email: '', 
-        password: '', 
-        general: errorMessage 
-      });
+      // Handle specific error types
+      if (errorType === 'email_not_found') {
+        setErrors({ 
+          email: errorMessage, 
+          password: '', 
+          general: '' 
+        });
+      } else if (errorType === 'wrong_password') {
+        setErrors({ 
+          email: '', 
+          password: errorMessage, 
+          general: '' 
+        });
+      } else {
+        // General error
+        setErrors({ 
+          email: '', 
+          password: '', 
+          general: errorMessage 
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -117,7 +157,7 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5 flex flex-col items-center">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5 flex flex-col items-center">
             {/* Email Input */}
             <div className="w-full">
               <input
@@ -126,13 +166,12 @@ const Login = () => {
                 placeholder="User name"
                 value={formData.email}
                 onChange={handleChange}
-                required
                 className={`w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
-                  errors.email ? 'ring-2 ring-red-500' : 'focus:ring-cyan-primary/50'
+                  errors.email ? 'ring-2 ring-yellow-500' : 'focus:ring-cyan-primary/50'
                 }`}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1.5 ml-1">{errors.email}</p>
+                <p className="text-yellow-500 text-sm mt-1.5 ml-1">{errors.email}</p>
               )}
             </div>
 
@@ -144,9 +183,8 @@ const Login = () => {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                required
                 className={`w-full px-5 py-3.5 bg-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all pr-12 ${
-                  errors.password ? 'ring-2 ring-red-500' : 'focus:ring-cyan-primary/50'
+                  errors.password ? 'ring-2 ring-yellow-500' : 'focus:ring-cyan-primary/50'
                 }`}
               />
               <button
@@ -157,7 +195,7 @@ const Login = () => {
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
               </button>
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1.5 ml-1">{errors.password}</p>
+                <p className="text-yellow-500 text-sm mt-1.5 ml-1">{errors.password}</p>
               )}
             </div>
 

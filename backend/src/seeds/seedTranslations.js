@@ -11,6 +11,7 @@ const translations = [
   { language: 'vi', category: 'sidebar', key: 'adminManagement', value: 'Quản trị viên' },
   { language: 'vi', category: 'sidebar', key: 'userManagement', value: 'Người dùng' },
   { language: 'vi', category: 'sidebar', key: 'version', value: 'Phiên bản' },
+  { language: 'vi', category: 'sidebar', key: 'mlGesturePractice', value: 'Luyện tập cử chỉ ML' },
 
   { language: 'en', category: 'sidebar', key: 'dashboard', value: 'Dashboard' },
   { language: 'en', category: 'sidebar', key: 'home', value: 'Home' },
@@ -18,6 +19,7 @@ const translations = [
   { language: 'en', category: 'sidebar', key: 'adminManagement', value: 'Admin Management' },
   { language: 'en', category: 'sidebar', key: 'userManagement', value: 'User Management' },
   { language: 'en', category: 'sidebar', key: 'version', value: 'Version' },
+  { language: 'en', category: 'sidebar', key: 'mlGesturePractice', value: 'ML Gesture Practice' },
 
 // Dashboard - Tabs
   { language: 'vi', category: 'dashboard', key: 'title', value: 'Tổng quan' },

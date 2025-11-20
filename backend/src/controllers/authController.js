@@ -160,7 +160,8 @@ exports.login = async (req, res) => {
     if (!admin) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Email not found in system',
+        errorType: 'email_not_found'
       });
     }
 
@@ -182,7 +183,8 @@ exports.login = async (req, res) => {
     if (hashedPassword !== admin.password) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Incorrect password',
+        errorType: 'wrong_password'
       });
     }
 

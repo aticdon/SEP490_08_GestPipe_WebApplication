@@ -18,6 +18,7 @@ import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import ForgotPassword from './pages/ForgotPassword';
 import Gestures from './pages/Gestures';
+// import GesturePracticeMLPage from './pages/GesturePracticeMLPage';
 import VersionList from './pages/VersionList'; 
 import AdminGestures from './pages/AdminGestures';
 
@@ -90,6 +91,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              {/* <Route
+                path="/gesture-practice-ml"
+                element={
+                  <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                    <GesturePracticeMLPage />
+                  </ProtectedRoute>
+                }
+              /> */}
               <Route 
                 path="/create-admin" 
                 element={
