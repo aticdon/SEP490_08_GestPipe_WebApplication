@@ -256,6 +256,29 @@ exports.updateProfile = async (req, res) => {
     const { id } = req.params;
     const { fullName, birthday, phoneNumber, province, uiLanguage } = req.body;
 
+    // Validation
+    if (!fullName || fullName.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Full name is required'
+      });
+    }
+
+    if (!phoneNumber || phoneNumber.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number is required'
+      });
+    }
+
+    // Validate phone number format: exactly 10 digits
+    if (!/^\d{10}$/.test(phoneNumber.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number must be exactly 10 digits'
+      });
+    }
+
     // Check if admin exists
     const admin = await Admin.findById(id);
     if (!admin) {
@@ -268,7 +291,7 @@ exports.updateProfile = async (req, res) => {
     // Update fields
     if (fullName) admin.fullName = fullName;
     if (birthday) admin.birthday = birthday;
-    if (phoneNumber) admin.phoneNumber = phoneNumber;
+    if (phoneNumber !== undefined && phoneNumber !== null && phoneNumber.trim() !== '') admin.phoneNumber = phoneNumber.trim();
     if (province) admin.province = province;
     if (uiLanguage) admin.uiLanguage = uiLanguage;
 
