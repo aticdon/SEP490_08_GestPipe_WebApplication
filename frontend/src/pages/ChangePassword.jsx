@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Loader2 } from 'lucide-react'; // Bỏ các icon Header
@@ -8,10 +9,7 @@ import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
-import { motion } from 'framer-motion'; // Thêm motion
-
-// === IMPORT LAYOUT MỚI ===
-import AdminLayout from '../components/AdminLayout'; 
+import { motion } from 'framer-motion'; // Thêm motion 
 
 // Hiệu ứng
 const pageVariants = {
@@ -58,19 +56,32 @@ const ChangePassword = () => {
 
   // (Bỏ handleLogout, AdminLayout sẽ tự lo)
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    
+    // Use flushSync to force synchronous update and maintain focus
+    flushSync(() => {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
     });
-  };
+    
+    // Ensure focus is maintained after synchronous update
+    const input = document.querySelector(`input[name="${name}"]`);
+    if (input && document.activeElement !== input) {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }, []);
 
-  const togglePasswordVisibility = (field) => {
+  const togglePasswordVisibility = useCallback((field) => {
     setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field]
     }));
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -151,6 +162,8 @@ const ChangePassword = () => {
               value={formData.oldPassword}
               onChange={handleChange}
               placeholder="••••••••••"
+              autoComplete="current-password"
+              spellCheck="false"
               className={inputStyle}
             />
             <button
@@ -175,6 +188,8 @@ const ChangePassword = () => {
               value={formData.newPassword}
               onChange={handleChange}
               placeholder="••••••"
+              autoComplete="new-password"
+              spellCheck="false"
               className={inputStyle}
             />
             <button
@@ -199,6 +214,8 @@ const ChangePassword = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="••••••••••"
+              autoComplete="new-password"
+              spellCheck="false"
               className={inputStyle}
             />
             <button
