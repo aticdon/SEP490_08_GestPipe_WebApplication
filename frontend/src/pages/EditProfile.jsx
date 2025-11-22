@@ -81,9 +81,23 @@ const EditProfile = () => {
   // (Bỏ handleLogout)
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === 'fullName') {
+      // Validation for fullName: only text, max 256 characters
+      if (value.length > 256) {
+        return; // Don't update if exceeds max length
+      }
+      // Allow only letters, spaces, and common name characters
+      const textOnlyRegex = /^[a-zA-ZÀ-ỹ\s\-'.]+$/;
+      if (value && !textOnlyRegex.test(value)) {
+        return; // Don't update if contains invalid characters
+      }
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
   };
 
@@ -97,6 +111,18 @@ const EditProfile = () => {
 
     if (!formData.phoneNumber.trim()) {
       toast.error('Phone number is required');
+      return;
+    }
+
+    // Additional validation for fullName
+    if (formData.fullName.length > 256) {
+      toast.error('Name must be less than 256 characters');
+      return;
+    }
+
+    const textOnlyRegex = /^[a-zA-ZÀ-ỹ\s\-'.]+$/;
+    if (!textOnlyRegex.test(formData.fullName)) {
+      toast.error('Name can only contain letters, spaces, hyphens, apostrophes, and periods');
       return;
     }
 
@@ -193,18 +219,25 @@ const EditProfile = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name */}
-            <div className="flex items-center">
-              <label className={labelStyle}>
-                {t('editProfile.name')}
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                className={inputStyle}
-                placeholder="Enter your name"
-              />
+            <div className="flex flex-col">
+              <div className="flex items-center">
+                <label className={labelStyle}>
+                  {t('editProfile.name')}
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className={inputStyle}
+                  placeholder="Enter your name"
+                />
+              </div>
+              <div className="flex justify-end mt-1">
+                <span className={`text-xs ${formData.fullName.length > 256 ? 'text-red-400' : 'text-gray-400'}`}>
+                  {formData.fullName.length}/256
+                </span>
+              </div>
             </div>
 
             {/* Date of Birthday */}
