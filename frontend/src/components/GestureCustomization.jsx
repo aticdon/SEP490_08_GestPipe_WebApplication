@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { X, Zap } from 'lucide-react';
@@ -104,6 +105,7 @@ function GestureCustomization({
   isRequesting: isRequestingProp,
   isChecking: isCheckingProp,
 }) {
+  const { t } = useTranslation();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const handsRef = useRef(null);
@@ -115,7 +117,7 @@ function GestureCustomization({
   const [loading, setLoading] = useState(true);
   const [samples, setSamples] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('Put two hands to record.');
+  const [statusMessage, setStatusMessage] = useState(t('gestureCustomization.putTwoHands'));
   const [tempMessage, setTempMessage] = useState(null); // Temporary message to show for 1s
   const [tempMessageType, setTempMessageType] = useState(null); // 'error' or 'success'
   const [pendingGestures, setPendingGestures] = useState([]); // collected gestures in this session
@@ -171,8 +173,8 @@ function GestureCustomization({
     // Check if gesture is blocked
     if (isGestureBlocked) {
       setStatus('blocked');
-      setStatusMessage('This gesture is already customized or waiting for approval.');
-      setMessage('Cannot customize gesture');
+      setStatusMessage(t('gestureCustomization.gestureUnavailableDesc'));
+      setMessage(t('gestureCustomization.gestureUnavailable'));
       return;
     }
 
@@ -246,7 +248,7 @@ function GestureCustomization({
     setIsCompleted(false);
     setStatus('recording');
     setMessage('');
-    setStatusMessage('Put two hands to record.');
+    setStatusMessage(t('gestureCustomization.putTwoHands'));
     setSamples([]);
     setIsUploading(false);
     setHasShownConflictError(false);
@@ -271,14 +273,14 @@ function GestureCustomization({
     }
 
     // Logic moved to main page - do nothing here
-    toast.info('Please use the Submit for Approval button on the main page.');
-  }, [handleRequestCustomizationProp]);
+    toast.info(t('gestureCustomization.useSubmitButton'));
+  }, [handleRequestCustomizationProp, t]);
 
   const handleSampleCompleted = useCallback(
     async (sample) => {
       // Check for conflict before adding sample
       try {
-        setStatusMessage('Checking for conflicts...');
+        setStatusMessage(t('gestureCustomization.checkingConflicts'));
         const conflictResult = await checkGestureConflict({
           leftStates: sample.leftStates || sample.left_finger_state || [0, 0, 0, 0, 0],
           rightStates: sample.rightStates || sample.right_finger_state || [0, 0, 0, 0, 0],
@@ -287,9 +289,9 @@ function GestureCustomization({
         });
 
         if (conflictResult.conflict) {
-          setTempMessage('Conflict detected: ' + conflictResult.message);
+          setTempMessage(t('gestureCustomization.conflictDetected') + conflictResult.message);
           setTempMessageType('error');
-          setStatusMessage('Conflict detected. Please try a different gesture.');
+          setStatusMessage(t('gestureCustomization.conflictDetectedDesc'));
           return; // Don't add the conflicting sample
         }
       } catch (err) {
@@ -305,19 +307,19 @@ function GestureCustomization({
           setIsUploading(true);
           (async () => {
             setStatus('recording');
-            setMessage('Uploading samples...');
-            setStatusMessage('Uploading samples to server, please wait...');
+            setMessage(t('gestureCustomization.uploadingSamples'));
+            setStatusMessage(t('gestureCustomization.uploadingSamplesDesc'));
             try {
               const resp = await customizeGesture({
                 adminId: admin?.id || admin?._id,
                 gestureName,
                 samples: updated,
               });
-              const successMsg = resp?.message || 'Uploaded successfully.';
-              setTempMessage('Uploaded successfully');
+              const successMsg = resp?.message || t('gestureCustomization.uploadedSuccess');
+              setTempMessage(t('gestureCustomization.uploadedSuccessShort'));
               setTempMessageType('success');
-              toast.success(`Customization for ${gestureName} uploaded.`);
-              toast.success(`Customization for ${gestureName} uploaded.`);
+              toast.success(t('gestureCustomization.customizationUploaded', { gestureName }));
+              toast.success(t('gestureCustomization.customizationUploaded', { gestureName }));
               if (onCompleted) {
                 onCompleted(gestureName);
               }
@@ -341,11 +343,11 @@ function GestureCustomization({
               setIsUploading(false);
               setSamples([]);
               setHasShownConflictError(false); // Reset conflict error flag for next gesture
-              setStatusMessage('Ready — record next gesture or Request approval.');
+              setStatusMessage(t('gestureCustomization.readyNext'));
               setIsCompleted(true); // Mark as completed only after all success logic
             } catch (err) {
               const detail = err?.response?.data?.detail;
-              const errorMessage = detail || err?.response?.data?.message || 'Failed to upload custom gesture samples.';
+              const errorMessage = detail || err?.response?.data?.message || t('gestureCustomization.uploadFailed');
               console.error('Upload error:', err?.response?.data);
               setStatus('error');
               setMessage(errorMessage);
@@ -354,14 +356,14 @@ function GestureCustomization({
               setIsUploading(false);
               setSamples([]); // Reset samples on upload failure
               setHasShownConflictError(false); // Reset conflict error flag
-              setStatusMessage('Upload failed. You can try recording again.');
+              setStatusMessage(t('gestureCustomization.uploadFailedDesc'));
             }
           })();
         }
         return updated;
       });
     },
-    [admin, gestureName, isUploading, onClose]
+    [admin, gestureName, isUploading, onClose, t]
   );
 
   const onResults = useCallback(
@@ -412,14 +414,14 @@ function GestureCustomization({
         bufferRef.current = [];
         prevLeftFistRef.current = false;
         if (!isUploading) {
-          setStatusMessage('Need both hands in frame to record.');
+          setStatusMessage(t('gestureCustomization.needBothHands'));
         }
         return;
       }
 
       if (recordingStateRef.current === 'WAIT') {
         if (!isUploading) {
-          setStatusMessage('Put two hands to record – close left fist to start.');
+          setStatusMessage(t('gestureCustomization.putTwoHandsStart'));
         }
         if (!isUploading && currentLeftFist && !prevLeftFist && wrist) {
           recordingStateRef.current = 'RECORD';
@@ -427,7 +429,7 @@ function GestureCustomization({
           currentLeftStateRef.current = leftStates;
           currentRightStateRef.current = rightStates;
           setHasShownConflictError(false); // Reset conflict error flag for new recording session
-          setStatusMessage('Recording... release left fist to stop.');
+          setStatusMessage(t('gestureCustomization.recording'));
         }
       } else if (recordingStateRef.current === 'RECORD') {
         if (wrist) {
@@ -440,7 +442,7 @@ function GestureCustomization({
         const buffer = bufferRef.current;
         recordingStateRef.current = 'WAIT';
         if (!buffer || buffer.length < MIN_FRAMES) {
-          setTempMessage('Sample too short. Try again.');
+          setTempMessage(t('gestureCustomization.sampleTooShort'));
           setTempMessageType('error');
           return;
         }
@@ -460,7 +462,7 @@ function GestureCustomization({
         });
         instanceCounterRef.current += 1;
         bufferRef.current = [];
-        setTempMessage('Sample captured successfully!');
+        setTempMessage(t('gestureCustomization.sampleCaptured'));
         setTempMessageType('success');
         handleSampleCompleted(sample);
       }
@@ -528,7 +530,7 @@ function GestureCustomization({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className={`rounded-xl shadow-xl max-w-2xl w-full ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
         <div className={`flex justify-between items-center p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-          <h2 className="text-xl font-bold">Customize Gesture: {gestureName}</h2>
+          <h2 className="text-xl font-bold">{t('gestureCustomization.title', { gestureName })}</h2>
           <button onClick={onClose} className={`p-2 rounded-full ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
             <X size={24} />
           </button>
@@ -537,19 +539,19 @@ function GestureCustomization({
         <div className="p-6 relative">
           {loading && status === 'idle' && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 z-10 rounded-lg">
-              <p>Loading Camera...</p>
+              <p>{t('gestureCustomization.loadingCamera')}</p>
             </div>
           )}
           {status === 'blocked' && (
             <div className="absolute inset-0 flex items-center justify-center bg-red-900 bg-opacity-90 z-10 rounded-lg">
               <div className="text-center text-white">
-                <div className="text-2xl font-bold mb-4">🚫 Gesture Unavailable</div>
-                <p className="mb-6">This gesture is already customized or waiting for admin approval. You cannot customize it at this time.</p>
+                <div className="text-2xl font-bold mb-4">{t('gestureCustomization.gestureUnavailable')}</div>
+                <p className="mb-6">{t('gestureCustomization.gestureUnavailableDesc')}</p>
                 <button
                   onClick={onClose}
                   className="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold text-white"
                 >
-                  Close
+                  {t('common.close')}
                 </button>
               </div>
             </div>
@@ -581,12 +583,12 @@ function GestureCustomization({
         <div className="p-4 flex flex-col items-center gap-4 border-t border-gray-700 w-full">
           {status === 'success' && (
             <div className="w-full mt-2 px-4 py-2 rounded bg-green-900/80 text-green-100 text-sm">
-              <strong>Thành công:</strong> {message}
+              <strong>{t('common.success')}:</strong> {message}
             </div>
           )}
           {pendingGestures.length > 0 && (
             <div className="w-full mt-3 px-4 py-2 rounded bg-gray-800/70 text-sm">
-              <div className="font-semibold mb-2">Đã ghi (Pending):</div>
+              <div className="font-semibold mb-2">{t('gestureCustomization.pending')}</div>
               <ul className="space-y-1">
                 {pendingGestures.map((p) => (
                   <li key={p.gestureName} className="flex justify-between items-center">
@@ -599,7 +601,7 @@ function GestureCustomization({
                         onClick={() => handleRemovePending(p.gestureName)}
                         className="px-3 py-1 rounded bg-red-600 text-white text-xs"
                       >
-                        Xóa
+                        {t('common.delete')}
                       </button>
                     </div>
                   </li>

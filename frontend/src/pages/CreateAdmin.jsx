@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check, Plus, Loader2, ArrowLeft } from 'lucide-react'; // <-- THÊM ICON
+import { Check, Plus, Loader2, ChevronDown } from 'lucide-react'; // <-- THÊM ICON
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import adminService from '../services/adminService';
@@ -26,6 +26,7 @@ const CreateAdmin = () => {
   // (Bỏ state admin, showUserDropdown)
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -115,106 +116,114 @@ const CreateAdmin = () => {
   return (
     // (Bỏ div layout cũ)
     <motion.main 
-      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-start pt-10"
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-center pb-32"
       initial="initial"
       animate="animate"
       exit="exit"
       variants={pageVariants}
       transition={pageVariants.transition}
     >
-      {/* Nút Back */}
-      <button
-        type="button"
-        aria-label="Back to admin list"
-        title="Back"
-        className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-lg border 
-                   border-white/20 bg-black/50 backdrop-blur-sm 
-                   text-gray-200 hover:text-white hover:border-cyan-400 
-                   focus:outline-none focus:border-cyan-400 transition"
-        onClick={() => navigate('/admin-list')}
-      >
-        <ArrowLeft size={18} />
-        Back
-      </button>
-
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-3xl mx-auto">
         {!success ? (
           /* Create Form */
           <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8">
-            <h2 className="text-2xl font-bold mb-6 text-white">
+            <h2 className="text-2xl font-bold mb-6 text-white text-center">
               {t('createAdmin.title')}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email */}
-              <div>
-                <label className={labelStyle}>
-                  {t('createAdmin.email')} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="admin@example.com"
-                  className={inputStyle}
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Email */}
+                <div>
+                  <label className={labelStyle}>
+                    {t('createAdmin.email')} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="admin@example.com"
+                    className={inputStyle}
+                  />
+                </div>
 
-              {/* Full Name */}
-              <div>
-                <label className={labelStyle}>
-                  {t('createAdmin.fullName')} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  className={inputStyle}
-                />
-              </div>
+                {/* Full Name */}
+                <div>
+                  <label className={labelStyle}>
+                    {t('createAdmin.fullName')} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder="John Doe"
+                    className={inputStyle}
+                  />
+                </div>
 
-              {/* Phone Number */}
-              <div>
-                <label className={labelStyle}>
-                  {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="0123456789"
-                  className={inputStyle}
-                />
-              </div>
+                {/* Phone Number */}
+                <div>
+                  <label className={labelStyle}>
+                    {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    placeholder="0123456789"
+                    className={inputStyle}
+                  />
+                </div>
 
-              {/* Province */}
-              <div>
-                <label className={labelStyle}>
-                  {t('createAdmin.province')} <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="province"
-                  value={formData.province}
-                  onChange={handleChange}
-                  className={`${inputStyle} appearance-none`}
-                >
-                  <option value="">{t('createAdmin.selectProvince')}</option>
-                  {provinces.map((province) => (
-                    <option key={province} value={province}>{province}</option>
-                  ))}
-                </select>
+                {/* Province */}
+                <div className="relative">
+                  <label className={labelStyle}>
+                    {t('createAdmin.province')} <span className="text-red-500">*</span>
+                  </label>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setShowProvinceDropdown(!showProvinceDropdown)}
+                    className={`${inputStyle} flex justify-between items-center text-left`}
+                  >
+                    <span className={formData.province ? "text-white" : "text-gray-500"}>
+                      {formData.province || t('createAdmin.selectProvince')}
+                    </span>
+                    <ChevronDown size={18} className="text-gray-400" />
+                  </button>
+
+                  {showProvinceDropdown && (
+                    <div className="absolute z-50 mt-2 w-full rounded-lg shadow-2xl 
+                                    bg-[#1a1b26] border border-gray-700 overflow-hidden
+                                    max-h-60 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600">
+                      {provinces.map((province) => (
+                        <button
+                          key={province}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, province });
+                            setShowProvinceDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-3 text-gray-300 text-sm
+                                     hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-0"
+                        >
+                          {province}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Buttons */}
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-4 pt-4 justify-end">
                 <button
                   type="button"
                   onClick={() => navigate('/admin-list')}
-                  className="flex-1 py-3 rounded-lg font-semibold transition-all 
+                  className="px-6 py-3 rounded-lg font-semibold transition-all 
                              bg-gray-600 text-white hover:bg-gray-500"
                 >
                   {t('common.cancel')}
@@ -222,12 +231,12 @@ const CreateAdmin = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg 
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg 
                              hover:from-blue-500 hover:to-cyan-400
                              transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
-                    <Loader2 size={20} className="mx-auto animate-spin" />
+                    <Loader2 size={20} className="animate-spin" />
                   ) : (
                     t('createAdmin.createButton')
                   )}

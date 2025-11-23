@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const CameraPreview = ({ theme }) => {
+  const { t } = useTranslation();
   const videoRef = useRef(null);
   const [isActive, setIsActive] = useState(false);
   const [error, setError] = useState('');
@@ -28,7 +30,7 @@ const CameraPreview = ({ theme }) => {
       console.error('Camera error', err);
       setError(
         err.message ||
-          'Unable to access camera. Please check permissions or device.'
+          t('cameraPreview.cameraError')
       );
       setIsActive(false);
     }
@@ -62,14 +64,14 @@ const CameraPreview = ({ theme }) => {
               theme === 'dark' ? 'text-white' : 'text-gray-900'
             }`}
           >
-            Live Camera
+            {t('cameraPreview.title')}
           </h3>
           <p
             className={`text-sm ${
               theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
-            Preview your gestures in real time before training.
+            {t('cameraPreview.description')}
           </p>
         </div>
         <button
@@ -81,7 +83,7 @@ const CameraPreview = ({ theme }) => {
               : 'bg-cyan-500 text-white hover:bg-cyan-600'
           }`}
         >
-          {isActive ? 'Stop Camera' : 'Start Camera'}
+          {isActive ? t('cameraPreview.stopCamera') : t('cameraPreview.startCamera')}
         </button>
       </div>
 
@@ -95,12 +97,12 @@ const CameraPreview = ({ theme }) => {
           autoPlay
           muted
           playsInline
-          className="w-full h-64 object-cover"
+          className="w-full aspect-video object-cover"
           style={{ transform: 'scaleX(-1)' }}
         />
         {!isActive && (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-300 bg-black/60">
-            Camera inactive
+            {t('cameraPreview.cameraInactive')}
           </div>
         )}
       </div>
@@ -108,7 +110,7 @@ const CameraPreview = ({ theme }) => {
       {error && (
         <p className="text-sm text-red-400">
           {error ||
-            'Camera access blocked. Please allow permissions and retry.'}
+            t('cameraPreview.cameraBlocked')}
         </p>
       )}
     </div>
