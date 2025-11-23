@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { flushSync } from 'react-dom';
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Loader2 } from 'lucide-react'; // Bỏ các icon Header
@@ -38,6 +37,8 @@ const ChangePassword = () => {
     confirmPassword: ''
   });
 
+  const [focusedInput, setFocusedInput] = useState(null);
+
   // Check login
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -59,21 +60,10 @@ const ChangePassword = () => {
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     
-    // Use flushSync to force synchronous update and maintain focus
-    flushSync(() => {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    });
-    
-    // Ensure focus is maintained after synchronous update
-    const input = document.querySelector(`input[name="${name}"]`);
-    if (input && document.activeElement !== input) {
-      input.focus();
-      const len = input.value.length;
-      input.setSelectionRange(len, len);
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   }, []);
 
   const togglePasswordVisibility = useCallback((field) => {
@@ -82,6 +72,21 @@ const ChangePassword = () => {
       [field]: !prev[field]
     }));
   }, []);
+
+  // Maintain focus after state updates (lightweight approach)
+  useLayoutEffect(() => {
+    if (focusedInput) {
+      const input = document.querySelector(`input[name="${focusedInput}"]`);
+      if (input && document.activeElement !== input) {
+        // Only restore focus if it's clearly lost (not during typing)
+        const timeSinceLastFocus = Date.now() - (input.dataset.lastFocus || 0);
+        if (timeSinceLastFocus > 100) { // 100ms threshold
+          input.focus();
+          input.dataset.lastFocus = Date.now();
+        }
+      }
+    }
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -161,6 +166,7 @@ const ChangePassword = () => {
               name="oldPassword"
               value={formData.oldPassword}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('oldPassword')}
               placeholder="••••••••••"
               autoComplete="current-password"
               spellCheck="false"
@@ -187,6 +193,7 @@ const ChangePassword = () => {
               name="newPassword"
               value={formData.newPassword}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('newPassword')}
               placeholder="••••••"
               autoComplete="new-password"
               spellCheck="false"
@@ -213,6 +220,7 @@ const ChangePassword = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('confirmPassword')}
               placeholder="••••••••••"
               autoComplete="new-password"
               spellCheck="false"
