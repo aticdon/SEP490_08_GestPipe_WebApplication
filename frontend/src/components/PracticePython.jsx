@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { GESTURE_DATABASE } from '../utils/gestureDatabase';
 
 const PracticePython = ({ gestureName, onClose }) => {
+  const { t } = useTranslation();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const intervalRef = useRef(null);
@@ -64,7 +66,7 @@ const PracticePython = ({ gestureName, onClose }) => {
           // Add error handler
           video.onerror = (error) => {
             console.error('Video element error:', error);
-            toast.error('Video display error');
+            toast.error(t('practicePython.videoError'));
           };
           
           // Handle video loading and playing more safely
@@ -74,7 +76,7 @@ const PracticePython = ({ gestureName, onClose }) => {
             if (isComponentMounted) {
               video.play().catch(error => {
                 console.error('Video play error:', error);
-                toast.error('Video play failed');
+                toast.error(t('practicePython.videoPlayFailed'));
               });
             }
           };
@@ -85,7 +87,7 @@ const PracticePython = ({ gestureName, onClose }) => {
           
           video.onplaying = () => {
             console.log('Video is playing - camera feed should be visible');
-            toast.success('Camera ready!');
+            toast.success(t('practicePython.cameraReady'));
           };
           
           // Force load and play
@@ -100,11 +102,11 @@ const PracticePython = ({ gestureName, onClose }) => {
       } catch (error) {
         console.error('Camera access failed:', error);
         if (error.name === 'NotAllowedError') {
-          toast.error('Camera permission denied. Please allow camera access.');
+          toast.error(t('practicePython.cameraDenied'));
         } else if (error.name === 'NotFoundError') {
-          toast.error('No camera found');
+          toast.error(t('practicePython.noCamera'));
         } else {
-          toast.error(`Camera error: ${error.message}`);
+          toast.error(t('practicePython.cameraError', { error: error.message }));
         }
       }
     };
@@ -192,7 +194,7 @@ const PracticePython = ({ gestureName, onClose }) => {
       if (result.success) {
         setSessionActive(true);
         setStatus('ready');
-        toast.success('Practice session started!');
+        toast.success(t('practicePython.sessionStarted'));
         
         // Start sending frames every 200ms (5 FPS)
         intervalRef.current = setInterval(captureFrame, 200);
@@ -200,11 +202,11 @@ const PracticePython = ({ gestureName, onClose }) => {
         // Start polling for updates
         pollSessionStatus();
       } else {
-        toast.error(result.message || 'Failed to start session');
+        toast.error(result.message || t('practicePython.sessionStartFailed'));
       }
     } catch (error) {
       console.error('Start session error:', error);
-      toast.error('Failed to start practice session');
+      toast.error(t('practicePython.sessionStartFailed'));
     }
   };
 
@@ -227,11 +229,11 @@ const PracticePython = ({ gestureName, onClose }) => {
       
       setSessionActive(false);
       setStatus('idle');
-      toast.info('Practice session stopped');
+      toast.info(t('practicePython.sessionStopped'));
     } catch (error) {
       console.error('Stop session error:', error);
     }
-  }, [gestureName]);
+  }, [gestureName, t]);
 
   // Poll session status for updates
   const pollSessionStatus = () => {
@@ -280,7 +282,7 @@ const PracticePython = ({ gestureName, onClose }) => {
       if (response.ok) {
         setStats({ correct: 0, wrong: 0, total: 0, accuracy: 0 });
         setLastResult(null);
-        toast.success('Session reset');
+        toast.success(t('practicePython.sessionReset'));
       }
     } catch (error) {
       console.error('Reset error:', error);
@@ -305,10 +307,10 @@ const PracticePython = ({ gestureName, onClose }) => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-md">
-          <h3 className="text-lg font-semibold mb-4">Error</h3>
-          <p>Gesture "{gestureName}" not found</p>
+          <h3 className="text-lg font-semibold mb-4">{t('common.error')}</h3>
+          <p>{t('practicePython.gestureNotFound', { gestureName })}</p>
           <button onClick={onClose} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
-            Close
+            {t('common.close')}
           </button>
         </div>
       </div>
@@ -320,20 +322,20 @@ const PracticePython = ({ gestureName, onClose }) => {
       <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-90vh overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Practice: {gestureName}</h2>
+          <h2 className="text-2xl font-bold">{t('practicePython.title', { gestureName })}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
         </div>
 
         {/* Status */}
         <div className="mb-4 p-4 bg-blue-50 rounded-lg">
           <p className="text-lg font-medium">
-            Status: <span className={sessionActive ? 'text-green-600' : 'text-gray-600'}>
-              {sessionActive ? 'Active - Python Processing' : 'Inactive'}
+            {t('practicePython.status')} <span className={sessionActive ? 'text-green-600' : 'text-gray-600'}>
+              {sessionActive ? t('practicePython.active') : t('practicePython.inactive')}
             </span>
           </p>
           {lastResult && (
             <p className={`mt-2 ${lastResult.success ? 'text-green-600' : 'text-red-600'}`}>
-              Last: {lastResult.message}
+              {t('practicePython.last')} {lastResult.message}
             </p>
           )}
         </div>
@@ -342,27 +344,27 @@ const PracticePython = ({ gestureName, onClose }) => {
         <div className="mb-4 grid grid-cols-4 gap-4 text-center">
           <div className="bg-green-100 p-3 rounded">
             <div className="text-2xl font-bold text-green-600">{stats.correct}</div>
-            <div className="text-sm text-green-600">Correct</div>
+            <div className="text-sm text-green-600">{t('practicePython.correct')}</div>
           </div>
           <div className="bg-red-100 p-3 rounded">
             <div className="text-2xl font-bold text-red-600">{stats.wrong}</div>
-            <div className="text-sm text-red-600">Wrong</div>
+            <div className="text-sm text-red-600">{t('practicePython.wrong')}</div>
           </div>
           <div className="bg-blue-100 p-3 rounded">
             <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-            <div className="text-sm text-blue-600">Total</div>
+            <div className="text-sm text-blue-600">{t('practicePython.total')}</div>
           </div>
           <div className="bg-yellow-100 p-3 rounded">
             <div className="text-2xl font-bold text-yellow-600">{stats.accuracy}%</div>
-            <div className="text-sm text-yellow-600">Accuracy</div>
+            <div className="text-sm text-yellow-600">{t('practicePython.accuracy')}</div>
           </div>
         </div>
 
         {/* Gesture Info */}
         <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-semibold mb-2">Gesture Template:</h3>
-          <p><strong>Fingers:</strong> {gestureInfo.fingers?.join(', ')}</p>
-          <p><strong>Motion:</strong> [{gestureInfo.delta?.[0]?.toFixed(2)}, {gestureInfo.delta?.[1]?.toFixed(2)}]</p>
+          <h3 className="font-semibold mb-2">{t('practicePython.gestureTemplate')}</h3>
+          <p><strong>{t('practicePython.fingers')}</strong> {gestureInfo.fingers?.join(', ')}</p>
+          <p><strong>{t('practicePython.motion')}</strong> [{gestureInfo.delta?.[0]?.toFixed(2)}, {gestureInfo.delta?.[1]?.toFixed(2)}]</p>
         </div>
 
         {/* Video */}
@@ -385,7 +387,7 @@ const PracticePython = ({ gestureName, onClose }) => {
               <div className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-lg">
                 <div className="text-center">
                   <div className="text-4xl mb-2">📹</div>
-                  <p className="text-gray-600">Initializing camera...</p>
+                  <p className="text-gray-600">{t('practicePython.initializingCamera')}</p>
                 </div>
               </div>
             )}
@@ -394,9 +396,9 @@ const PracticePython = ({ gestureName, onClose }) => {
           
           {/* Camera debug info */}
           <div className="mt-2 text-sm text-gray-600">
-            Stream status: {stream ? 'Connected' : 'Not connected'}
+            {t('practicePython.streamStatus')} {stream ? t('practicePython.connected') : t('practicePython.notConnected')}
             {stream && (
-              <span className="ml-2 text-green-600">✓ Camera ready</span>
+              <span className="ml-2 text-green-600">✓ {t('practicePython.cameraReady')}</span>
             )}
           </div>
           
@@ -415,7 +417,7 @@ const PracticePython = ({ gestureName, onClose }) => {
               }}
               className="px-3 py-1 text-xs bg-blue-500 text-white rounded"
             >
-              Fix Video
+              {t('practicePython.fixVideo')}
             </button>
             <button
               onClick={async () => {
@@ -435,7 +437,7 @@ const PracticePython = ({ gestureName, onClose }) => {
               }}
               className="px-3 py-1 text-xs bg-orange-500 text-white rounded"
             >
-              Test API
+              {t('practicePython.testApi')}
             </button>
             <button
               onClick={() => {
@@ -455,21 +457,21 @@ const PracticePython = ({ gestureName, onClose }) => {
               }}
               className="px-3 py-1 text-xs bg-gray-500 text-white rounded"
             >
-              Debug Info
+              {t('practicePython.debugInfo')}
             </button>
           </div>
         </div>
 
         {/* Instructions */}
         <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold mb-2">Instructions:</h4>
+          <h4 className="font-semibold mb-2">{t('practicePython.instructions')}</h4>
           <ol className="list-decimal list-inside text-sm space-y-1">
-            <li>Make sure your hands are visible in the camera</li>
-            <li>Start the session to begin Python processing</li>
-            <li>Follow the same logic as training_session.py:</li>
-            <li>• Left hand fist = start recording</li>
-            <li>• Make gesture with right hand</li>
-            <li>• Release left hand = evaluate</li>
+            <li>{t('practicePython.instruction1')}</li>
+            <li>{t('practicePython.instruction2')}</li>
+            <li>{t('practicePython.instruction3')}</li>
+            <li>{t('practicePython.instruction4')}</li>
+            <li>{t('practicePython.instruction5')}</li>
+            <li>{t('practicePython.instruction6')}</li>
           </ol>
         </div>
 
@@ -480,14 +482,14 @@ const PracticePython = ({ gestureName, onClose }) => {
               onClick={startSession}
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
-              Start Session
+              {t('practicePython.startSession')}
             </button>
           ) : (
             <button
               onClick={stopSession}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
             >
-              Stop Session
+              {t('practicePython.stopSession')}
             </button>
           )}
           
@@ -496,14 +498,14 @@ const PracticePython = ({ gestureName, onClose }) => {
             disabled={!sessionActive}
             className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-300"
           >
-            Reset Stats
+            {t('practicePython.resetStats')}
           </button>
           
           <button
             onClick={onClose}
             className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
           >
-            Close
+            {t('common.close')}
           </button>
         </div>
       </div>

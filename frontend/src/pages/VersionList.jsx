@@ -3,37 +3,44 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Search as SearchIcon, Eye, Loader2 } from 'lucide-react';
+import { Search as SearchIcon, Eye, Loader2, Layers, Calendar, Download, Activity } from 'lucide-react';
+import { motion } from 'framer-motion';
 import versionService from '../services/versionService';
 import authService from '../services/authService'; 
-import { motion } from 'framer-motion'; 
+import { useTheme } from '../utils/ThemeContext'; 
 
 // ================== MAPPING UTILITY ==================
-const mapStatusType = {
-  "Release": "bg-gradient-to-r from-blue-500 to-cyan-400 text-white",
-  "Stop": "bg-gradient-to-r from-gray-600 to-gray-500 text-white",
-};
-
-// ================== FORMAT Các trường ==================
-const formatNumber = (num) =>
-  typeof num === "number" ? num.toLocaleString("vi-VN") : num || "-";
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  return isNaN(d.getTime()) ? "-" : d.toLocaleDateString("vi-VN");
-};
-
-const formatAccuracy = (acc) => {
-  if (acc === undefined || acc === null || acc === '') return "-";
-  if (typeof acc === 'string' && acc.includes('%')) return acc;
-  return `${acc}%`;
+const getStatusBadge = (status) => {
+  switch (status) {
+    case "Release": return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20";
+    case "Stop": return "bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20";
+    default: return "bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20";
+  }
 };
 
 // ========= POPUP COMPONENT (Giữ nguyên) =========
 const VersionDetailPopup = ({ show, detail, onClose }) => {
   const { t } = useTranslation();
-  // ... (Code popup của bạn giữ nguyên, không cần sửa) ...
+  const { theme } = useTheme(); // Assuming useTheme is available or passed, but here it's not imported. I should import it or use props. 
+  // Wait, VersionList uses useTheme? No, it doesn't import it. I should check if I can import it.
+  // Looking at imports: import { useTheme } from '../utils/ThemeContext'; is missing.
+  // I will add the import first.
+  
+  const formatNumber = (num) =>
+    typeof num === "number" ? num.toLocaleString("vi-VN") : num || t('common.notAvailable');
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return t('common.notAvailable');
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleDateString("vi-VN");
+  };
+
+  const formatAccuracy = (acc) => {
+    if (acc === undefined || acc === null || acc === '') return t('common.notAvailable');
+    if (typeof acc === 'string' && acc.includes('%')) return acc;
+    return `${acc}%`;
+  };
+
   const popupRef = useRef();
   useEffect(() => {
     if (!show) return;
@@ -53,7 +60,7 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
     if (typeof detail.description === 'string') {
       descriptionText = detail.description;
     } else {
-      descriptionText = detail.description?.text || '-';
+      descriptionText = detail.description?.text || t('common.notAvailable');
     }
     infoRows = [
       { label: t('versionList.releaseName'), value: detail.releaseName },
@@ -61,27 +68,25 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
       { label: t('versionList.releaseDate'), value: formatDate(detail.releaseDate) },
       { label: t('versionList.numberOfDownloads'), value: formatNumber(detail.downloads) },
       { label: t('versionList.accuracy'), value: formatAccuracy(detail.accuracy) },
-      { label: t('versionList.status'), value: detail.status },
+      { label: t('versionList.status'), value: t(`versionList.${detail.status}`) },
     ];
   }
 
   return (
     <div 
-      className={`fixed z-[999] inset-0 flex items-center justify-center bg-black bg-opacity-85 font-montserrat 
+      className={`fixed z-[999] inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm font-montserrat 
                   transition-opacity duration-300 ease-in-out 
                   pl-72 
                   ${show ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
     >
       <div
         ref={popupRef}
-        className={`w-full max-w-[650px] rounded-2xl border px-5 py-7 bg-black relative
+        className={`w-full max-w-[650px] rounded-2xl border px-5 py-7 relative
                     transition-all duration-300 ease-in-out
+                    bg-white dark:bg-black border-gray-200 dark:border-white/10 shadow-2xl
                     ${show ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}
         style={{
           minWidth: '340px',
-          borderColor: '#f6f6f6ff',
-          borderWidth: '0.1px',
-          boxShadow: '0px 6px 40px 16px rgba(0,0,0,0.85)',
           maxHeight: '90vh',
           overflow: 'hidden', 
         }}
@@ -90,7 +95,7 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
           <>
             <div
               className="flex flex-col gap-4 pb-2 scrollbar-thin scrollbar-track-transparent 
-                         scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500" 
+                         scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500" 
               style={{ paddingLeft: 32, overflowY: "auto", maxHeight: '70vh' }}
             >
               {infoRows.map(({ label, value }, idx) => (
@@ -99,39 +104,36 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
                   className="flex flex-row items-center"
                   style={{ minHeight: '32px' }}
                 >
-                  <span className="font-bold text-base text-white mr-2" style={{ minWidth: 210 }}>
+                  <span className="font-bold text-base text-black dark:text-white mr-2" style={{ minWidth: 210 }}>
                     {label}
                   </span>
-                  <span className="text-white text-base font-normal break-words">
-                    {value || '-'}
+                  <span className="text-gray-900 dark:text-white text-base font-normal break-words">
+                    {value || t('common.notAvailable')}
                   </span>
                 </div>
               ))}
               <div className="flex flex-row items-start pt-1">
-                <span className="font-bold text-base text-white mr-2" style={{ minWidth: 210 }}>
+                <span className="font-bold text-base text-black dark:text-white mr-2" style={{ minWidth: 210 }}>
                   {t('versionList.description')}
                 </span>
                 <div
-                  className="text-white text-base font-normal flex-1 
+                  className="text-gray-900 dark:text-white text-base font-normal flex-1 
                              scrollbar-thin scrollbar-track-transparent 
-                             scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500"
+                             scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500
+                             bg-gray-100 dark:bg-white/10 rounded px-2 py-1"
                   style={{
                     wordBreak: 'break-word',
                     maxWidth: '100%',
                     whiteSpace: 'pre-line',
                     maxHeight: '150px',
                     overflowY: 'auto',
-                    backgroundColor: 'rgba(16,16,16,0.17)',
-                    borderRadius: 4,
-                    padding: '4px 8px',
-                    paddingRight: '12px', 
                   }}
                 >
                   <div>
                     {descriptionText}
                   </div>
                   {Array.isArray(detail.description?.features) && (
-                    <ul className="text-white text-base mt-2 list-disc pl-5">
+                    <ul className="text-gray-700 dark:text-white text-base mt-2 list-disc pl-5">
                       {detail.description.features.map((feat, idx) => (
                         <li key={idx} style={{ marginBottom: '2px' }}>
                           {feat}
@@ -164,10 +166,10 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
 
 // Biến cho hiệu ứng
 const pageVariants = {
-  initial: { opacity: 0, x: "20px" },
-  animate: { opacity: 1, x: "0px" },
-  exit: { opacity: 0, x: "-20px" },
-  transition: { type: 'tween', ease: 'anticipate', duration: 0.3 }
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+  transition: { type: 'tween', ease: 'easeOut', duration: 0.3 }
 };
 
 
@@ -175,6 +177,21 @@ const pageVariants = {
 const VersionList = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const formatNumber = (num) =>
+    typeof num === "number" ? num.toLocaleString("vi-VN") : num || t('common.notAvailable');
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return t('common.notAvailable');
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleDateString("vi-VN");
+  };
+
+  const formatAccuracy = (acc) => {
+    if (acc === undefined || acc === null || acc === '') return t('common.notAvailable');
+    if (typeof acc === 'string' && acc.includes('%')) return acc;
+    return `${acc}%`;
+  };
 
   const [versions, setVersions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -230,114 +247,133 @@ const VersionList = () => {
   }, [versions, searchTerm]);
 
   return (
-    // ===== SỬA LẠI: Bỏ flex-1, flex-col, overflow-hidden =====
     <motion.main 
-      className="p-8 font-montserrat" // <-- CHỈ CÒN PADDING
+      className="flex-1 h-full overflow-hidden p-6 md:p-8 font-montserrat flex flex-col gap-4"
       initial="initial"
       animate="animate"
       exit="exit"
       variants={pageVariants}
-      transition={pageVariants.transition}
     >
       
-      {/* ====== THANH SEARCH ====== */}
-      <div className="flex justify-end mb-6 flex-shrink-0">
-          <div className="relative w-full max-w-xs">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" size={18} />
-            <input
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              placeholder={t('versionList.searchVersion')} 
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/20 
-                         bg-black/50 backdrop-blur-sm text-white 
-                         font-montserrat text-sm placeholder:text-gray-500 
-                         focus:outline-none focus:border-cyan-400"
-            />
-          </div>
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+        <div>
+          <h1 className="text-3xl font-extrabold text-black dark:text-white mb-2 flex items-center gap-3">
+            <Layers className="text-cyan-600 dark:text-cyan-400" size={32} />
+            {t('versionList.title', { defaultValue: 'Version Management' })}
+          </h1>
+          <p className="text-gray-700 dark:text-gray-400 text-base font-medium">{t('versionList.subtitle', { defaultValue: 'Manage system versions and releases' })}</p>
+        </div>
+      </div>
+
+      {/* Controls Section */}
+      <div className="flex flex-col md:flex-row gap-3 bg-white/60 dark:bg-black/40 p-3 rounded-2xl border border-gray-200 dark:border-white/10 backdrop-blur-md z-20 shrink-0">
+        {/* Search */}
+        <div className="relative flex-1">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder={t('versionList.searchVersion')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 
+                       bg-gray-100 dark:bg-white/5 text-black dark:text-white 
+                       font-montserrat text-sm placeholder:text-gray-600 
+                       focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 transition-all"
+          />
+        </div>
       </div>
       
-      {/* ====== CONTAINER BẢNG (ĐÃ SỬA LẠI HOÀN TOÀN) ====== */}
-      {/* Bỏ flex-1, flex-col. Giữ overflow-hidden */}
-      <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
-        
-        {loading ? ( 
-          <div className="flex flex-col items-center justify-center h-96">
+      {/* Table Section */}
+      <div className="bg-white/60 dark:bg-black/50 backdrop-blur-lg rounded-2xl border border-gray-200 dark:border-white/20 shadow-xl overflow-hidden flex-1 flex flex-col">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4">
             <Loader2 size={48} className="text-cyan-500 animate-spin" />
-            <p className="text-lg font-medium text-cyan-500 mt-4">{t('versionList.loadingVersions')}</p>
+            <p className="text-gray-500 dark:text-gray-400 animate-pulse">{t('versionList.loadingVersions')}</p>
           </div>
         ) : (
-          // Bọc bảng trong div cuộn (cho cả ngang và dọc)
-          // THÊM max-h-[70vh] (70% chiều cao màn hình)
-          <div className="overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600"
-               style={{ maxHeight: '70vh' }}>
-            
-            {/* DÙNG MỘT BẢNG DUY NHẤT */}
-            <table className="w-full min-w-[900px] table-auto">
-              
-              {/* HEADER BẢNG */}
-              <thead className="sticky top-0 bg-gradient-table-header from-header-start-gray to-header-end-gray text-white z-10">
-                <tr>
-                  {/* Bỏ % width, để table-auto tự tính */}
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.versionHeader')}</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm">{t('versionList.releaseNameHeader')}</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.releaseDateHeader')}</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.downloadsHeader')}</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.accuracyHeader')}</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.statusHeader')}</th>
-                  <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('versionList.actionHeader')}</th>
-                </tr>
-              </thead>
-              
-              {/* BODY BẢNG */}
-              <tbody className="font-montserrat">
-                {getVisibleVersions().length === 0 ? (
+          <>
+            {/* Header (Fixed) */}
+            <div className="flex-shrink-0 overflow-y-hidden bg-gray-200 dark:bg-header-end-gray" style={{ scrollbarGutter: 'stable' }}>
+              <table className="w-full table-fixed">
+                <thead className="bg-gray-200 dark:bg-gradient-table-header dark:from-header-start-gray dark:to-header-end-gray text-black dark:text-white border-b border-gray-300 dark:border-white/10">
                   <tr>
-                    <td colSpan={7} className="text-center py-10 text-gray-400 font-montserrat">
-                      {t('versionList.noVersionsFound')}
-                    </td>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.versionHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('versionList.releaseNameHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.releaseDateHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.downloadsHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.accuracyHeader')}</th>
+                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[10%]">{t('versionList.statusHeader')}</th>
+                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[10%]">{t('versionList.actionHeader')}</th>
                   </tr>
-                ) : (
-                  getVisibleVersions().map((v, i) => (
-                    <tr
-                      key={v._id || v.id || i}
-                      className={`border-b border-table-border-dark hover:bg-table-row-hover transition-colors
-                                  ${i % 2 === 0 ? 'bg-white/5' : 'bg-transparent'}`}
-                    >
-                      {/* Bỏ % width, thêm whitespace-nowrap */}
-                      <td className="px-6 py-4 font-montserrat text-gray-200 text-sm whitespace-nowrap">{v.version}</td>
-                      <td className="px-6 py-4 font-montserrat text-gray-200 text-sm truncate">{v.release_name}</td>
-                      <td className="px-6 py-4 font-montserrat text-gray-200 text-sm whitespace-nowrap">{formatDate(v.release_date)}</td>
-                      <td className="px-6 py-4 font-montserrat text-gray-200 text-sm whitespace-nowrap">
-                        <span className="flex items-center">
-                          <svg className="w-4 h-4 mr-1 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                          </svg>
-                          {formatNumber(v.downloads)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 font-montserrat text-gray-200 text-sm whitespace-nowrap">{formatAccuracy(v.accuracy)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-4 py-1.5 rounded-xl text-xs font-semibold
-                          ${mapStatusType[v.status] || "bg-gray-600 text-white"}`}>
-                          {v.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleShowDetail(v._id || v.id)}
-                          className="p-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white 
-                                     hover:from-blue-500 hover:to-cyan-400 transition"
-                          title={t('versionList.viewDetails')}
-                        >
-                          <Eye size={18} />
-                        </button>
+                </thead>
+              </table>
+            </div>
+
+            {/* Body (Scrollable) */}
+            <div className="overflow-y-scroll flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500" style={{ scrollbarGutter: 'stable' }}>
+              <table className="w-full table-fixed">
+                <tbody className="divide-y divide-gray-200 dark:divide-white/5">
+                  {getVisibleVersions().length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-16 text-gray-500">
+                        <div className="flex flex-col items-center gap-3">
+                          <SearchIcon size={48} className="opacity-20" />
+                          <p>{t('versionList.noVersionsFound')}</p>
+                        </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    getVisibleVersions().map((v, i) => (
+                      <tr 
+                        key={v._id || v.id || i} 
+                        className={`hover:bg-gray-100 dark:hover:bg-white/5 transition-colors group ${i % 2 === 0 ? 'bg-gray-50 dark:bg-white/5' : 'bg-transparent'}`}
+                      >
+                        <td className="px-4 py-4 w-[15%]">
+                          <span className="text-black dark:text-white font-bold text-sm">{v.version}</span>
+                        </td>
+                        <td className="px-4 py-4 w-[20%]">
+                          <span className="text-gray-800 dark:text-gray-300 font-medium text-sm truncate block">{v.release_name}</span>
+                        </td>
+                        <td className="px-4 py-4 w-[15%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                            <Calendar size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                            <span className="truncate">{formatDate(v.release_date)}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 w-[15%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                            <Download size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                            <span className="truncate">{formatNumber(v.downloads)}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 w-[15%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                            <Activity size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                            <span className="truncate">{formatAccuracy(v.accuracy)}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 w-[10%] text-center">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium capitalize border ${getStatusBadge(v.status)}`}>
+                            {t(`versionList.${v.status}`)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 w-[10%] text-center">
+                          <button
+                            onClick={() => handleShowDetail(v._id || v.id)}
+                            className="p-2 rounded-lg transition-all duration-200 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-300"
+                            title={t('versionList.viewDetails')}
+                          >
+                            <Eye size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
       

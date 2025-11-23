@@ -44,9 +44,11 @@ const AdminSidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLay
   return (
     <aside 
       className={`w-75 h-full flex flex-col flex-shrink-0
-                 bg-black/30 backdrop-blur-lg 
-                 border-r border-white/25 
-                 transition-all duration-300 ease-in-out`}
+                 backdrop-blur-lg 
+                 border-r transition-all duration-300 ease-in-out
+                 ${theme === 'dark' 
+                   ? 'bg-black/80 border-white/25' 
+                   : 'bg-white/90 border-gray-200'}`}
     >
       <nav className="flex-1 pt-6 px-4 space-y-2">
         {menuItems.map((item) => {
@@ -62,7 +64,9 @@ const AdminSidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLay
                           transition-colors duration-200 ease-in-out ${ 
                 isActive
                   ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold' // Style Active
-                  : 'text-gray-200 hover:text-white hover:bg-white/10' // Style Inactive
+                  : theme === 'dark'
+                    ? 'text-gray-200 hover:text-white hover:bg-white/10' // Style Inactive Dark
+                    : 'text-black hover:text-black hover:bg-black/5'  // Style Inactive Light
               }`}
             >
               <Icon size={25} />
@@ -73,7 +77,7 @@ const AdminSidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLay
       </nav>
 
       <div className="pb-6 flex gap-3 justify-start px-11">
-        <LanguageSwitcher theme="dark" /> 
+        <LanguageSwitcher theme={theme} /> 
       </div>
     </aside>
   );

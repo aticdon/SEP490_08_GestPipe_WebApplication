@@ -8,7 +8,7 @@ import authService from '../services/authService';
 import adminService from '../services/adminService';
 import { useTheme } from '../utils/ThemeContext';
 // (Bỏ import Sidebar, AdminSidebar, Logo, backgroundImage)
-import { Loader2, ArrowLeft } from 'lucide-react'; // Thêm Loader, ArrowLeft
+import { Loader2 } from 'lucide-react'; // Thêm Loader
 import { motion } from 'framer-motion'; // Thêm motion
 
 // Hiệu ứng
@@ -62,20 +62,21 @@ const EditProfile = () => {
     }
 
     const adminData = authService.getCurrentUser();
-    if (adminData) {
-      const parsedAdmin = adminData; // authService đã parse
-      setAdmin(parsedAdmin);
-      
-      setFormData({
-        fullName: parsedAdmin.fullName || '',
-        birthday: parsedAdmin.birthday ? parsedAdmin.birthday.split('T')[0] : '',
-        email: parsedAdmin.email || '',
-        phoneNumber: parsedAdmin.phoneNumber || '',
-        province: parsedAdmin.province || ''
-      });
-    } else {
+    if (!adminData) {
       navigate('/');
+      return;
     }
+
+    const parsedAdmin = adminData; // authService đã parse
+    setAdmin(parsedAdmin);
+    
+    setFormData({
+      fullName: parsedAdmin.fullName || '',
+      birthday: parsedAdmin.birthday ? parsedAdmin.birthday.split('T')[0] : '',
+      email: parsedAdmin.email || '',
+      phoneNumber: parsedAdmin.phoneNumber || '',
+      province: parsedAdmin.province || ''
+    });
   }, [navigate]);
 
   // (Bỏ handleLogout)
@@ -144,8 +145,10 @@ const EditProfile = () => {
 
   // Style input đồng bộ
   const inputStyle = `flex-1 px-4 py-2 rounded-lg border 
-                      bg-gray-900/70 border-gray-700 text-white 
-                      placeholder:text-gray-500 focus:outline-none focus:border-cyan-400`;
+                      ${theme === 'dark' 
+                        ? 'bg-gray-900/70 border-gray-700 text-white placeholder:text-gray-500' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'} 
+                      focus:outline-none focus:border-cyan-400 transition-colors duration-300`;
   const labelStyle = `w-48 font-semibold text-base ${
                       theme === 'dark' ? 'text-white' : 'text-gray-800'
                     }`;
@@ -162,7 +165,7 @@ const EditProfile = () => {
   return (
     // (Bỏ div layout)
     <motion.main 
-      className="flex-1 overflow-y-auto p-8 font-montserrat flex justify-center pt-10" // Tự cuộn
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-center"
       initial="initial"
       animate="animate"
       exit="exit"
@@ -170,24 +173,12 @@ const EditProfile = () => {
       transition={pageVariants.transition}
     >
       <div className="w-full max-w-2xl">
-        {/* Nút Back */}
-        <button
-          type="button"
-          aria-label="Back to profile"
-          title="Back"
-          className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-lg border 
-                     border-white/20 bg-black/50 backdrop-blur-sm 
-                     text-gray-200 hover:text-white hover:border-cyan-400 
-                     focus:outline-none focus:border-cyan-400 transition"
-          onClick={() => navigate('/profile')}
-        >
-          <ArrowLeft size={18} />
-          Back
-        </button>
-
         {/* Edit Profile Form (Style "kính mờ") */}
-        <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8 sm:p-10">
-          <h2 className="text-3xl font-bold text-center mb-8 text-white">
+        <div className={`backdrop-blur-lg rounded-2xl border shadow-xl p-8 sm:p-10 transition-colors duration-300
+                        ${theme === 'dark' 
+                          ? 'bg-black/50 border-white/20' 
+                          : 'bg-white/80 border-gray-200'}`}>
+          <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
             {t('editProfile.title')}
           </h2>
 
@@ -217,7 +208,7 @@ const EditProfile = () => {
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}
-                className={inputStyle}
+                className={`${inputStyle} date-input-blue-icon`}
               />
             </div>
 
@@ -231,7 +222,7 @@ const EditProfile = () => {
                 name="email"
                 value={formData.email}
                 disabled
-                className={`${inputStyle} bg-gray-600/50 border-gray-700 text-gray-400 cursor-not-allowed`}
+                className={`${inputStyle} cursor-not-allowed opacity-70 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}
               />
             </div>
 
@@ -275,8 +266,8 @@ const EditProfile = () => {
               <button
                 type="button"
                 onClick={() => navigate('/profile')}
-                className="px-8 py-3 rounded-lg font-medium transition-all
-                           bg-gray-600 text-white hover:bg-gray-500"
+                className={`px-8 py-3 rounded-lg font-medium transition-all
+                           ${theme === 'dark' ? 'bg-gray-600 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
               >
                 {t('common.cancel')}
               </button>

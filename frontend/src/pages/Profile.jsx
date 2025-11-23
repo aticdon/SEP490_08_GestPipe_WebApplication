@@ -73,12 +73,12 @@ const Profile = () => {
     }
 
     const adminData = authService.getCurrentUser();
-    if (adminData) {
-      fetchProfile(adminData._id || adminData.id);
-    } else {
-      authService.logout(); // Failsafe
+    if (!adminData) {
       navigate('/');
+      return;
     }
+
+    fetchProfile(adminData._id || adminData.id);
   }, [navigate, fetchProfile]);
 
   // (Bỏ handleLogout)
@@ -110,7 +110,7 @@ const Profile = () => {
   return (
     // (Bỏ div layout)
     <motion.main 
-      className="flex-1 overflow-y-auto p-8 font-montserrat flex justify-center pt-10" // Tự cuộn
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-center"
       initial="initial"
       animate="animate"
       exit="exit"
@@ -119,8 +119,11 @@ const Profile = () => {
     >
       <div className="w-full max-w-2xl">
         {/* Profile Card (Style "kính mờ") */}
-        <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8 sm:p-10">
-          <h2 className="text-3xl font-bold text-center mb-8 text-white">
+        <div className={`backdrop-blur-lg rounded-2xl border shadow-xl p-8 sm:p-10 transition-colors duration-300
+                        ${theme === 'dark' 
+                          ? 'bg-black/50 border-white/20' 
+                          : 'bg-white/80 border-gray-200'}`}>
+          <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
             {t('profile.title')}
           </h2>
 
@@ -150,7 +153,7 @@ const Profile = () => {
               <InfoRow 
                 label={t('profile.role')} 
                 value={
-                  <span className="px-3 py-1 rounded-full bg-gray-700 text-gray-100 font-semibold text-sm capitalize">
+                  <span className={`px-3 py-1 rounded-full font-semibold text-sm capitalize ${theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-gray-200 text-gray-800'}`}>
                     {profileData.role}
                   </span>
                 } 
@@ -166,8 +169,8 @@ const Profile = () => {
           <div className="flex gap-4 mt-8 justify-end">
             <button
               onClick={() => navigate('/change-password')}
-              className="px-6 py-2 rounded-lg font-medium transition-all
-                         bg-gray-600 text-white hover:bg-gray-500"
+              className={`px-6 py-2 rounded-lg font-medium transition-all
+                         ${theme === 'dark' ? 'bg-gray-600 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
             >
               {t('profile.changePassword')}
             </button>
