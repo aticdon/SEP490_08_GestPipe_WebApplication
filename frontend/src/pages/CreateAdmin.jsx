@@ -62,9 +62,23 @@ const CreateAdmin = () => {
   // (Bỏ handleLogout)
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === 'phoneNumber') {
+      // Validation for phoneNumber: only numbers, max 10 digits
+      if (value.length > 10) {
+        return; // Don't update if exceeds max length
+      }
+      // Allow only numbers
+      const numberOnlyRegex = /^[0-9]*$/;
+      if (!numberOnlyRegex.test(value)) {
+        return; // Don't update if contains non-numeric characters
+      }
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
   };
 
@@ -73,6 +87,18 @@ const CreateAdmin = () => {
     
     if (!formData.email || !formData.fullName || !formData.phoneNumber || !formData.province) {
       toast.error(t('notifications.fillRequiredFields'));
+      return;
+    }
+
+    // Additional validation for phoneNumber
+    if (formData.phoneNumber.length !== 10) {
+      toast.error('Phone number must be exactly 10 digits');
+      return;
+    }
+
+    const numberOnlyRegex = /^[0-9]+$/;
+    if (!numberOnlyRegex.test(formData.phoneNumber)) {
+      toast.error('Phone number can only contain numbers');
       return;
     }
 
@@ -177,18 +203,25 @@ const CreateAdmin = () => {
               </div>
 
               {/* Phone Number */}
-              <div>
-                <label className={labelStyle}>
-                  {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="0123456789"
-                  className={inputStyle}
-                />
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <label className={labelStyle}>
+                    {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    placeholder="0123456789"
+                    className={inputStyle}
+                  />
+                </div>
+                <div className="flex justify-end mt-1">
+                  <span className={`text-xs ${formData.phoneNumber.length !== 10 ? 'text-red-400' : 'text-green-400'}`}>
+                    {formData.phoneNumber.length}/10 digits
+                  </span>
+                </div>
               </div>
 
               {/* Province */}
