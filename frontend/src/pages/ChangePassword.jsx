@@ -120,6 +120,12 @@ const ChangePassword = () => {
       
       toast.success(t('notifications.passwordChanged'));
       
+      setFormData({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+
       setTimeout(() => {
         if (admin?.role === 'superadmin') {
           navigate('/dashboard');
@@ -155,7 +161,7 @@ const ChangePassword = () => {
   const labelStyle = `block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`;
 
   // TÁCH FORM RA THÀNH COMPONENT RIÊNG
-  const ChangePasswordForm = () => (
+  const renderChangePasswordForm = () => (
     <div className={`backdrop-blur-lg rounded-2xl border shadow-xl p-8 sm:p-10 transition-colors duration-300
                     ${theme === 'dark' 
                       ? 'bg-black/50 border-white/20' 
@@ -164,7 +170,7 @@ const ChangePassword = () => {
         {t('changePassword.title')}
       </h2>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
         {/* Old Password */}
         <div>
           <label className={labelStyle}>
@@ -178,6 +184,7 @@ const ChangePassword = () => {
               onChange={handleChange}
               placeholder="••••••••••"
               className={getInputStyle('oldPassword')}
+              autoComplete="new-password"
             />
             <button
               type="button"
@@ -205,6 +212,7 @@ const ChangePassword = () => {
               onChange={handleChange}
               placeholder="••••••"
               className={getInputStyle('newPassword')}
+              autoComplete="new-password"
             />
             <button
               type="button"
@@ -232,6 +240,7 @@ const ChangePassword = () => {
               onChange={handleChange}
               placeholder="••••••••••"
               className={getInputStyle('confirmPassword')}
+              autoComplete="new-password"
             />
             <button
               type="button"
@@ -321,7 +330,7 @@ const ChangePassword = () => {
           </div>
 
           {/* Form */}
-          <ChangePasswordForm />
+          {renderChangePasswordForm()}
         </motion.div>
       </div>
     );
@@ -339,7 +348,7 @@ const ChangePassword = () => {
       transition={pageVariants.transition}
     >
       <div className="w-full max-w-2xl mx-auto">
-        <ChangePasswordForm />
+        {renderChangePasswordForm()}
       </div>
     </motion.main>
   );
