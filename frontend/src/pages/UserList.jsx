@@ -5,7 +5,10 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2'; 
 import { motion } from 'framer-motion'; 
-import { Lock, Unlock, Search as SearchIcon, ChevronDown, Eye, Loader2, X } from 'lucide-react'; 
+import { 
+  Lock, Unlock, Search as SearchIcon, ChevronDown, Eye, Loader2, X, Users, Filter, UserCheck, UserX,
+  Mail, Phone, Calendar
+} from 'lucide-react'; 
 // Services
 import authService from '../services/authService';
 import userService from '../services/userService';
@@ -25,37 +28,25 @@ const STATUS_LABELS = ['all', 'online', 'offline', 'inactive', 'blocked'];
 
 const getStatusBadge = (status) => {
   switch (status) {
-    case "online": return "bg-gradient-to-r from-green-500 to-green-400 text-white";
-    case "offline": return "bg-gradient-to-r from-gray-600 to-gray-500 text-white";
-    case "blocked": return "bg-gradient-to-r from-red-600 to-red-500 text-white";
-    case "inactive": return "bg-gradient-to-r from-gray-600 to-gray-500 text-white";
-    default: return "bg-gray-600 text-white";
+    case "online": return "bg-green-500/20 text-green-400 border border-green-500/30";
+    case "offline": return "bg-gray-500/20 text-gray-400 border border-gray-500/30";
+    case "blocked": return "bg-red-500/20 text-red-400 border border-red-500/30";
+    case "inactive": return "bg-gray-500/20 text-gray-400 border border-gray-500/30";
+    default: return "bg-gray-500/20 text-gray-400 border border-gray-500/30";
   }
-};
-
-const getDisplayDate = (dateStr) => {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  return isNaN(d.getTime()) ? "-" : d.toLocaleDateString("vi-VN");
-};
-
-const formatDate = (date) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "-" : d.toLocaleDateString("vi-VN");
 };
 
 // === POPUP DETAIl
 const InfoRow = ({ label, value }) => (
   <tr>
     <td
-      className="py-2 font-bold text-base text-white whitespace-nowrap text-left pr-6 align-top"
+      className="py-2 font-bold text-base text-gray-900 dark:text-white whitespace-nowrap text-left pr-6 align-top"
       style={{ fontFamily: 'Montserrat', minWidth: 150 }}
     >
       {label}:
     </td>
     <td
-      className="py-2 font-normal text-base text-white text-left pl-3 break-words"
+      className="py-2 font-normal text-base text-gray-700 dark:text-white text-left pl-3 break-words"
       style={{ fontFamily: 'Montserrat' }}
     >
       {value || "-"}
@@ -67,6 +58,19 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
   const popupRef = useRef();
   const [togglingLock, setTogglingLock] = useState(false);
   const { t } = useTranslation();
+  const { theme } = useTheme(); // Add theme hook
+
+  const formatDate = (date) => {
+    if (!date) return t('common.notAvailable');
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   const mapStatusDetail = (status) => {
     switch (status) {
@@ -99,7 +103,7 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
 
   return (
     <div 
-      className={`fixed z-[999] inset-0 flex items-center justify-center bg-black bg-opacity-85 font-montserrat 
+      className={`fixed z-[999] inset-0 flex items-center justify-center bg-black/85 font-montserrat 
                   transition-opacity duration-300 ease-in-out 
                   pl-72 
                   ${show ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
@@ -109,7 +113,7 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.9 }}
         transition={{ type: 'tween', ease: 'anticipate', duration: 0.3 }}
-        className="w-full max-w-2xl bg-black/80 backdrop-blur-lg rounded-2xl border border-white/40 shadow-xl 
+        className="w-full max-w-2xl bg-white/90 dark:bg-black/80 backdrop-blur-lg rounded-2xl border border-gray-200 dark:border-white/40 shadow-xl 
                    flex flex-col relative"
         style={{ minHeight: "550px", maxHeight: '90vh' }}
       >
@@ -117,14 +121,15 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
           type="button"
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full transition-colors
-                     text-gray-400 hover:bg-white/10 hover:text-white z-20"
+                     text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white z-20"
           aria-label="Close"
         >
+          <X size={24} />
         </button>
 
         {user ? (
           <>
-            <div className="px-10 py-10 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600">
+            <div className="px-10 py-10 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600">
               <table className="w-full" style={{ tableLayout: "fixed" }}>
                 <tbody>
                   <tr>
@@ -136,7 +141,7 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
                         verticalAlign: "top",
                       }}
                     >
-                      <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden border-2 border-gray-200 shadow-xl mt-2">
+                      <div className="w-48 h-48 rounded-full bg-gray-200 dark:bg-gray-300 flex items-center justify-center overflow-hidden border-2 border-gray-300 dark:border-gray-200 shadow-xl mt-2">
                         {user.avatarUrl ? (
                           <img src={user.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                         ) : (
@@ -193,10 +198,10 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
 
 // Biến cho hiệu ứng chuyển động
 const pageVariants = {
-  initial: { opacity: 0, x: "-20px" },
-  animate: { opacity: 1, x: "0px" },
-  exit: { opacity: 0, x: "20px" },
-  transition: { type: 'tween', ease: 'anticipate', duration: 0.3 }
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+  transition: { type: 'tween', ease: 'easeOut', duration: 0.3 }
 };
 
 // ====================================================================
@@ -206,6 +211,18 @@ const UserList = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { theme } = useTheme(); 
+
+  const getDisplayDate = (dateStr) => {
+    if (!dateStr) return t('common.notAvailable');
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   // State
   const [users, setUsers] = useState([]);
@@ -339,7 +356,7 @@ const UserList = () => {
   return (
     <> {/* <-- BỌC TRONG FRAGMENT */}
       <motion.main 
-        className="flex-1 overflow-hidden p-8 font-montserrat flex flex-col"
+        className="flex-1 h-full overflow-hidden p-6 md:p-8 font-montserrat flex flex-col gap-4"
         initial="initial"
         animate="animate"
         exit="exit"
@@ -347,70 +364,91 @@ const UserList = () => {
         transition={pageVariants.transition}
       >
         
-        {/* KHỐI FILTER + SEARCH */}
-        <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          <div className="relative" ref={filterDropdownRef}>
-              <button
-                onClick={() => setShowFilterDropdown(s => !s)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border 
-                           border-white/20 bg-black/50 backdrop-blur-sm 
-                           text-gray-200 hover:text-white hover:border-cyan-400 
-                           focus:outline-none focus:border-cyan-400 transition"
-              >
-                <span className="capitalize">
-                  {filterType === "all" ? t('userList.allUsers') : (filterType === 'blocked' ? t('userList.locked') : filterType)}
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+          <div>
+            <h1 className="text-3xl font-extrabold text-black dark:text-white mb-2 flex items-center gap-3">
+              <Users className="text-cyan-600 dark:text-cyan-400" size={32} />
+              {t('userList.title', { defaultValue: 'User Management' })}
+            </h1>
+            <p className="text-gray-700 dark:text-gray-400 text-base font-medium">{t('userList.subtitle', { defaultValue: 'Manage system users and permissions' })}</p>
+          </div>
+        </div>
+
+        {/* Controls Section */}
+        <div className="flex flex-col md:flex-row gap-3 bg-white/60 dark:bg-black/40 p-3 rounded-2xl backdrop-blur-md z-20 shrink-0 border border-gray-200 dark:border-white/10">
+          {/* Search */}
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder={t('userList.searchUser')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 
+                        bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white 
+                        font-montserrat text-sm placeholder:text-gray-500 
+                        focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 transition-all"
+            />
+          </div>
+
+          {/* Filter */}
+          <div className="relative min-w-[160px]" ref={filterDropdownRef}>
+            <button
+              onClick={() => setShowFilterDropdown(s => !s)}
+              className="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-xl border 
+                        border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 
+                        text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20
+                        focus:outline-none transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-cyan-600 dark:text-cyan-400" />
+                <span className="capitalize text-sm font-medium">
+                  {filterType === "all" ? t('userList.allUsers') : t(`userList.${filterType}`)}
                 </span>
-                <ChevronDown size={18} />
-              </button>
-              
-              {showFilterDropdown && (
-                <div
-                  className="absolute top-full mt-2 w-48 rounded-lg shadow-xl z-50 
-                             bg-gray-800 border border-gray-600 overflow-hidden"
-                >
-                  {STATUS_LABELS.map(st => (
-                    <button
-                      key={st}
-                      onClick={() => {
-                        setFilterType(st);
-                        setShowFilterDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-gray-200 
-                                 hover:bg-white/10 capitalize transition-colors"
-                    >
-                      {st === 'blocked' ? t('userList.locked') : st}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="relative w-full max-w-xs">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" size={18} />
-              <input
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                placeholder={t('userList.searchUser')}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/20 
-                           bg-black/50 backdrop-blur-sm text-white 
-                           font-montserrat text-sm placeholder:text-gray-500 
-                           focus:outline-none focus:border-cyan-400"
-              />
-            </div>
+              </div>
+              <ChevronDown size={14} className={`transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showFilterDropdown && (
+              <div className="absolute top-full right-0 mt-2 w-full rounded-xl shadow-2xl z-50 
+                            bg-white dark:bg-gray-900/95 border border-gray-200 dark:border-white/10 backdrop-blur-xl overflow-hidden">
+                {STATUS_LABELS.map(st => (
+                  <button
+                    key={st}
+                    onClick={() => {
+                      setFilterType(st);
+                      setShowFilterDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2
+                              ${filterType === st ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
+                  >
+                    {st === 'online' && <UserCheck size={14} />}
+                    {st === 'offline' && <UserX size={14} />}
+                    {st === 'blocked' && <Lock size={14} />}
+                    {st === 'inactive' && <UserX size={14} />}
+                    {st === 'all' && <Filter size={14} />}
+                    <span className="capitalize">{t(`userList.${st}`)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         
         {/* CONTAINER BẢNG */}
-        <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden flex-1 flex flex-col">
+        <div className="bg-white/60 dark:bg-black/50 backdrop-blur-lg rounded-2xl border border-gray-200 dark:border-white/20 shadow-xl overflow-hidden flex-1 flex flex-col">
           
           {/* Div cho Header (Không cuộn) */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 overflow-y-hidden bg-gray-200 dark:bg-header-end-gray" style={{ scrollbarGutter: 'stable' }}>
             <table className="w-full table-fixed">
-              <thead className="bg-gradient-table-header from-header-start-gray to-header-end-gray text-white">
+              <thead className="bg-gray-200 dark:bg-gradient-table-header dark:from-header-start-gray dark:to-header-end-gray text-black dark:text-white border-b border-gray-300 dark:border-white/10">
                 <tr>
-                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[25%]">{t('userList.email')}</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[25%]">{t('userList.phoneNumber')}</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-left text-sm w-[20%]">{t('userList.createDate')}</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-center text-sm w-[15%]">{t('userList.status')}</th>
-                  <th className="px-5 py-5 font-montserrat font-bold text-center text-sm w-[20%]">{t('userList.action')}</th>
+                  <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[25%]">{t('userList.email')}</th>
+                  <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('userList.phoneNumber')}</th>
+                  <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('userList.createDate')}</th>
+                  <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('userList.status')}</th>
+                  <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('userList.action')}</th>
                 </tr>
               </thead>
             </table>
@@ -419,7 +457,7 @@ const UserList = () => {
           {/* Div cho Body (Sẽ cuộn) */}
           <div
             className="overflow-y-scroll flex-1 scrollbar-thin scrollbar-track-transparent 
-                        scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500"
+                        scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500"
             style={{ scrollbarGutter: 'stable' }}
           >
             <table className="w-full table-fixed">
@@ -427,27 +465,41 @@ const UserList = () => {
                 {getVisibleUsers().map((u, i) => (
                   <tr
                     key={u.id}
-                    className={`border-b border-table-border-dark hover:bg-table-row-hover transition-colors 
-                                ${i % 2 === 0 ? 'bg-white/5' : 'bg-transparent'}`}
+                    className={`border-b border-gray-200 dark:border-table-border-dark hover:bg-gray-100 dark:hover:bg-table-row-hover transition-colors 
+                                ${i % 2 === 0 ? 'bg-gray-50 dark:bg-white/5' : 'bg-transparent'}`}
                   >
-                    <td className="px-5 py-4 text-gray-200 text-sm truncate w-[25%] text-left">{u.email}</td>
-                    <td className="px-5 py-4 text-gray-200 text-sm w-[25%] text-left">{u.phoneNumber}</td>
-                    <td className="px-5 py-4 text-gray-200 text-sm w-[20%] text-left">{getDisplayDate(u.createDate)}</td>
-                    <td className="px-5 py-4 w-[15%] text-center">
-                      <span className={`px-4 py-1.5 rounded-xl text-xs font-semibold capitalize
+                    <td className="px-4 py-4 w-[25%] text-left">
+                      <div className="flex items-center gap-2 text-black dark:text-white font-bold text-sm truncate">
+                        <Mail size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                        <span className="truncate">{u.email}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 w-[20%] text-left">
+                      <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                        <Phone size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                        <span className="truncate">{u.phoneNumber}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 w-[20%] text-left">
+                      <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                        <Calendar size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                        <span className="truncate">{getDisplayDate(u.createDate)}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 w-[20%] text-center">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium capitalize border whitespace-nowrap
                         ${getStatusBadge(u.status)}`}>
-                        {u.status === "blocked" ? t('userList.locked') : u.status}
+                        {t(`userList.${u.status}`)}
                       </span>
                     </td>
-                    <td className="px-5 py-4 w-[20%] text-center">
-                      <div className="flex items-center gap-3 justify-center">
+                    <td className="px-4 py-4 w-[15%] text-center">
+                      <div className="flex items-center gap-2 justify-center">
                         <button
                           onClick={(e) => {
                             e.stopPropagation(); 
                             handleShowDetail(u.id);
                           }}
-                          className="p-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white 
-                                     hover:from-blue-500 hover:to-cyan-400 transition"
+                          className="p-2 rounded-lg transition-all duration-200 text-blue-500 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300"
                           title={t('userList.viewDetails')}
                         >
                           <Eye size={18} />
@@ -458,15 +510,15 @@ const UserList = () => {
                             handleToggleLock(u.id, u.isLocked);
                           }}
                           disabled={togglingId === u.id} 
-                          className={`p-2 rounded-full text-white hover:opacity-80 transition
-                                     ${togglingId === u.id ? 'cursor-not-allowed' : ''}
+                          className={`p-2 rounded-lg transition-all duration-200
+                                     ${togglingId === u.id ? 'cursor-not-allowed opacity-50' : ''}
                                      ${u.isLocked
-                                       ? "bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-500"
-                                       : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500" 
+                                       ? "text-green-500 dark:text-green-400 hover:bg-green-500/10 hover:text-green-600 dark:hover:text-green-300"
+                                       : "text-red-500 dark:text-red-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-300" 
                                      }`}
                           title={u.isLocked ? t('userList.unlockUser') : t('userList.lockUser')}
                         >
-                          {togglingId === u.id ? <Loader2 size={18} className="animate-spin"/> : (u.isLocked ? <Lock size={18} /> : <Unlock size={18} />)}
+                          {togglingId === u.id ? <Loader2 size={18} className="animate-spin"/> : (u.isLocked ? <Unlock size={18} /> : <Lock size={18} />)}
                         </button>
                       </div>
                     </td>
@@ -475,7 +527,7 @@ const UserList = () => {
 
                 {getVisibleUsers().length === 0 && (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 text-gray-400">
+                    <td colSpan={5} className="text-center py-10 text-gray-500 dark:text-gray-400">
                       {t('userList.noUsersFound')}
                     </td>
                   </tr>

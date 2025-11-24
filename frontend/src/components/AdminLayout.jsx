@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { ToastContainer } from 'react-toastify';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
-import { Sun, Moon, Bell, ChevronDown, User } from 'lucide-react';
+import backgroundLightImage from '../assets/backgrounds/background_lightheme.jpg';
+import { Sun, Moon, ChevronDown, User } from 'lucide-react';
 import Sidebar from './Sidebar';
 import AdminSidebar from './AdminSidebar';
 import { useTheme } from '../utils/ThemeContext';
@@ -63,8 +64,8 @@ const AdminLayout = () => {
   // Nếu chưa có admin (đang fetch), hiển thị loading
   if (!admin) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading Layout...</div>
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
+        <div className={`text-xl ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Loading Layout...</div>
       </div>
     );
   }
@@ -73,7 +74,7 @@ const AdminLayout = () => {
     <div
       className="h-screen flex flex-col relative"
       style={{
-        backgroundImage: `url(${backgroundImage})`,
+        backgroundImage: `url(${theme === 'dark' ? backgroundImage : backgroundLightImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -93,48 +94,43 @@ const AdminLayout = () => {
         <header
           className={`sticky top-0 z-50 border-b backdrop-blur-lg ${
             theme === "dark"
-              ? "bg-black/30 border-white/25"
-              : "bg-white/30 border-gray-200"
+              ? "bg-black/80 border-white/25"
+              : "bg-white/90 border-gray-200"
           }`}
         >
           {/* ... (Toàn bộ code Header giữ nguyên) ... */}
-          <div className="px-6 py-6 flex items-center relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
-              <img src={Logo} alt="GestPipe" className="h-20" />
+          <div className="px-6 py-4 flex items-center justify-between relative h-24">
+            {/* Logo Center */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+              <img src={Logo} alt="GestPipe" className="h-20 object-contain" />
             </div>
-            <div className="ml-auto flex items-center gap-1">
+
+            {/* Right Side: Theme Switch & Profile */}
+            <div className="ml-auto flex items-center gap-3 z-20">
               <button
                 onClick={toggleTheme}
-                className={`p-2 rounded-lg transition-all duration-200 ease-in-out ${
+                className={`p-2 rounded-full transition-all duration-200 ease-in-out shadow-sm border ${
                   theme === "dark"
-                    ? "text-gray-100 hover:bg-white/10"
-                    : "text-yellow-400 hover:bg-black/10"
+                    ? "bg-white/10 text-gray-100 border-white/10 hover:bg-white/20"
+                    : "bg-gray-100 text-black border-gray-200 hover:bg-gray-200"
                 }`}
               >
                 {theme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
               </button>
-              <button
-                className={`p-2 rounded-lg relative transition-all duration-200 ease-in-out ${
-                  theme === "dark"
-                    ? "text-gray-100 hover:bg-white/10"
-                    : "text-gray-700 hover:bg-black/10"
-                }`}
-                title="Noti"
-              >
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+              
               <div className="relative" ref={userDropdownRef}>
                 <button
                   onClick={() => setShowUserDropdown((s) => !s)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-full transition-all duration-200 ease-in-out border shadow-sm ${
                     theme === "dark"
-                      ? "text-gray-300 hover:bg-white/10"
-                      : "text-gray-700 hover:bg-black/10"
+                      ? "bg-white/10 text-gray-100 border-white/10 hover:bg-white/20"
+                      : "bg-gray-100 text-black border-gray-200 hover:bg-gray-200"
                   }`}
                 >
-                  <User size={20} className={theme === "dark" ? "text-gray-100" : "text-gray-700"} />
-                  <ChevronDown size={16} className={theme === "dark" ? "text-gray-400" : "text-gray-600"} />
+                  <div className={`p-1 rounded-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+                    <User size={18} className={theme === "dark" ? "text-gray-100" : "text-black"} />
+                  </div>
+                  <ChevronDown size={16} className={theme === "dark" ? "text-gray-400" : "text-black"} />
                 </button>
                 <div
                   className={`absolute right-0 mt-2 w-56 rounded-lg shadow-xl z-50 
@@ -166,7 +162,7 @@ const AdminLayout = () => {
                       theme === "dark" ? "text-white hover:bg-white/10" : "text-gray-900 hover:bg-gray-100"
                     }`}
                   >
-                    {t("profile.title") || "Profile"}
+                    {t("profile.title", { defaultValue: "Profile" })}
                   </button>
                   <button
                     onClick={() => { setShowUserDropdown(false); navigate('/change-password'); }}
@@ -174,13 +170,13 @@ const AdminLayout = () => {
                       theme === "dark" ? "text-gray-300 hover:bg-white/10" : "text-gray-700 hover:bg-gray-100"
                     }`}
                   >
-                    {t("profile.changePassword") || "Change Password"}
+                    {t("profile.changePassword", { defaultValue: "Change Password" })}
                   </button>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-base font-medium text-red-500 hover:bg-red-500/10 rounded-b-lg"
                   >
-                    {t("common.logout") || "Logout"}
+                    {t("common.logout", { defaultValue: "Logout" })}
                   </button>
                 </div>
               </div>

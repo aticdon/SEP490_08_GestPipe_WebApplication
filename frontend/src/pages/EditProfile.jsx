@@ -8,7 +8,7 @@ import authService from '../services/authService';
 import adminService from '../services/adminService';
 import { useTheme } from '../utils/ThemeContext';
 // (Bỏ import Sidebar, AdminSidebar, Logo, backgroundImage)
-import { Loader2, ArrowLeft } from 'lucide-react'; // Thêm Loader, ArrowLeft
+import { Loader2 } from 'lucide-react'; // Thêm Loader
 import { motion } from 'framer-motion'; // Thêm motion
 
 // Hiệu ứng
@@ -35,22 +35,73 @@ const EditProfile = () => {
     phoneNumber: '',
     province: ''
   });
+  const [errors, setErrors] = useState({});
 
   // (Danh sách provinces giữ nguyên)
   const provinces = [
-    'An Giang', 'Bà Rịa - Vũng Tàu', 'Bạc Liêu', 'Bắc Kạn', 'Bắc Giang', 
-    'Bắc Ninh', 'Bến Tre', 'Bình Dương', 'Bình Định', 'Bình Phước', 
-    'Bình Thuận', 'Cà Mau', 'Cao Bằng', 'Cần Thơ', 'Đà Nẵng', 
-    'Đắk Lắk', 'Đắk Nông', 'Điện Biên', 'Đồng Nai', 'Đồng Tháp', 
-    'Gia Lai', 'Hà Giang', 'Hà Nam', 'Hà Nội', 'Hà Tĩnh', 
-    'Hải Dương', 'Hải Phòng', 'Hậu Giang', 'Hòa Bình', 'Hưng Yên', 
-    'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu', 'Lâm Đồng', 
-    'Lạng Sơn', 'Lào Cai', 'Long An', 'Nam Định', 'Nghệ An', 
-    'Ninh Bình', 'Ninh Thuận', 'Phú Thọ', 'Phú Yên', 'Quảng Bình', 
-    'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 'Quảng Trị', 'Sóc Trăng', 
-    'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên', 'Thanh Hóa', 
-    'Thừa Thiên Huế', 'Tiền Giang', 'TP. Hồ Chí Minh', 'Trà Vinh', 
-    'Tuyên Quang', 'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái'
+    { key: 'anGiang', value: 'An Giang' },
+    { key: 'baRiaVungTau', value: 'Bà Rịa - Vũng Tàu' },
+    { key: 'bacLieu', value: 'Bạc Liêu' },
+    { key: 'bacKan', value: 'Bắc Kạn' },
+    { key: 'bacGiang', value: 'Bắc Giang' },
+    { key: 'bacNinh', value: 'Bắc Ninh' },
+    { key: 'benTre', value: 'Bến Tre' },
+    { key: 'binhDuong', value: 'Bình Dương' },
+    { key: 'binhDinh', value: 'Bình Định' },
+    { key: 'binhPhuoc', value: 'Bình Phước' },
+    { key: 'binhThuan', value: 'Bình Thuận' },
+    { key: 'caMau', value: 'Cà Mau' },
+    { key: 'caoBang', value: 'Cao Bằng' },
+    { key: 'canTho', value: 'Cần Thơ' },
+    { key: 'daNang', value: 'Đà Nẵng' },
+    { key: 'dakLak', value: 'Đắk Lắk' },
+    { key: 'dakNong', value: 'Đắk Nông' },
+    { key: 'dienBien', value: 'Điện Biên' },
+    { key: 'dongNai', value: 'Đồng Nai' },
+    { key: 'dongThap', value: 'Đồng Tháp' },
+    { key: 'giaLai', value: 'Gia Lai' },
+    { key: 'haGiang', value: 'Hà Giang' },
+    { key: 'haNam', value: 'Hà Nam' },
+    { key: 'haNoi', value: 'Hà Nội' },
+    { key: 'haTinh', value: 'Hà Tĩnh' },
+    { key: 'haiDuong', value: 'Hải Dương' },
+    { key: 'haiPhong', value: 'Hải Phòng' },
+    { key: 'hauGiang', value: 'Hậu Giang' },
+    { key: 'hoaBinh', value: 'Hòa Bình' },
+    { key: 'hungYen', value: 'Hưng Yên' },
+    { key: 'khanhHoa', value: 'Khánh Hòa' },
+    { key: 'kienGiang', value: 'Kiên Giang' },
+    { key: 'konTum', value: 'Kon Tum' },
+    { key: 'laiChau', value: 'Lai Châu' },
+    { key: 'lamDong', value: 'Lâm Đồng' },
+    { key: 'langSon', value: 'Lạng Sơn' },
+    { key: 'laoCai', value: 'Lào Cai' },
+    { key: 'longAn', value: 'Long An' },
+    { key: 'namDinh', value: 'Nam Định' },
+    { key: 'ngheAn', value: 'Nghệ An' },
+    { key: 'ninhBinh', value: 'Ninh Bình' },
+    { key: 'ninhThuan', value: 'Ninh Thuận' },
+    { key: 'phuTho', value: 'Phú Thọ' },
+    { key: 'phuYen', value: 'Phú Yên' },
+    { key: 'quangBinh', value: 'Quảng Bình' },
+    { key: 'quangNam', value: 'Quảng Nam' },
+    { key: 'quangNgai', value: 'Quảng Ngãi' },
+    { key: 'quangNinh', value: 'Quảng Ninh' },
+    { key: 'quangTri', value: 'Quảng Trị' },
+    { key: 'socTrang', value: 'Sóc Trăng' },
+    { key: 'sonLa', value: 'Sơn La' },
+    { key: 'tayNinh', value: 'Tây Ninh' },
+    { key: 'thaiBinh', value: 'Thái Bình' },
+    { key: 'thaiNguyen', value: 'Thái Nguyên' },
+    { key: 'thanhHoa', value: 'Thanh Hóa' },
+    { key: 'thuaThienHue', value: 'Thừa Thiên Huế' },
+    { key: 'tienGiang', value: 'Tiền Giang' },
+    { key: 'hoChiMinh', value: 'TP. Hồ Chí Minh' },
+    { key: 'traVinh', value: 'Trà Vinh' },
+    { key: 'tuyenQuang', value: 'Tuyên Quang' },
+    { key: 'vinhLong', value: 'Vĩnh Long' },
+    { key: 'vinhPhuc', value: 'Vĩnh Phúc' },
+    { key: 'yenBai', value: 'Yên Bái' }
   ];
 
   // Check login và pre-fill form
@@ -62,73 +113,59 @@ const EditProfile = () => {
     }
 
     const adminData = authService.getCurrentUser();
-    if (adminData) {
-      const parsedAdmin = adminData; // authService đã parse
-      setAdmin(parsedAdmin);
-      
-      setFormData({
-        fullName: parsedAdmin.fullName || '',
-        birthday: parsedAdmin.birthday ? parsedAdmin.birthday.split('T')[0] : '',
-        email: parsedAdmin.email || '',
-        phoneNumber: parsedAdmin.phoneNumber || '',
-        province: parsedAdmin.province || ''
-      });
-    } else {
+    if (!adminData) {
       navigate('/');
+      return;
     }
+
+    const parsedAdmin = adminData; // authService đã parse
+    setAdmin(parsedAdmin);
+    
+    setFormData({
+      fullName: parsedAdmin.fullName || '',
+      birthday: parsedAdmin.birthday ? parsedAdmin.birthday.split('T')[0] : '',
+      email: parsedAdmin.email || '',
+      phoneNumber: parsedAdmin.phoneNumber || '',
+      province: parsedAdmin.province || ''
+    });
   }, [navigate]);
 
   // (Bỏ handleLogout)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    if (name === 'fullName') {
-      // Validation for fullName: only text, max 256 characters
-      if (value.length > 256) {
-        return; // Don't update if exceeds max length
-      }
-      // Allow only letters, spaces, and common name characters
-      const textOnlyRegex = /^[a-zA-ZÀ-ỹ\s\-'.]+$/;
-      if (value && !textOnlyRegex.test(value)) {
-        return; // Don't update if contains invalid characters
-      }
-    }
-    
     setFormData({
       ...formData,
       [name]: value
     });
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = t('notifications.nameRequired');
+    }
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(formData.phoneNumber.trim())) {
+      newErrors.phoneNumber = 'Phone number must be exactly 10 digits';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.fullName) {
-      toast.error(t('notifications.nameRequired'));
-      return;
-    }
-
-    if (!formData.phoneNumber.trim()) {
-      toast.error('Phone number is required');
-      return;
-    }
-
-    // Additional validation for fullName
-    if (formData.fullName.length > 256) {
-      toast.error('Name must be less than 256 characters');
-      return;
-    }
-
-    const textOnlyRegex = /^[a-zA-ZÀ-ỹ\s\-'.]+$/;
-    if (!textOnlyRegex.test(formData.fullName)) {
-      toast.error('Name can only contain letters, spaces, hyphens, apostrophes, and periods');
-      return;
-    }
-
-    // Check phone number format: exactly 10 digits
-    if (!/^\d{10}$/.test(formData.phoneNumber.trim())) {
-      toast.error('Phone number must be exactly 10 digits');
+    if (!validateForm()) {
       return;
     }
 
@@ -169,9 +206,12 @@ const EditProfile = () => {
   };
 
   // Style input đồng bộ
-  const inputStyle = `flex-1 px-4 py-2 rounded-lg border 
-                      bg-gray-900/70 border-gray-700 text-white 
-                      placeholder:text-gray-500 focus:outline-none focus:border-cyan-400`;
+  const getInputStyle = (fieldName) => `flex-1 px-4 py-2 rounded-lg border 
+                      ${errors[fieldName] ? 'border-red-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
+                      ${theme === 'dark' 
+                        ? 'bg-gray-900/70 text-white placeholder:text-gray-500' 
+                        : 'bg-white text-gray-900 placeholder:text-gray-400'} 
+                      focus:outline-none focus:border-cyan-400 transition-colors duration-300`;
   const labelStyle = `w-48 font-semibold text-base ${
                       theme === 'dark' ? 'text-white' : 'text-gray-800'
                     }`;
@@ -188,7 +228,7 @@ const EditProfile = () => {
   return (
     // (Bỏ div layout)
     <motion.main 
-      className="flex-1 overflow-y-auto p-8 font-montserrat flex justify-center pt-10" // Tự cuộn
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-center"
       initial="initial"
       animate="animate"
       exit="exit"
@@ -196,30 +236,18 @@ const EditProfile = () => {
       transition={pageVariants.transition}
     >
       <div className="w-full max-w-2xl">
-        {/* Nút Back */}
-        <button
-          type="button"
-          aria-label="Back to profile"
-          title="Back"
-          className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-lg border 
-                     border-white/20 bg-black/50 backdrop-blur-sm 
-                     text-gray-200 hover:text-white hover:border-cyan-400 
-                     focus:outline-none focus:border-cyan-400 transition"
-          onClick={() => navigate('/profile')}
-        >
-          <ArrowLeft size={18} />
-          Back
-        </button>
-
         {/* Edit Profile Form (Style "kính mờ") */}
-        <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8 sm:p-10">
-          <h2 className="text-3xl font-bold text-center mb-8 text-white">
+        <div className={`backdrop-blur-lg rounded-2xl border shadow-xl p-8 sm:p-10 transition-colors duration-300
+                        ${theme === 'dark' 
+                          ? 'bg-black/50 border-white/20' 
+                          : 'bg-white/80 border-gray-200'}`}>
+          <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
             {t('editProfile.title')}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name */}
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
               <div className="flex items-center">
                 <label className={labelStyle}>
                   {t('editProfile.name')}
@@ -229,15 +257,13 @@ const EditProfile = () => {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  className={inputStyle}
+                  className={getInputStyle('fullName')}
                   placeholder="Enter your name"
                 />
               </div>
-              <div className="flex justify-end mt-1">
-                <span className={`text-xs ${formData.fullName.length > 256 ? 'text-red-400' : 'text-gray-400'}`}>
-                  {formData.fullName.length}/256
-                </span>
-              </div>
+              {errors.fullName && (
+                <p className="text-red-500 text-sm ml-48 mt-1">{errors.fullName}</p>
+              )}
             </div>
 
             {/* Date of Birthday */}
@@ -250,7 +276,7 @@ const EditProfile = () => {
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}
-                className={inputStyle}
+                className={`${getInputStyle('birthday')} date-input-blue-icon`}
               />
             </div>
 
@@ -264,23 +290,28 @@ const EditProfile = () => {
                 name="email"
                 value={formData.email}
                 disabled
-                className={`${inputStyle} bg-gray-600/50 border-gray-700 text-gray-400 cursor-not-allowed`}
+                className={`${getInputStyle('email')} cursor-not-allowed opacity-70 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}
               />
             </div>
 
             {/* Phone Number */}
-            <div className="flex items-center">
-              <label className={labelStyle}>
-                {t('editProfile.phone')}
-              </label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className={inputStyle}
-                placeholder="Enter your phone number"
-              />
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center">
+                <label className={labelStyle}>
+                  {t('editProfile.phone')}
+                </label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className={getInputStyle('phoneNumber')}
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              {errors.phoneNumber && (
+                <p className="text-red-500 text-sm ml-48 mt-1">{errors.phoneNumber}</p>
+              )}
             </div>
 
             {/* Address (Province Dropdown) */}
@@ -292,12 +323,12 @@ const EditProfile = () => {
                 name="province"
                 value={formData.province}
                 onChange={handleChange}
-                className={`${inputStyle} appearance-none`}
+                className={`${getInputStyle('province')} appearance-none`}
               >
-                <option value="">Select province</option>
+                <option value="">{t('createAdmin.selectProvince')}</option>
                 {provinces.map((province) => (
-                  <option key={province} value={province}>
-                    {province}
+                  <option key={province.key} value={province.value}>
+                    {t(`provinces.${province.key}`)}
                   </option>
                 ))}
               </select>
@@ -308,8 +339,8 @@ const EditProfile = () => {
               <button
                 type="button"
                 onClick={() => navigate('/profile')}
-                className="px-8 py-3 rounded-lg font-medium transition-all
-                           bg-gray-600 text-white hover:bg-gray-500"
+                className={`px-8 py-3 rounded-lg font-medium transition-all
+                           ${theme === 'dark' ? 'bg-gray-600 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
               >
                 {t('common.cancel')}
               </button>

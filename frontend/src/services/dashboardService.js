@@ -21,6 +21,12 @@ export const fetchDashboardVersion = async () => {
   return response.data;
 };
 
+export const fetchDashboardGesture = async () => {
+  const response = await axios.get(`${API_URL}/gesture-overview`, {
+    headers: authHeaders(),
+  });
+  return response.data;
+};
 
 export const fetchDashboardStats = async () => {
   const response = await axios.get(`${API_URL}/stats`, {
@@ -33,5 +39,6 @@ export const fetchDashboardStats = async () => {
 export default {
   fetchDashboardUser,
   fetchDashboardVersion,
+  fetchDashboardGesture,
   fetchDashboardStats
 };

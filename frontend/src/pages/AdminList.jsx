@@ -4,46 +4,34 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify'; 
 import Swal from 'sweetalert2';
 import 'react-toastify/dist/ReactToastify.css';
-import { motion } from 'framer-motion'; // <-- THÊM
+import { motion } from 'framer-motion'; 
+import { 
+  Lock, Unlock, Plus, Search as SearchIcon, Loader2, ChevronDown, 
+  Shield, Mail, Phone, Calendar, UserCheck, UserX, Filter
+} from 'lucide-react';
 
-// Icons
-import { Lock, Unlock, Plus, Search as SearchIcon, Loader2, ChevronDown } from 'lucide-react';
-
-// Services
 import adminService from '../services/adminService';
 import authService from '../services/authService';
-
-// Theme Context (VẪN CẦN NÓ ĐỂ STYLE POPUP SWAL)
 import { useTheme } from '../utils/ThemeContext';
 
-// (KHÔNG IMPORT AdminLayout, Sidebar, Logo, backgroundImage)
-
-// ==========================
 // Status mapping
-// ==========================
 const STATUS_LABELS = ['all', 'active', 'suspended', 'inactive'];
 
 const getStatusBadge = (status) => {
   switch (status) {
-    case "active": return "bg-gradient-to-r from-green-500 to-green-400 text-white";
-    case "suspended": return "bg-gradient-to-r from-red-600 to-red-500 text-white";
-    case "inactive": return "bg-gradient-to-r from-gray-600 to-gray-500 text-white";
-    default: return "bg-gray-600 text-white";
+    case "active": return "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20";
+    case "suspended": return "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20";
+    case "inactive": return "bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20";
+    default: return "bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20";
   }
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  const d = new Date(dateString);
-  return isNaN(d.getTime()) ? "N/A" : d.toLocaleDateString("vi-VN");
 };
 
 // Hiệu ứng chuyển động
 const pageVariants = {
-  initial: { opacity: 0, x: "20px" },
-  animate: { opacity: 1, x: "0px" },
-  exit: { opacity: 0, x: "-20px" },
-  transition: { type: 'tween', ease: 'anticipate', duration: 0.3 }
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+  transition: { type: 'tween', ease: 'easeOut', duration: 0.3 }
 };
 
 // ====================================================================
@@ -51,13 +39,24 @@ const pageVariants = {
 // ====================================================================
 const AdminList = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme(); // Chỉ cần theme
+  const { theme } = useTheme(); 
   const { t } = useTranslation();
 
-  // (Bỏ state layout: admin, showUserDropdown)
+  const formatDate = (dateString) => {
+    if (!dateString) return t('common.notAvailable');
+    const d = new Date(dateString);
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(''); // (Giữ lại error để hiển thị lỗi)
+  const [error, setError] = useState(''); 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -65,16 +64,13 @@ const AdminList = () => {
   const [togglingId, setTogglingId] = useState(null);
 
   useEffect(() => {
-    // Vẫn check role
     const currentAdmin = authService.getCurrentUser();
     if (!currentAdmin || !['superadmin'].includes(currentAdmin.role)) {
-      navigate('/user-list'); // Chuyển về user-list nếu không phải superadmin
+      navigate('/user-list'); 
       return;
     }
     fetchAdmins();
-  }, [navigate]); // Bỏ fetchAdmins
-
-  // (Bỏ handleLogout)
+  }, [navigate]); 
 
   const fetchAdmins = useCallback(async () => {
     try {
@@ -84,20 +80,19 @@ const AdminList = () => {
       setError('');
     } catch (err) {
       const errorMsg = err.response?.data?.message || t('notifications.failedLoadAdmins');
-      setError(errorMsg); // Set state lỗi
+      setError(errorMsg); 
       toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   }, [t]);
 
-  // ===== LOGIC LOCK/UNLOCK (NÂNG CẤP POPUP KÍNH MỜ) =====
+  // ===== LOGIC LOCK/UNLOCK =====
   const handleToggleStatus = async (adminId, currentStatus) => {
     const actionText = currentStatus === 'active' ? t('alerts.suspendTitle') : t('alerts.activateTitle');
     const actionMessage = currentStatus === 'active' ? t('alerts.suspendMessage') : t('alerts.activateMessage');
     const confirmText = currentStatus === 'active' ? t('alerts.yesSuspend') : t('alerts.yesActivate');
     
-    // Style cho popup
     const swalConfig = {
       title: actionText,
       html: actionMessage,
@@ -107,18 +102,15 @@ const AdminList = () => {
       cancelButtonColor: '#6b7280',
       confirmButtonText: confirmText,
       cancelButtonText: t('alerts.cancel'),
-      
-      // === STYLE KÍNH MỜ (VIỀN TRẮNG 0.5px) ===
-      background: 'rgba(0,0,0,0.7)', // Nền đen mờ
-      backdrop: `rgba(0,0,0,0.4) backdrop-blur-sm`, // Backdrop mờ
-      width: '450px', // Kích thước nhỏ
+      background: theme === 'dark' ? 'rgba(0,0,0,0.9)' : '#ffffff', 
+      backdrop: `rgba(0,0,0,0.6) backdrop-blur-sm`, 
+      width: '450px', 
       customClass: {
-        container: 'pl-72', // <-- LỆCH VỀ BÊN PHẢI (giả định sidebar w-72)
-        popup: 'font-montserrat rounded-2xl border border-white/50 bg-black/70 backdrop-blur-lg text-white', // <-- VIỀN TRẮNG (0.5px là khó, dùng 1px với opacity 50)
-        title: 'text-white',
-        htmlContainer: 'text-gray-300',
-        confirmButton: 'font-semibold',
-        cancelButton: 'font-semibold'
+        popup: `font-montserrat rounded-2xl border ${theme === 'dark' ? 'border-white/20 bg-black/90 text-white' : 'border-gray-200 bg-white text-black'}`, 
+        title: `${theme === 'dark' ? 'text-white' : 'text-black'} text-xl font-extrabold`,
+        htmlContainer: `${theme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`,
+        confirmButton: 'px-6 py-2.5 rounded-lg font-semibold shadow-lg',
+        cancelButton: 'px-6 py-2.5 rounded-lg font-semibold hover:bg-gray-700'
       }
     };
 
@@ -139,7 +131,6 @@ const AdminList = () => {
       
       const successMessage = currentStatus === 'active' ? t('alerts.accountSuspended') : t('alerts.accountActivated');
       
-      // Popup success (cũng cần style)
       await Swal.fire({
         title: t('alerts.success'),
         html: successMessage,
@@ -148,7 +139,7 @@ const AdminList = () => {
         timerProgressBar: true,
         showConfirmButton: false,
         background: swalConfig.background,
-        color: swalConfig.customClass.color,
+        color: '#fff',
         customClass: swalConfig.customClass
       });
       
@@ -160,7 +151,7 @@ const AdminList = () => {
           icon: 'error',
           confirmButtonColor: '#ef4444',
           background: swalConfig.background,
-          color: swalConfig.customClass.color,
+          color: '#fff',
           customClass: swalConfig.customClass
         });
         toast.error(errorMsg);
@@ -195,165 +186,204 @@ const AdminList = () => {
 
 
   return (
-    // THÊM HIỆU ỨNG VÀO <main>
     <motion.main 
-      className="p-8 font-montserrat" // <-- SỬA LẠI: Chỉ p-8
+      className="flex-1 h-full overflow-hidden p-6 md:p-8 font-montserrat flex flex-col gap-4"
       initial="initial"
       animate="animate"
       exit="exit"
       variants={pageVariants}
-      transition={pageVariants.transition}
     >
-      
-      {/* KHỐI FILTER + SEARCH (ĐỒNG BỘ STYLE) */}
-      <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          
-          <div className="flex items-center gap-4">
-            {/* Create New Admin Button */}
-            <button 
-              onClick={() => navigate('/create-admin')}
-              className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-lg transition-all shadow-lg
-                          bg-gradient-to-r from-blue-600 to-cyan-500 text-white 
-                          hover:from-blue-500 hover:to-cyan-400`}
-            >
-              <Plus size={20} />
-              {t('adminList.createNew')}
-            </button>
-            
-            {/* FILTER */}
-            <div className="relative" ref={filterDropdownRef}>
-              <button
-                onClick={() => setShowFilterDropdown(s => !s)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border 
-                           border-white/20 bg-black/50 backdrop-blur-sm 
-                           text-gray-200 hover:text-white hover:border-cyan-400 
-                           focus:outline-none focus:border-cyan-400 transition"
-              >
-                <span className="capitalize">
-                  {t(`adminList.${filterStatus}`)}
-                </span>
-                <ChevronDown size={18} />
-              </button>
-              
-              {showFilterDropdown && (
-                <div
-                  className="absolute top-full mt-2 w-48 rounded-lg shadow-xl z-50 
-                             bg-gray-800 border border-gray-600 overflow-hidden"
-                >
-                  {STATUS_LABELS.map(st => (
-                    <button
-                      key={st}
-                      onClick={() => {
-                        setFilterStatus(st);
-                        setShowFilterDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-gray-200 
-                                 hover:bg-white/10 capitalize transition-colors"
-                    >
-                      {t(`adminList.${st}`)}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+        <div>
+          <h1 className="text-3xl font-extrabold text-black dark:text-white mb-2 flex items-center gap-3">
+            <Shield className="text-cyan-600 dark:text-cyan-400" size={32} />
+            {t('adminList.title', { defaultValue: 'Admin Management' })}
+          </h1>
+          <p className="text-gray-700 dark:text-gray-400 text-base font-medium">{t('adminList.subtitle', { defaultValue: 'Manage system administrators and permissions' })}</p>
+        </div>
 
-          {/* SEARCH */}
-          <div className="relative w-full max-w-xs">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" size={18} />
-            <input
-              type="text"
-              placeholder={t('adminList.searchAdmin')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/20 
-                         bg-black/50 backdrop-blur-sm text-white 
-                         font-montserrat text-sm placeholder:text-gray-500 
-                         focus:outline-none focus:border-cyan-400"
-            />
-          </div>
+        <button 
+          onClick={() => navigate('/create-admin')}
+          className="flex items-center gap-2 px-5 py-2 font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20
+                     bg-gradient-to-r from-cyan-600 to-blue-600 text-white 
+                     hover:from-cyan-500 hover:to-blue-500 hover:scale-105 active:scale-95"
+        >
+          <Plus size={20} />
+          {t('adminList.createNew')}
+        </button>
       </div>
       
-      {/* CONTAINER BẢNG (ĐỒNG BỘ STYLE) */}
-      <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl 
-                    overflow-hidden overflow-x-auto
-                    max-h-[75vh] overflow-y-auto 
-                    scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600">
-        
+      {/* Controls Section */}
+      <div className="flex flex-col md:flex-row gap-3 bg-white/60 dark:bg-black/40 p-3 rounded-2xl border border-gray-200 dark:border-white/10 backdrop-blur-md z-20 shrink-0">
+        {/* Search */}
+        <div className="relative flex-1">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder={t('adminList.searchAdmin')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 
+                       bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white 
+                       font-montserrat text-sm placeholder:text-gray-500 
+                       focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 transition-all"
+          />
+        </div>
+
+        {/* Filter */}
+        <div className="relative min-w-[160px]" ref={filterDropdownRef}>
+          <button
+            onClick={() => setShowFilterDropdown(s => !s)}
+            className="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-xl border 
+                       border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 
+                       text-gray-900 dark:text-gray-200 hover:text-black dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20
+                       focus:outline-none transition-all"
+          >
+            <div className="flex items-center gap-2">
+              <Filter size={14} className="text-cyan-600 dark:text-cyan-400" />
+              <span className="capitalize text-sm font-medium">
+                {t(`adminList.${filterStatus}`)}
+              </span>
+            </div>
+            <ChevronDown size={14} className={`transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showFilterDropdown && (
+            <div className="absolute top-full right-0 mt-2 w-full rounded-xl shadow-2xl z-50 
+                           bg-white dark:bg-gray-900/95 border border-gray-200 dark:border-white/10 backdrop-blur-xl overflow-hidden">
+              {STATUS_LABELS.map(st => (
+                <button
+                  key={st}
+                  onClick={() => {
+                    setFilterStatus(st);
+                    setShowFilterDropdown(false);
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2
+                            ${filterStatus === st 
+                              ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' 
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
+                >
+                  {st === 'active' && <UserCheck size={14} />}
+                  {st === 'suspended' && <UserX size={14} />}
+                  {st === 'inactive' && <Lock size={14} />}
+                  {st === 'all' && <Filter size={14} />}
+                  <span className="capitalize">{t(`adminList.${st}`)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Table Section */}
+      <div className="bg-white/60 dark:bg-black/50 backdrop-blur-lg rounded-2xl border border-gray-200 dark:border-white/20 shadow-xl overflow-hidden flex-1 flex flex-col">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-96">
+          <div className="flex flex-col items-center justify-center h-full gap-4">
             <Loader2 size={48} className="text-cyan-500 animate-spin" />
-            <p className="text-lg font-medium text-cyan-500 mt-4">{t('adminList.loading')}</p>
+            <p className="text-gray-500 dark:text-gray-400 animate-pulse">{t('adminList.loading')}</p>
           </div>
         ) : error ? ( 
-            <div className="flex flex-col items-center justify-center h-96">
-              <p className="text-lg font-medium text-red-400">{error}</p>
+            <div className="flex flex-col items-center justify-center h-full text-red-500 dark:text-red-400 gap-2">
+              <Shield size={48} className="opacity-50" />
+              <p className="text-lg font-medium">{error}</p>
             </div>
         ) : (
-          <table className="w-full min-w-[900px] table-auto">
-            
-            <thead className="sticky top-0 bg-gradient-table-header from-header-start-gray to-header-end-gray text-white z-10">
-              <tr>
-                {/* Bỏ % width, để table-auto tự tính */}
-                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm">{t('adminList.name')}</th>
-                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm">{t('adminList.email')}</th>
-                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.phone')}</th>
-                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.createDate')}</th>
-                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.status')}</th>
-                <th className="px-6 py-4 font-montserrat font-bold text-left text-sm whitespace-nowrap">{t('adminList.action')}</th>
-              </tr>
-            </thead>
-            
-            <tbody className="font-montserrat">
-              {filteredAdmins.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-gray-400">
-                    {t('adminList.noAdmins')}
-                  </td>
-                </tr>
-              ) : (
-                filteredAdmins.map((admin, i) => (
-                  <tr 
-                    key={admin._id} 
-                    className={`border-b border-table-border-dark hover:bg-table-row-hover transition-colors
-                                ${i % 2 === 0 ? 'bg-white/5' : 'bg-transparent'}`}
-                  >
-                    <td className="px-6 py-4 text-gray-200 text-sm truncate">{admin.fullName}</td>
-                    <td className="px-6 py-4 text-gray-200 text-sm truncate">{admin.email}</td>
-                    <td className="px-6 py-4 text-gray-200 text-sm whitespace-nowrap">{admin.phoneNumber || 'N/A'}</td>
-                    <td className="px-6 py-4 text-gray-200 text-sm whitespace-nowrap">{formatDate(admin.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-4 py-1.5 rounded-xl text-xs font-semibold capitalize
-                        ${getStatusBadge(admin.accountStatus)}`}>
-                        {t(`adminList.${admin.accountStatus}`)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleToggleStatus(admin._id, admin.accountStatus)}
-                        disabled={togglingId === admin._id}
-                        className={`p-2 rounded-full text-white hover:opacity-80 transition
-                                   ${togglingId === admin._id ? 'cursor-not-allowed' : ''}
-                                   ${admin.accountStatus === 'active' 
-                                     ? 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500' // Nút Active (Unlock)
-                                     : 'bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-500' // Nút Inactive/Suspended (Lock)
-                                   }`}
-                        title={admin.accountStatus === 'active' ? t('alerts.suspendTitle') : t('alerts.activateTitle')}
-                      >
-                        {togglingId === admin._id ? (
-                          <Loader2 size={18} className="animate-spin" />
-                        ) : admin.accountStatus === 'active' ? (
-                          <Unlock size={18} />
-                        ) : (
-                          <Lock size={18} />
-                        )}
-                      </button>
-                    </td>
+          <>
+            {/* Header (Fixed) */}
+            <div className="flex-shrink-0 overflow-y-hidden bg-gray-200 dark:bg-header-end-gray" style={{ scrollbarGutter: 'stable' }}>
+              <table className="w-full table-fixed">
+                <thead className="bg-gray-200 dark:bg-gradient-table-header dark:from-header-start-gray dark:to-header-end-gray text-black dark:text-white border-b border-gray-300 dark:border-white/10">
+                  <tr>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[18%]">{t('adminList.name')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[22%]">{t('adminList.email')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('adminList.phone')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('adminList.createDate')}</th>
+                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('adminList.status')}</th>
+                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[10%]">{t('adminList.action')}</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+              </table>
+            </div>
+
+            {/* Body (Scrollable) */}
+            <div className="overflow-y-scroll flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500" style={{ scrollbarGutter: 'stable' }}>
+              <table className="w-full table-fixed">
+                <tbody className="divide-y divide-gray-200 dark:divide-white/5">
+                  {filteredAdmins.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-16 text-gray-500">
+                        <div className="flex flex-col items-center gap-3">
+                          <SearchIcon size={48} className="opacity-20" />
+                          <p>{t('adminList.noAdmins')}</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredAdmins.map((admin, i) => (
+                      <tr 
+                        key={admin._id} 
+                        className={`hover:bg-gray-100 dark:hover:bg-white/5 transition-colors group ${i % 2 === 0 ? 'bg-gray-50 dark:bg-white/5' : 'bg-transparent'}`}
+                      >
+                        <td className="px-4 py-4 w-[18%]">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
+                              {admin.fullName.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-black dark:text-white font-bold text-sm truncate">{admin.fullName}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 w-[22%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                            <Mail size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                            <span className="truncate">{admin.email}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 w-[15%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                            <Phone size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                            <span className="truncate">{admin.phoneNumber || t('common.notAvailable')}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 w-[20%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm">
+                            <Calendar size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                            <span>{formatDate(admin.createdAt)}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 w-[15%] text-center">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium capitalize border ${getStatusBadge(admin.accountStatus)}`}>
+                            {t(`adminList.${admin.accountStatus}`)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 w-[10%] text-center">
+                          <button
+                            onClick={() => handleToggleStatus(admin._id, admin.accountStatus)}
+                            disabled={togglingId === admin._id}
+                            className={`p-2 rounded-lg transition-all duration-200 inline-flex
+                                      ${togglingId === admin._id ? 'cursor-not-allowed opacity-50' : ''}
+                                      ${admin.accountStatus === 'active' 
+                                        ? 'text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-700 dark:hover:text-red-300' 
+                                        : 'text-green-600 dark:text-green-400 hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-300'
+                                      }`}
+                            title={admin.accountStatus === 'active' ? t('alerts.suspendTitle') : t('alerts.activateTitle')}
+                          >
+                            {togglingId === admin._id ? (
+                              <Loader2 size={18} className="animate-spin" />
+                            ) : admin.accountStatus === 'active' ? (
+                              <Lock size={18} />
+                            ) : (
+                              <Unlock size={18} />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
       

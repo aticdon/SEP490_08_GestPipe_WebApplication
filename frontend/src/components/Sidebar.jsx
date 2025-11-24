@@ -12,22 +12,24 @@ const Sidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
   const { t } = useTranslation();
 
   const menuItems = [
-    { id: 'overview', label: t('sidebar.dashboard'), icon: LayoutGrid, path: '/dashboard' },
+    { id: 'overview', label: t('sidebar.dashboard', { defaultValue: 'Dashboard' }), icon: LayoutGrid, path: '/dashboard' },
     // ===== THAY ĐỔI Ở ĐÂY =====
     { id: 'gestures', label: t('sidebar.gestureController', { defaultValue: 'Gesture Controller' }), icon: Hand, path: '/gestures' },
     // { id: 'gesture-practice-ml', label: t('sidebar.mlGesturePractice', { defaultValue: 'ML Gesture Practice' }), icon: Hand, path: '/gesture-practice-ml' },
     // ========================
-    { id: 'admin', label: t('sidebar.adminManagement'), icon: UserCog, path: '/admin-list' },
-    { id: 'user', label: t('sidebar.userManagement'), icon: UserIcon, path: '/user-list' },
-    { id: 'versions', label: t('sidebar.version'), icon: Layers, path: '/version-list' },
+    { id: 'admin', label: t('sidebar.adminManagement', { defaultValue: 'Admin Management' }), icon: UserCog, path: '/admin-list' },
+    { id: 'user', label: t('sidebar.userManagement', { defaultValue: 'User Management' }), icon: UserIcon, path: '/user-list' },
+    { id: 'versions', label: t('sidebar.version', { defaultValue: 'Version' }), icon: Layers, path: '/version-list' },
   ];
 
   return (
     <aside 
       className={`w-75 h-full flex flex-col flex-shrink-0
-                 bg-black/30 backdrop-blur-lg 
-                 border-r border-white/25 
-                 transition-all duration-300 ease-in-out`}
+                 backdrop-blur-lg 
+                 border-r transition-all duration-300 ease-in-out
+                 ${theme === 'dark' 
+                   ? 'bg-black/80 border-white/25' 
+                   : 'bg-white/90 border-gray-200'}`}
     >
       <nav className="flex-1 pt-6 px-4 space-y-2">
         {menuItems.map((item) => {
@@ -41,7 +43,9 @@ const Sidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
                           transition-colors duration-200 ease-in-out ${ 
                 isActive
                   ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold' 
-                  : 'text-gray-200 hover:text-white hover:bg-white/10'
+                  : theme === 'dark'
+                    ? 'text-gray-200 hover:text-white hover:bg-white/10'
+                    : 'text-black hover:text-black hover:bg-black/5'
               }`}
             >
               <Icon size={25} />
@@ -52,7 +56,7 @@ const Sidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
       </nav>
 
       <div className="pb-6 flex gap-3 justify-start px-11">
-        <LanguageSwitcher theme="dark" /> 
+        <LanguageSwitcher theme={theme} /> 
       </div>
 
     </aside>
