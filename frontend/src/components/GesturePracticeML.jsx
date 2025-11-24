@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { X, PlayCircle, StopCircle, RotateCcw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Gesture templates từ CSV data thực tế
 const GESTURE_TEMPLATES = {
@@ -110,13 +112,14 @@ const GESTURE_TEMPLATES = {
 
 // Modern spinner component
 function ModernSpinner({ firstTime }) {
+  const { t } = useTranslation();
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
       <div className="flex flex-col items-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-        <div className="mt-4 text-lg font-semibold text-white drop-shadow-lg">Recognizing...</div>
+        <div className="mt-4 text-lg font-semibold text-white drop-shadow-lg">{t('gesturePractice.recognizing')}</div>
         {firstTime && (
-          <div className="mt-2 text-sm text-gray-200 opacity-80">It may take a little longer to load the camera on your first visit.</div>
+          <div className="mt-2 text-sm text-gray-200 opacity-80">{t('gesturePractice.firstTimeLoad')}</div>
         )}
       </div>
     </div>
@@ -124,6 +127,7 @@ function ModernSpinner({ firstTime }) {
 }
 
 function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
+  const { t } = useTranslation();
   // Debug gesture name
   console.log('🎯 GesturePracticeMLFixed received gestureName:', gestureName);
   console.log('🎨 Theme received:', theme);
@@ -395,7 +399,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         setStaticPositions([]);
       }
     }
-  }, [template?.right_fingers, staticHoldStartTime, staticRequiredDuration]);
+  }, [template?.right_fingers, staticHoldStartTime, staticRequiredDuration, gestureName]);
   
   // Evaluate gesture - USE REFS WITH PROTECTION
   const evaluateGesture = useCallback(() => {
@@ -413,20 +417,20 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     console.log('🔍 Evaluating gesture with REF, sequence length:', currentSequence.length);
     
     if (currentSequence.length === 0) {
-      setStatusMessage('⚠️ No gesture data recorded');
+      setStatusMessage(t('gesturePractice.noData'));
       setPracticeState("IDLE");
       practiceStateRef.current = "IDLE";
       return;
     }
     
     if (!template) {
-      setStatusMessage('❌ No template found');
+      setStatusMessage(t('gesturePractice.noTemplate'));
       setPracticeState("IDLE");
       practiceStateRef.current = "IDLE";
       return;
     }
     
-    setStatusMessage('🔍 Evaluating...');
+    setStatusMessage(t('gesturePractice.evaluating'));
     
     // Calculate average RIGHT HAND finger states ONLY (left hand ignored completely)
     const avgFingers = [0, 0, 0, 0, 0];
@@ -451,7 +455,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     // Check finger match
     const fingerMatch = template.right_fingers.every((expected, i) => expected === avgFingers[i]);
     if (!fingerMatch) {
-      handleAttemptResult(false, `❌ Wrong fingers: got [${avgFingers.join(',')}], expected [${template.right_fingers.join(',')}]`, 'Wrong finger position');
+      handleAttemptResult(false, t('gesturePractice.wrongFingers', { actual: avgFingers.join(','), expected: template.right_fingers.join(',') }), 'Wrong finger position');
       return;
     }
     
@@ -467,7 +471,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       const minFrames = 15; // ~0.5s at 30fps
       if (currentSequence.length < minFrames) {
         console.log(`🔵 ❌ Not enough frames: ${currentSequence.length} < ${minFrames}`);
-        handleAttemptResult(false, `❌ Hold gesture longer (need ~0.5s minimum)`, 'Hold too short');
+        handleAttemptResult(false, t('gesturePractice.holdLonger'), 'Hold too short');
         return;
       }
       
@@ -482,7 +486,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       console.log(`🔵 Frame analysis: ${matchingFrames}/${currentSequence.length} = ${matchPercentage.toFixed(1)}% match`);
       
       if (matchPercentage < 70) { // Need 70% of frames to match
-        handleAttemptResult(false, `❌ Inconsistent fingers: only ${matchPercentage.toFixed(0)}% match (need 70%)`, 'Inconsistent gesture');
+        handleAttemptResult(false, t('gesturePractice.inconsistentFingers', { matchPercentage: matchPercentage.toFixed(0) }), 'Inconsistent gesture');
         return;
       }
       
@@ -501,19 +505,19 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         console.log(`🔵 Movement check: max = ${(maxMovement * 100).toFixed(1)}cm`);
         
         if (maxMovement > 0.05) { // 5cm threshold
-          handleAttemptResult(false, `❌ Too much movement: ${(maxMovement * 100).toFixed(1)}cm (max 5cm)`, 'Hand moved too much');
+          handleAttemptResult(false, t('gesturePractice.tooMuchMovement', { movement: (maxMovement * 100).toFixed(1) }), 'Hand moved too much');
           return;
         }
       }
       
       // Success!
       const durationMs = currentSequence.length * (1000/30); // Estimate duration
-      handleAttemptResult(true, `✅ Perfect static ${gestureName}! ${matchPercentage.toFixed(0)}% accuracy, ${(durationMs/1000).toFixed(1)}s hold`);
-      toast.success(`✅ Perfect ${gestureName}!`);
+      handleAttemptResult(true, t('gesturePractice.perfectStatic', { gestureName, matchPercentage: matchPercentage.toFixed(0), duration: (durationMs/1000).toFixed(1) }));
+      toast.success(t('gesturePractice.perfect', { gestureName }));
     } else {
       // Motion gesture using currentSequence
       if (currentSequence.length < 3) {
-        handleAttemptResult(false, '❌ Too few motion frames', 'Motion too short');
+        handleAttemptResult(false, t('gesturePractice.tooFewFrames'), 'Motion too short');
         return;
       }
       
@@ -524,7 +528,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       const deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       
       if (deltaMag < 0.03) {
-        handleAttemptResult(false, '❌ Not enough motion detected', 'Motion too small');
+        handleAttemptResult(false, t('gesturePractice.notEnoughMotion'), 'Motion too small');
         return;
       }
       
@@ -545,7 +549,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       if (expectedMainX !== actualMainX) {
         const expectedDir = expectedMainX ? 'horizontal' : 'vertical';
         const actualDir = actualMainX ? 'horizontal' : 'vertical';
-        handleAttemptResult(false, `❌ Wrong main direction: moved ${actualDir}, expected ${expectedDir}`, 'Wrong direction');
+        handleAttemptResult(false, t('gesturePractice.wrongDirection', { actual: actualDir, expected: expectedDir }), 'Wrong direction');
         return;
       }
       
@@ -558,7 +562,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         if (expectedRight !== actualRight) {
           const expectedDirStr = expectedRight ? 'right' : 'left';
           const actualDirStr = actualRight ? 'right' : 'left';
-          handleAttemptResult(false, `❌ Wrong horizontal direction: moved ${actualDirStr}, expected ${expectedDirStr}`, 'Wrong horizontal direction');
+          handleAttemptResult(false, t('gesturePractice.wrongHorizontal', { actual: actualDirStr, expected: expectedDirStr }), 'Wrong horizontal direction');
           return;
         }
       } else {
@@ -569,16 +573,16 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         if (expectedDown !== actualDown) {
           const expectedDirStr = expectedDown ? 'down' : 'up';
           const actualDirStr = actualDown ? 'down' : 'up';
-          handleAttemptResult(false, `❌ Wrong vertical direction: moved ${actualDirStr}, expected ${expectedDirStr}`, 'Wrong vertical direction');
+          handleAttemptResult(false, t('gesturePractice.wrongVertical', { actual: actualDirStr, expected: expectedDirStr }), 'Wrong vertical direction');
           return;
         }
       }
       
       // All checks passed!
-      handleAttemptResult(true, `✅ Perfect ${gestureName}! Direction: ${deltaMag.toFixed(3)} movement`);
-      toast.success(`✅ Perfect ${gestureName}!`);
+      handleAttemptResult(true, t('gesturePractice.perfect', { gestureName }) + ` Direction: ${deltaMag.toFixed(3)} movement`);
+      toast.success(t('gesturePractice.perfect', { gestureName }));
     }
-  }, [gestureSequence, template, gestureName, staticHoldStartTime, staticRequiredDuration, handleAttemptResult]);
+  }, [gestureSequence, template, gestureName, staticHoldStartTime, staticRequiredDuration, handleAttemptResult, t]);
   
   // MediaPipe results handler
   const onResults = useCallback((results) => {
@@ -696,9 +700,9 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         setStaticPositions([]);
         
         if (template.is_static) {
-          setStatusMessage(`🔵 Static ${gestureName} - Hold correct position`);
+          setStatusMessage(t('gesturePractice.staticHold', { gestureName }));
         } else {
-          setStatusMessage(`🔴 Recording ${gestureName} - Make gesture now`);
+          setStatusMessage(t('gesturePractice.recording', { gestureName }));
         }
         info += '🚀 RECORDING! ';
       }
@@ -811,7 +815,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       } catch (error) {
         if (mounted) {
           console.error('❌ Error initializing MediaPipe:', error);
-          toast.error('Failed to initialize camera');
+          toast.error(t('gesturePractice.cameraInitFailed'));
         }
       } finally {
         initializingRef.current = false;
@@ -862,23 +866,23 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   // Set initial status message
   useEffect(() => {
     if (template) {
-      setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to start`);
+      setStatusMessage(t('gesturePractice.practiceStart', { gestureName }));
     }
-  }, [gestureName, template]);
+  }, [gestureName, template, t]);
   
   const resetStats = () => {
     setAttemptStats({ correct: 0, wrong: 0 });
-    toast.info('Statistics reset');
+    toast.info(t('gesturePractice.statsReset'));
   };
   
   if (!template) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-md">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Gesture Not Found</h2>
-          <p>The gesture "{gestureName}" is not available in the template library.</p>
+          <h2 className="text-xl font-bold text-red-600 mb-4">{t('gesturePractice.gestureNotFound')}</h2>
+          <p>{t('gesturePractice.gestureNotFoundDesc', { gestureName })}</p>
           <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
-            Close
+            {t('common.close')}
           </button>
         </div>
       </div>
@@ -894,174 +898,204 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       Math.round((attemptStats.correct / (attemptStats.correct + attemptStats.wrong)) * 100) : 0;
     
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div 
-          className="rounded-xl shadow-xl max-w-md w-full"
-          style={{
-            backgroundColor: '#1f2937', // Dark gray-800
-            color: '#ffffff',
-            border: 'none'
-          }}
-        >
-          {/* Summary Header */}
-          <div 
-            className="p-6 border-b"
-            style={{
-              borderBottomColor: '#374151', // Force dark border
-              borderBottomWidth: '1px',
-              borderBottomStyle: 'solid'
-            }}
+      <AnimatePresence>
+        <div className="fixed inset-0 z-[999] flex items-center justify-center px-4">
+          <motion.div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+          <motion.div 
+            className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#1a1b26] shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold text-center" style={{ color: '#ffffff' }}>📊 Practice Complete!</h2>
-            <p className="text-center mt-2" style={{ color: '#d1d5db' }}>
-              {gestureName} - 5 attempts completed
-            </p>
-          </div>
-          
-          {/* Summary Stats */}
-          <div className="p-6" style={{ backgroundColor: '#1f2937' }}>
-            <div className="grid grid-cols-3 gap-4 text-center mb-6">
-              <div>
-                <div className="text-3xl font-bold text-green-500">{attemptStats.correct}</div>
-                <div className="text-sm" style={{ color: '#9ca3af' }}>Correct</div>
+            {/* Summary Header */}
+            <div className="p-6 border-b border-white/10 bg-black/20 text-center">
+              <div className="mx-auto w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center mb-3">
+                <span className="text-2xl">📊</span>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-red-500">{attemptStats.wrong}</div>
-                <div className="text-sm" style={{ color: '#9ca3af' }}>Wrong</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-blue-500">{accuracy}%</div>
-                <div className="text-sm" style={{ color: '#9ca3af' }}>Accuracy</div>
-              </div>
+              <h2 className="text-2xl font-bold text-white">{t('gesturePractice.practiceComplete')}</h2>
+              <p className="text-gray-400 mt-1 text-sm">
+                {gestureName} • 5 {t('gesturePractice.attemptsCompleted')}
+              </p>
             </div>
             
-            {/* Attempt History - Only show errors */}
-            {attemptHistory.some(att => att.result === 'wrong') && (
-              <div 
-                className="mb-4 p-4 rounded-lg"
-                style={{ backgroundColor: '#374151' }}
-              >
-                <h3 className="font-semibold mb-2" style={{ color: '#e5e7eb' }}>
-                  ❌ Errors in attempts:
-                </h3>
-                <div className="space-y-1">
-                  {attemptHistory
-                    .filter(att => att.result === 'wrong')
-                    .filter((att, index, arr) => 
-                      // Remove duplicates - keep only first occurrence of each attempt
-                      arr.findIndex(a => a.attempt === att.attempt && a.error === att.error) === index
-                    )
-                    .map((att, index) => (
-                      <div key={`${att.attempt}-${index}`} className="text-sm" style={{ color: '#d1d5db' }}>
-                        <span className="font-medium">Attempt {att.attempt}:</span> {att.error}
-                      </div>
-                    ))}
+            {/* Summary Stats */}
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-black/20 rounded-xl p-3 text-center border border-white/5">
+                  <div className="text-2xl font-bold text-green-400">{attemptStats.correct}</div>
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mt-1">{t('gesturePractice.correct')}</div>
+                </div>
+                <div className="bg-black/20 rounded-xl p-3 text-center border border-white/5">
+                  <div className="text-2xl font-bold text-red-400">{attemptStats.wrong}</div>
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mt-1">{t('gesturePractice.wrong')}</div>
+                </div>
+                <div className="bg-black/20 rounded-xl p-3 text-center border border-white/5">
+                  <div className="text-2xl font-bold text-cyan-400">{accuracy}%</div>
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mt-1">{t('gesturePractice.accuracy')}</div>
                 </div>
               </div>
-            )}
-            
-            {/* Performance Message */}
-            <div 
-              className="p-4 rounded-lg mb-4 text-center"
-              style={{
-                backgroundColor: accuracy >= 80 ? '#064e3b' : accuracy >= 60 ? '#92400e' : '#7f1d1d',
-                color: accuracy >= 80 ? '#bbf7d0' : accuracy >= 60 ? '#fde68a' : '#fecaca'
-              }}
-            >
-              {accuracy >= 80 ? '🎉 Excellent! Great job!' :
-               accuracy >= 60 ? '👍 Good work! Keep practicing!' :
-               '💪 Keep practicing to improve!'}
+              
+              {/* Attempt History - Only show errors */}
+              {attemptHistory.some(att => att.result === 'wrong') && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                  <h3 className="font-semibold text-red-400 text-sm mb-2 flex items-center gap-2">
+                    <X size={14} /> {t('gesturePractice.errorsInAttempts')}
+                  </h3>
+                  <div className="space-y-1 max-h-32 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10">
+                    {attemptHistory
+                      .filter(att => att.result === 'wrong')
+                      .filter((att, index, arr) => 
+                        // Remove duplicates - keep only first occurrence of each attempt
+                        arr.findIndex(a => a.attempt === att.attempt && a.error === att.error) === index
+                      )
+                      .map((att, index) => (
+                        <div key={`${att.attempt}-${index}`} className="text-xs text-gray-300 flex gap-2">
+                          <span className="font-mono text-gray-500">#{att.attempt}</span>
+                          <span>{att.error}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Performance Message */}
+              <div className={`p-3 rounded-lg text-center text-sm font-medium border ${
+                accuracy >= 80 ? 'bg-green-500/10 text-green-400 border-green-500/20' : 
+                accuracy >= 60 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 
+                'bg-red-500/10 text-red-400 border-red-500/20'
+              }`}>
+                {accuracy >= 80 ? t('gesturePractice.excellent') :
+                 accuracy >= 60 ? t('gesturePractice.goodWork') :
+                 t('gesturePractice.keepPracticing')}
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    console.log('🔄 Practice Again clicked - resetting all states');
+                    setShowFinalResult(false);
+                    setAttemptCount(0);
+                    setAttemptStats({ correct: 0, wrong: 0 });
+                    setAttemptHistory([]); // Reset error history
+                    setPracticeState("IDLE");
+                    practiceStateRef.current = "IDLE";
+                    setStatusMessage(t('gesturePractice.practiceStart', { gestureName }));
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all
+                             bg-cyan-500 hover:bg-cyan-400 text-white shadow-lg shadow-cyan-500/20"
+                >
+                  {t('gesturePractice.practiceAgain')}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all
+                             bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10"
+                >
+                  {t('common.close')}
+                </button>
+              </div>
             </div>
-            
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  console.log('🔄 Practice Again clicked - resetting all states');
-                  setShowFinalResult(false);
-                  setAttemptCount(0);
-                  setAttemptStats({ correct: 0, wrong: 0 });
-                  setAttemptHistory([]); // Reset error history
-                  setPracticeState("IDLE");
-                  practiceStateRef.current = "IDLE";
-                  setStatusMessage(`🎯 Practice ${gestureName} - Close left fist to start`);
-                }}
-                className="flex-1 py-2 px-4 rounded-lg font-medium"
-                style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
-              >
-                Practice Again
-              </button>
-              <button
-                onClick={onClose}
-                className="flex-1 py-2 px-4 rounded-lg font-medium"
-                style={{ backgroundColor: '#374151', color: '#d1d5db' }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </AnimatePresence>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      {loading && <ModernSpinner firstTime={firstTime} />}
-      <div className={`rounded-xl shadow-xl max-w-2xl w-full ${
-        theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-      }`}>
-        {/* Header */}
-        <div className={`flex justify-between items-center p-4 border-b ${
-          theme === 'dark' ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'
-        }`}>
-          <div>
-            <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-              🎯 {gestureName}
-            </h2>
-            <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              {attemptCount}/{maxAttempts} attempts
-            </p>
-          </div>
-          <button 
-            onClick={onClose} 
-            className={`p-2 rounded-lg ${
-              theme === 'dark' ? 'text-gray-400 hover:text-white hover:bg-gray-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <X size={24} />
-          </button>
-        </div>
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[999] flex items-center justify-center px-4">
+        <motion.div 
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        />
         
-        {/* Camera Only */}
-        <div className="p-6">
-          <canvas
-            ref={canvasRef}
-            width={640}
-            height={480}
-            className="w-full max-w-xl mx-auto rounded-lg border"
-            style={{ transform: 'scaleX(-1)' }}
-          />
-          <video
-            ref={videoRef}
-            className="hidden"
-            autoPlay
-            playsInline
-            muted
-          />
-          {/* Simple status */}
-          <div className={`mt-4 p-3 rounded-lg text-center ${
-            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
-          }`}>
-            <p className={`text-lg font-semibold ${
-              theme === 'dark' ? 'text-white' : 'text-gray-800'
-            }`}>
-              {statusMessage || `🎯 Practice ${gestureName} - Close left fist to start`}
-            </p>
+        {loading && <ModernSpinner firstTime={firstTime} />}
+        
+        <motion.div 
+          className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-[#1a1b26] shadow-2xl overflow-hidden"
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: "spring", duration: 0.5 }}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-center px-6 py-4 border-b border-white/10 bg-black/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                <PlayCircle size={20} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white capitalize">
+                  {gestureName}
+                </h2>
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <span className="bg-white/10 px-2 py-0.5 rounded text-gray-300">
+                    {attemptCount}/{maxAttempts} {t('gesturePractice.attempts')}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <X size={20} />
+            </button>
           </div>
-        </div>
+          
+          {/* Camera Area */}
+          <div className="p-6 bg-[#1a1b26]">
+            <div className="relative w-full max-w-xl mx-auto rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg">
+              <canvas
+                ref={canvasRef}
+                width={640}
+                height={480}
+                className="w-full h-auto block"
+                style={{ transform: 'scaleX(-1)' }}
+              />
+              <video
+                ref={videoRef}
+                className="hidden"
+                autoPlay
+                playsInline
+                muted
+              />
+              
+              {/* Overlay Status */}
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${practiceState === 'RECORDING' ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}></div>
+                <span className="text-xs font-medium text-white uppercase tracking-wider">
+                  {practiceState === 'RECORDING' ? 'Recording' : 'Live Camera'}
+                </span>
+              </div>
+            </div>
+
+            {/* Status Message Bar */}
+            <div className="mt-6">
+              <div className="bg-black/40 border border-white/5 rounded-xl p-4 text-center backdrop-blur-sm">
+                <p className="text-lg font-medium text-white flex items-center justify-center gap-2">
+                  {statusMessage || t('gesturePractice.practiceStart', { gestureName })}
+                </p>
+                {template?.description && (
+                  <p className="text-sm text-gray-400 mt-1">
+                    {template.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 }
 

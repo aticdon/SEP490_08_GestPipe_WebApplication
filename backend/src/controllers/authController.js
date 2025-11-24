@@ -271,6 +271,7 @@ exports.changePassword = async (req, res) => {
         success: false,
         message: 'Admin not found'
       });
+      console.log('fail tem');
     }
 
     // Verify current password

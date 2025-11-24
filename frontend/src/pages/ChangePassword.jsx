@@ -8,12 +8,14 @@ import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
-import { motion } from 'framer-motion'; // Thêm motion 
+import backgroundLightImage from '../assets/backgrounds/background_lightheme.jpg';
+import { motion } from 'framer-motion'; // Thêm motion
 
 // Hiệu ứng
 const pageVariants = {
-  initial: { opacity: 0, scale: 0.95 },
-  animate: { opacity: 1, scale: 1.0 },
+  initial: { opacity: 0, x: "20px" },
+  animate: { opacity: 1, x: "0px" },
+  exit: { opacity: 0, x: "-20px" },
   transition: { type: 'tween', ease: 'anticipate', duration: 0.3 }
 };
 
@@ -36,6 +38,7 @@ const ChangePassword = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState({});
 
   const [focusedInput, setFocusedInput] = useState(null);
 
@@ -48,23 +51,30 @@ const ChangePassword = () => {
     }
 
     const adminData = authService.getCurrentUser();
-    if (adminData) {
-      setAdmin(adminData);
-    } else {
-      navigate('/'); // Failsafe
+    if (!adminData) {
+      navigate('/');
+      return;
     }
+
+    setAdmin(adminData);
   }, [navigate]);
 
   // (Bỏ handleLogout, AdminLayout sẽ tự lo)
 
-  const handleChange = useCallback((e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: value
-    }));
-  }, []);
+    });
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
+  };
 
   const togglePasswordVisibility = useCallback((field) => {
     setShowPasswords(prev => ({
@@ -88,19 +98,30 @@ const ChangePassword = () => {
     }
   });
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.oldPassword) {
+      newErrors.oldPassword = t('notifications.fillAllFields');
+    }
+    if (!formData.newPassword) {
+      newErrors.newPassword = t('notifications.fillAllFields');
+    } else if (formData.newPassword.length < 6) {
+      newErrors.newPassword = t('notifications.passwordMinLength');
+    }
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = t('notifications.fillAllFields');
+    } else if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = t('notifications.passwordsNotMatch');
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.oldPassword || !formData.newPassword || !formData.confirmPassword) {
-      toast.error(t('notifications.fillAllFields'));
-      return;
-    }
-    if (formData.newPassword.length < 6) {
-      toast.error(t('notifications.passwordMinLength'));
-      return;
-    }
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error(t('notifications.passwordsNotMatch'));
+    if (!validateForm()) {
       return;
     }
 
@@ -142,15 +163,21 @@ const ChangePassword = () => {
   const isFirstLogin = admin.isFirstLogin === true;
 
   // Style input đồng bộ
-  const inputStyle = `w-full px-4 py-3 rounded-lg border 
-                      bg-gray-900/70 border-gray-700 text-white 
-                      placeholder:text-gray-500 focus:outline-none focus:border-cyan-400 pr-12`;
-  const labelStyle = `block text-sm font-medium mb-2 text-gray-300`;
+  const getInputStyle = (fieldName) => `w-full px-4 py-3 rounded-lg border 
+                      ${errors[fieldName] ? 'border-red-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
+                      ${theme === 'dark' 
+                        ? 'bg-gray-900/70 text-white placeholder:text-gray-500' 
+                        : 'bg-white text-gray-900 placeholder:text-gray-400'} 
+                      focus:outline-none focus:border-cyan-400 pr-12 transition-colors duration-300`;
+  const labelStyle = `block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`;
 
   // TÁCH FORM RA THÀNH COMPONENT RIÊNG
   const ChangePasswordForm = () => (
-    <div className="bg-black/50 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl p-8 sm:p-10 w-full max-w-lg">
-      <h2 className="text-3xl font-bold text-center mb-8 text-white">
+    <div className={`backdrop-blur-lg rounded-2xl border shadow-xl p-8 sm:p-10 transition-colors duration-300
+                    ${theme === 'dark' 
+                      ? 'bg-black/50 border-white/20' 
+                      : 'bg-white/80 border-gray-200'}`}>
+      <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
         {t('changePassword.title')}
       </h2>
       
@@ -168,9 +195,7 @@ const ChangePassword = () => {
               onChange={handleChange}
               onFocus={() => setFocusedInput('oldPassword')}
               placeholder="••••••••••"
-              autoComplete="current-password"
-              spellCheck="false"
-              className={inputStyle}
+              className={getInputStyle('oldPassword')}
             />
             <button
               type="button"
@@ -180,6 +205,9 @@ const ChangePassword = () => {
               {showPasswords.old ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          {errors.oldPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.oldPassword}</p>
+          )}
         </div>
 
         {/* New Password */}
@@ -195,9 +223,7 @@ const ChangePassword = () => {
               onChange={handleChange}
               onFocus={() => setFocusedInput('newPassword')}
               placeholder="••••••"
-              autoComplete="new-password"
-              spellCheck="false"
-              className={inputStyle}
+              className={getInputStyle('newPassword')}
             />
             <button
               type="button"
@@ -207,6 +233,9 @@ const ChangePassword = () => {
               {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          {errors.newPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.newPassword}</p>
+          )}
         </div>
 
         {/* Confirm Password */}
@@ -222,9 +251,7 @@ const ChangePassword = () => {
               onChange={handleChange}
               onFocus={() => setFocusedInput('confirmPassword')}
               placeholder="••••••••••"
-              autoComplete="new-password"
-              spellCheck="false"
-              className={inputStyle}
+              className={getInputStyle('confirmPassword')}
             />
             <button
               type="button"
@@ -234,6 +261,9 @@ const ChangePassword = () => {
               {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+          )}
         </div>
 
         {/* Buttons */}
@@ -242,7 +272,8 @@ const ChangePassword = () => {
             <button
               type="button"
               onClick={() => navigate('/profile')}
-              className="px-8 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500 transition-all"
+              className={`px-8 py-3 font-semibold rounded-lg transition-all
+                         ${theme === 'dark' ? 'bg-gray-600 text-white hover:bg-gray-500' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
             >
               {t('common.cancel')}
             </button>
@@ -273,9 +304,9 @@ const ChangePassword = () => {
     // Trường hợp 1: Lần đầu login (KHÔNG CÓ LAYOUT)
     return (
       <div 
-        className="h-screen flex flex-col items-center justify-center p-8 relative"
+        className="h-screen flex flex-col items-center justify-center p-8 relative pb-32"
         style={{
-          backgroundImage: `url(${backgroundImage})`,
+          backgroundImage: `url(${theme === 'dark' ? backgroundImage : backgroundLightImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
@@ -287,7 +318,7 @@ const ChangePassword = () => {
         <ToastContainer theme={theme === 'dark' ? 'dark' : 'light'} />
         
         <motion.div 
-          className="relative z-10 w-full max-w-2xl flex flex-col items-center"
+          className="relative z-10 w-full max-w-2xl flex flex-col items-center mx-auto"
           initial="initial"
           animate="animate"
           variants={pageVariants}
@@ -320,14 +351,16 @@ const ChangePassword = () => {
   // Trang này được gọi từ <AdminLayoutRoute>
   return (
     <motion.main 
-      className="flex-1 overflow-y-auto p-8 font-montserrat flex justify-center pt-10" // Tự cuộn
+      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-center"
       initial="initial"
       animate="animate"
       exit="exit"
       variants={pageVariants}
       transition={pageVariants.transition}
     >
-      <ChangePasswordForm />
+      <div className="w-full max-w-2xl mx-auto">
+        <ChangePasswordForm />
+      </div>
     </motion.main>
   );
 };
