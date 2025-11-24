@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Loader2 } from 'lucide-react'; // Bỏ các icon Header
@@ -40,6 +40,8 @@ const ChangePassword = () => {
   });
   const [errors, setErrors] = useState({});
 
+  const [focusedInput, setFocusedInput] = useState(null);
+
   // Check login
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -74,12 +76,27 @@ const ChangePassword = () => {
     }
   };
 
-  const togglePasswordVisibility = (field) => {
+  const togglePasswordVisibility = useCallback((field) => {
     setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field]
     }));
-  };
+  }, []);
+
+  // Maintain focus after state updates (lightweight approach)
+  useLayoutEffect(() => {
+    if (focusedInput) {
+      const input = document.querySelector(`input[name="${focusedInput}"]`);
+      if (input && document.activeElement !== input) {
+        // Only restore focus if it's clearly lost (not during typing)
+        const timeSinceLastFocus = Date.now() - (input.dataset.lastFocus || 0);
+        if (timeSinceLastFocus > 100) { // 100ms threshold
+          input.focus();
+          input.dataset.lastFocus = Date.now();
+        }
+      }
+    }
+  });
 
   const validateForm = () => {
     const newErrors = {};
@@ -176,6 +193,7 @@ const ChangePassword = () => {
               name="oldPassword"
               value={formData.oldPassword}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('oldPassword')}
               placeholder="••••••••••"
               className={getInputStyle('oldPassword')}
             />
@@ -203,6 +221,7 @@ const ChangePassword = () => {
               name="newPassword"
               value={formData.newPassword}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('newPassword')}
               placeholder="••••••"
               className={getInputStyle('newPassword')}
             />
@@ -230,6 +249,7 @@ const ChangePassword = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              onFocus={() => setFocusedInput('confirmPassword')}
               placeholder="••••••••••"
               className={getInputStyle('confirmPassword')}
             />
