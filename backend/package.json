@@ -28,7 +28,8 @@
     "seed:superadmin": "node src/seeds/createSuperAdmin.js",
     "seed:gestures": "node src/seeds/seedGestures.js",
     "seed:users": "node src/seeds/seedUsers.js",
-    "seed:all": "npm run seed:superadmin && npm run seed:gestures && npm run seed:users"
+    "seed:translations": "node src/seeds/seedTranslations.js",
+    "seed:all": "npm run seed:superadmin && npm run seed:gestures && npm run seed:users && npm run seed:translations"
   },
   "keywords": [],
   "author": "",
