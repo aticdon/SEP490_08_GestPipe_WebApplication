@@ -32,7 +32,13 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
   const formatDate = (dateStr) => {
     if (!dateStr) return t('common.notAvailable');
     const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleDateString("vi-VN");
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const formatAccuracy = (acc) => {
@@ -184,7 +190,13 @@ const VersionList = () => {
   const formatDate = (dateStr) => {
     if (!dateStr) return t('common.notAvailable');
     const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleDateString("vi-VN");
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const formatAccuracy = (acc) => {
@@ -298,12 +310,12 @@ const VersionList = () => {
               <table className="w-full table-fixed">
                 <thead className="bg-gray-200 dark:bg-gradient-table-header dark:from-header-start-gray dark:to-header-end-gray text-black dark:text-white border-b border-gray-300 dark:border-white/10">
                   <tr>
-                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.versionHeader')}</th>
-                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('versionList.releaseNameHeader')}</th>
-                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.releaseDateHeader')}</th>
-                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.downloadsHeader')}</th>
-                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('versionList.accuracyHeader')}</th>
-                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[10%]">{t('versionList.statusHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[13%]">{t('versionList.versionHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[16%]">{t('versionList.releaseNameHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('versionList.releaseDateHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[14%]">{t('versionList.downloadsHeader')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[14%]">{t('versionList.accuracyHeader')}</th>
+                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[13%]">{t('versionList.statusHeader')}</th>
                     <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[10%]">{t('versionList.actionHeader')}</th>
                   </tr>
                 </thead>
@@ -329,31 +341,31 @@ const VersionList = () => {
                         key={v._id || v.id || i} 
                         className={`hover:bg-gray-100 dark:hover:bg-white/5 transition-colors group ${i % 2 === 0 ? 'bg-gray-50 dark:bg-white/5' : 'bg-transparent'}`}
                       >
-                        <td className="px-4 py-4 w-[15%]">
+                        <td className="px-4 py-4 w-[13%]">
                           <span className="text-black dark:text-white font-bold text-sm">{v.version}</span>
                         </td>
-                        <td className="px-4 py-4 w-[20%]">
+                        <td className="px-4 py-4 w-[16%]">
                           <span className="text-gray-800 dark:text-gray-300 font-medium text-sm truncate block">{v.release_name}</span>
                         </td>
-                        <td className="px-4 py-4 w-[15%]">
-                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                        <td className="px-4 py-4 w-[20%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm">
                             <Calendar size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
-                            <span className="truncate">{formatDate(v.release_date)}</span>
+                            <span>{formatDate(v.release_date)}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-4 w-[15%]">
+                        <td className="px-4 py-4 w-[14%]">
                           <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
                             <Download size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
                             <span className="truncate">{formatNumber(v.downloads)}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-4 w-[15%]">
+                        <td className="px-4 py-4 w-[14%]">
                           <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
                             <Activity size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
                             <span className="truncate">{formatAccuracy(v.accuracy)}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-4 w-[10%] text-center">
+                        <td className="px-4 py-4 w-[13%] text-center">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium capitalize border ${getStatusBadge(v.status)}`}>
                             {t(`versionList.${v.status}`)}
                           </span>
