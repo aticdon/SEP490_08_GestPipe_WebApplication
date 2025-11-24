@@ -146,6 +146,18 @@ const CreateAdmin = () => {
       return;
     }
 
+    // Additional validation for phoneNumber
+    if (formData.phoneNumber.length !== 10) {
+      toast.error('Phone number must be exactly 10 digits');
+      return;
+    }
+
+    const numberOnlyRegex = /^[0-9]+$/;
+    if (!numberOnlyRegex.test(formData.phoneNumber)) {
+      toast.error('Phone number can only contain numbers');
+      return;
+    }
+
     setLoading(true);
 
     try {
