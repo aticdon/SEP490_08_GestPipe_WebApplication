@@ -38,6 +38,7 @@ const ChangePassword = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState({});
 
   // Check login
   useEffect(() => {
@@ -59,10 +60,18 @@ const ChangePassword = () => {
   // (Bỏ handleLogout, AdminLayout sẽ tự lo)
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ''
+      });
+    }
   };
 
   const togglePasswordVisibility = (field) => {
@@ -72,19 +81,30 @@ const ChangePassword = () => {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.oldPassword) {
+      newErrors.oldPassword = t('notifications.fillAllFields');
+    }
+    if (!formData.newPassword) {
+      newErrors.newPassword = t('notifications.fillAllFields');
+    } else if (formData.newPassword.length < 6) {
+      newErrors.newPassword = t('notifications.passwordMinLength');
+    }
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = t('notifications.fillAllFields');
+    } else if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = t('notifications.passwordsNotMatch');
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.oldPassword || !formData.newPassword || !formData.confirmPassword) {
-      toast.error(t('notifications.fillAllFields'));
-      return;
-    }
-    if (formData.newPassword.length < 6) {
-      toast.error(t('notifications.passwordMinLength'));
-      return;
-    }
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error(t('notifications.passwordsNotMatch'));
+    if (!validateForm()) {
       return;
     }
 
@@ -126,10 +146,11 @@ const ChangePassword = () => {
   const isFirstLogin = admin.isFirstLogin === true;
 
   // Style input đồng bộ
-  const inputStyle = `w-full px-4 py-3 rounded-lg border 
+  const getInputStyle = (fieldName) => `w-full px-4 py-3 rounded-lg border 
+                      ${errors[fieldName] ? 'border-red-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
                       ${theme === 'dark' 
-                        ? 'bg-gray-900/70 border-gray-700 text-white placeholder:text-gray-500' 
-                        : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'} 
+                        ? 'bg-gray-900/70 text-white placeholder:text-gray-500' 
+                        : 'bg-white text-gray-900 placeholder:text-gray-400'} 
                       focus:outline-none focus:border-cyan-400 pr-12 transition-colors duration-300`;
   const labelStyle = `block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`;
 
@@ -156,7 +177,7 @@ const ChangePassword = () => {
               value={formData.oldPassword}
               onChange={handleChange}
               placeholder="••••••••••"
-              className={inputStyle}
+              className={getInputStyle('oldPassword')}
             />
             <button
               type="button"
@@ -166,6 +187,9 @@ const ChangePassword = () => {
               {showPasswords.old ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          {errors.oldPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.oldPassword}</p>
+          )}
         </div>
 
         {/* New Password */}
@@ -180,7 +204,7 @@ const ChangePassword = () => {
               value={formData.newPassword}
               onChange={handleChange}
               placeholder="••••••"
-              className={inputStyle}
+              className={getInputStyle('newPassword')}
             />
             <button
               type="button"
@@ -190,6 +214,9 @@ const ChangePassword = () => {
               {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          {errors.newPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.newPassword}</p>
+          )}
         </div>
 
         {/* Confirm Password */}
@@ -204,7 +231,7 @@ const ChangePassword = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="••••••••••"
-              className={inputStyle}
+              className={getInputStyle('confirmPassword')}
             />
             <button
               type="button"
@@ -214,6 +241,9 @@ const ChangePassword = () => {
               {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+          )}
         </div>
 
         {/* Buttons */}

@@ -45,7 +45,13 @@ const AdminList = () => {
   const formatDate = (dateString) => {
     if (!dateString) return t('common.notAvailable');
     const d = new Date(dateString);
-    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleDateString("vi-VN");
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const [admins, setAdmins] = useState([]);
@@ -292,9 +298,9 @@ const AdminList = () => {
                     <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[18%]">{t('adminList.name')}</th>
                     <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[22%]">{t('adminList.email')}</th>
                     <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('adminList.phone')}</th>
-                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('adminList.createDate')}</th>
+                    <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('adminList.createDate')}</th>
                     <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('adminList.status')}</th>
-                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('adminList.action')}</th>
+                    <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[10%]">{t('adminList.action')}</th>
                   </tr>
                 </thead>
               </table>
@@ -339,10 +345,10 @@ const AdminList = () => {
                             <span className="truncate">{admin.phoneNumber || t('common.notAvailable')}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-4 w-[15%]">
-                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
+                        <td className="px-4 py-4 w-[20%]">
+                          <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm">
                             <Calendar size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
-                            <span className="truncate">{formatDate(admin.createdAt)}</span>
+                            <span>{formatDate(admin.createdAt)}</span>
                           </div>
                         </td>
                         <td className="px-4 py-4 w-[15%] text-center">
@@ -350,7 +356,7 @@ const AdminList = () => {
                             {t(`adminList.${admin.accountStatus}`)}
                           </span>
                         </td>
-                        <td className="px-4 py-4 w-[15%] text-center">
+                        <td className="px-4 py-4 w-[10%] text-center">
                           <button
                             onClick={() => handleToggleStatus(admin._id, admin.accountStatus)}
                             disabled={togglingId === admin._id}

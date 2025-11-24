@@ -63,7 +63,13 @@ const UserDetailPopup = ({ show, user, onClose, onLockToggle }) => {
   const formatDate = (date) => {
     if (!date) return t('common.notAvailable');
     const d = new Date(date);
-    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleDateString("vi-VN");
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const mapStatusDetail = (status) => {
@@ -209,7 +215,13 @@ const UserList = () => {
   const getDisplayDate = (dateStr) => {
     if (!dateStr) return t('common.notAvailable');
     const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleDateString("vi-VN");
+    return isNaN(d.getTime()) ? t('common.notAvailable') : d.toLocaleString("vi-VN", {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // State
