@@ -326,6 +326,7 @@ const translations = [
 
   // Notifications - Error Messages
   { language: 'vi', category: 'notifications', key: 'nameRequired', value: 'Tên là bắt buộc!' },
+  { language: 'vi', category: 'notifications', key: 'phoneRequired', value: 'Số điện thoại là bắt buộc!' },
   { language: 'vi', category: 'notifications', key: 'fillAllFields', value: 'Vui lòng điền đầy đủ các trường' },
   { language: 'vi', category: 'notifications', key: 'passwordMinLength', value: 'Mật khẩu mới phải có ít nhất 6 ký tự' },
   { language: 'vi', category: 'notifications', key: 'passwordsNotMatch', value: 'Mật khẩu mới không khớp' },
@@ -336,8 +337,11 @@ const translations = [
   { language: 'vi', category: 'notifications', key: 'failedCreateAdmin', value: 'Tạo quản trị viên thất bại' },
   { language: 'vi', category: 'notifications', key: 'failedUpdateStatus', value: 'Cập nhật trạng thái thất bại' },
   { language: 'vi', category: 'notifications', key: 'fillRequiredFields', value: 'Vui lòng điền đầy đủ các trường bắt buộc' },
+  { language: 'vi', category: 'notifications', key: 'invalidEmailFormat', value: 'Định dạng email không hợp lệ' },
+  { language: 'vi', category: 'notifications', key: 'invalidPhoneFormat', value: 'Định dạng số điện thoại không hợp lệ' },
 
   { language: 'en', category: 'notifications', key: 'nameRequired', value: 'Name is required!' },
+  { language: 'en', category: 'notifications', key: 'phoneRequired', value: 'Phone number is required!' },
   { language: 'en', category: 'notifications', key: 'fillAllFields', value: 'Please fill in all fields' },
   { language: 'en', category: 'notifications', key: 'passwordMinLength', value: 'New password must be at least 6 characters' },
   { language: 'en', category: 'notifications', key: 'passwordsNotMatch', value: 'New passwords do not match' },
@@ -348,6 +352,8 @@ const translations = [
   { language: 'en', category: 'notifications', key: 'failedCreateAdmin', value: 'Failed to create admin' },
   { language: 'en', category: 'notifications', key: 'failedUpdateStatus', value: 'Failed to update admin status' },
   { language: 'en', category: 'notifications', key: 'fillRequiredFields', value: 'Please fill in all required fields' },
+  { language: 'en', category: 'notifications', key: 'invalidEmailFormat', value: 'Invalid email format' },
+  { language: 'en', category: 'notifications', key: 'invalidPhoneFormat', value: 'Invalid phone number format' },
 
   // SweetAlert - Confirm Dialogs
   { language: 'vi', category: 'alerts', key: 'suspendTitle', value: 'Tạm khóa tài khoản?' },
@@ -1107,6 +1113,65 @@ const translations = [
   { language: 'en', category: 'provinces', key: 'vinhLong', value: 'Vinh Long' },
   { language: 'en', category: 'provinces', key: 'vinhPhuc', value: 'Vinh Phuc' },
   { language: 'en', category: 'provinces', key: 'yenBai', value: 'Yen Bai' },
+
+  // Missing Translations Fixes
+  // Dashboard Subtitle
+  { language: 'vi', category: 'dashboard', key: 'subtitle', value: 'Chào mừng trở lại Bảng điều khiển Quản trị GestPipe' },
+  { language: 'en', category: 'dashboard', key: 'subtitle', value: 'Welcome back to GestPipe Admin Dashboard' },
+
+  // Page Titles & Subtitles
+  { language: 'vi', category: 'gestures', key: 'title', value: 'Quản lý Cử chỉ' },
+  { language: 'vi', category: 'gestures', key: 'subtitle', value: 'Quản lý và giám sát các cử chỉ hệ thống' },
+  { language: 'en', category: 'gestures', key: 'title', value: 'Gestures Management' },
+  { language: 'en', category: 'gestures', key: 'subtitle', value: 'Manage and monitor system gestures' },
+
+  { language: 'vi', category: 'adminList', key: 'title', value: 'Quản lý Quản trị viên' },
+  { language: 'vi', category: 'adminList', key: 'subtitle', value: 'Quản lý quản trị viên hệ thống và quyền hạn' },
+  { language: 'en', category: 'adminList', key: 'title', value: 'Admin Management' },
+  { language: 'en', category: 'adminList', key: 'subtitle', value: 'Manage system administrators and permissions' },
+
+  { language: 'vi', category: 'userList', key: 'title', value: 'Quản lý Người dùng' },
+  { language: 'vi', category: 'userList', key: 'subtitle', value: 'Quản lý người dùng hệ thống và quyền hạn' },
+  { language: 'en', category: 'userList', key: 'title', value: 'User Management' },
+  { language: 'en', category: 'userList', key: 'subtitle', value: 'Manage system users and permissions' },
+
+  { language: 'vi', category: 'versionList', key: 'title', value: 'Quản lý Phiên bản' },
+  { language: 'vi', category: 'versionList', key: 'subtitle', value: 'Quản lý các phiên bản và bản phát hành hệ thống' },
+  { language: 'en', category: 'versionList', key: 'title', value: 'Version Management' },
+  { language: 'en', category: 'versionList', key: 'subtitle', value: 'Manage system versions and releases' },
+
+  // Dashboard Age Chart Keys
+  { language: 'vi', category: 'dashboard', key: '16-24', value: '16 - 24' },
+  { language: 'vi', category: 'dashboard', key: '25-34', value: '25 - 34' },
+  { language: 'vi', category: 'dashboard', key: '35-50', value: '35 - 50' },
+  { language: 'vi', category: 'dashboard', key: '50+', value: '50+' },
+  { language: 'en', category: 'dashboard', key: '16-24', value: '16 - 24' },
+  { language: 'en', category: 'dashboard', key: '25-34', value: '25 - 34' },
+  { language: 'en', category: 'dashboard', key: '35-50', value: '35 - 50' },
+  { language: 'en', category: 'dashboard', key: '50+', value: '50+' },
+
+  // Gesture Chart Keys (category 'gesture' singular)
+  { language: 'vi', category: 'gesture', key: 'Thumb_Up', value: 'Ngón cái lên' },
+  { language: 'vi', category: 'gesture', key: 'Thumb_Down', value: 'Ngón cái xuống' },
+  { language: 'vi', category: 'gesture', key: 'Victory', value: 'Chiến thắng' },
+  { language: 'vi', category: 'gesture', key: 'Open_Palm', value: 'Mở lòng bàn tay' },
+  { language: 'vi', category: 'gesture', key: 'Closed_Fist', value: 'Nắm tay' },
+  { language: 'vi', category: 'gesture', key: 'Pointing_Up', value: 'Chỉ lên' },
+  { language: 'vi', category: 'gesture', key: 'Swipe_Left', value: 'Vuốt trái' },
+  { language: 'vi', category: 'gesture', key: 'Swipe_Right', value: 'Vuốt phải' },
+  { language: 'vi', category: 'gesture', key: 'Swipe_Up', value: 'Vuốt lên' },
+  { language: 'vi', category: 'gesture', key: 'Swipe_Down', value: 'Vuốt xuống' },
+  
+  { language: 'en', category: 'gesture', key: 'Thumb_Up', value: 'Thumb Up' },
+  { language: 'en', category: 'gesture', key: 'Thumb_Down', value: 'Thumb Down' },
+  { language: 'en', category: 'gesture', key: 'Victory', value: 'Victory' },
+  { language: 'en', category: 'gesture', key: 'Open_Palm', value: 'Open Palm' },
+  { language: 'en', category: 'gesture', key: 'Closed_Fist', value: 'Closed Fist' },
+  { language: 'en', category: 'gesture', key: 'Pointing_Up', value: 'Pointing Up' },
+  { language: 'en', category: 'gesture', key: 'Swipe_Left', value: 'Swipe Left' },
+  { language: 'en', category: 'gesture', key: 'Swipe_Right', value: 'Swipe Right' },
+  { language: 'en', category: 'gesture', key: 'Swipe_Up', value: 'Swipe Up' },
+  { language: 'en', category: 'gesture', key: 'Swipe_Down', value: 'Swipe Down' },
 
   // Admin Layout
 ];

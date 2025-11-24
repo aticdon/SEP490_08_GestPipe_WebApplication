@@ -149,13 +149,15 @@ const EditProfile = () => {
 
   const validateForm = () => {
     const newErrors = {};
+    const phoneRegex = /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
+
     if (!formData.fullName.trim()) {
       newErrors.fullName = t('notifications.nameRequired');
     }
     if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phoneNumber.trim())) {
-      newErrors.phoneNumber = 'Phone number must be exactly 10 digits';
+      newErrors.phoneNumber = t('notifications.phoneRequired');
+    } else if (!phoneRegex.test(formData.phoneNumber.trim())) {
+      newErrors.phoneNumber = t('notifications.invalidPhoneFormat');
     }
     
     setErrors(newErrors);

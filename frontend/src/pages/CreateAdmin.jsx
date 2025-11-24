@@ -130,9 +130,23 @@ const CreateAdmin = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.email) newErrors.email = t('notifications.fillRequiredFields');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
+
+    if (!formData.email) {
+      newErrors.email = t('notifications.fillRequiredFields');
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = t('notifications.invalidEmailFormat');
+    }
+
     if (!formData.fullName) newErrors.fullName = t('notifications.fillRequiredFields');
-    if (!formData.phoneNumber) newErrors.phoneNumber = t('notifications.fillRequiredFields');
+    
+    if (!formData.phoneNumber) {
+      newErrors.phoneNumber = t('notifications.fillRequiredFields');
+    } else if (!phoneRegex.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = t('notifications.invalidPhoneFormat');
+    }
+
     if (!formData.province) newErrors.province = t('notifications.fillRequiredFields');
     
     setErrors(newErrors);
@@ -217,7 +231,7 @@ const CreateAdmin = () => {
               {t('createAdmin.title')}
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Email */}
                 <div>
