@@ -214,7 +214,7 @@ const ForgotPassword = () => {
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center"
+                className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-400 text-sm text-center"
               >
                 {error}
               </motion.div>
@@ -252,12 +252,12 @@ const ForgotPassword = () => {
                           setEmailError('');
                         }}
                         className={`w-full pl-12 pr-5 py-3.5 bg-black/20 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all ${
-                          emailError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-cyan-500/50'
+                          emailError ? 'border-yellow-500/50 focus:border-yellow-500' : 'border-white/10 focus:border-cyan-500/50'
                         }`}
                       />
                     </div>
                     {emailError && (
-                      <p className="text-red-400 text-xs ml-1">{emailError}</p>
+                      <p className="text-yellow-400 text-xs ml-1">{emailError}</p>
                     )}
                   </div>
                   <button
@@ -295,13 +295,13 @@ const ForgotPassword = () => {
                           setOtpError('');
                         }}
                         className={`w-full pl-12 pr-5 py-3.5 bg-black/20 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all ${
-                          otpError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-cyan-500/50'
+                          otpError ? 'border-yellow-500/50 focus:border-yellow-500' : 'border-white/10 focus:border-cyan-500/50'
                         }`}
                         maxLength={6}
                       />
                     </div>
                     {otpError && (
-                      <p className="text-red-400 text-xs ml-1">{otpError}</p>
+                      <p className="text-yellow-400 text-xs ml-1">{otpError}</p>
                     )}
                   </div>
                   <button
@@ -339,12 +339,12 @@ const ForgotPassword = () => {
                           setPasswordError('');
                         }}
                         className={`w-full pl-12 pr-5 py-3.5 bg-black/20 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all ${
-                          passwordError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-cyan-500/50'
+                          passwordError ? 'border-yellow-500/50 focus:border-yellow-500' : 'border-white/10 focus:border-cyan-500/50'
                         }`}
                       />
                     </div>
                     {passwordError && (
-                      <p className="text-red-400 text-xs ml-1">{passwordError}</p>
+                      <p className="text-yellow-400 text-xs ml-1">{passwordError}</p>
                     )}
                   </div>
                   <div className="space-y-1.5">
@@ -359,12 +359,12 @@ const ForgotPassword = () => {
                           setConfirmPasswordError('');
                         }}
                         className={`w-full pl-12 pr-5 py-3.5 bg-black/20 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all ${
-                          confirmPasswordError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-cyan-500/50'
+                          confirmPasswordError ? 'border-yellow-500/50 focus:border-yellow-500' : 'border-white/10 focus:border-cyan-500/50'
                         }`}
                       />
                     </div>
                     {confirmPasswordError && (
-                      <p className="text-red-400 text-xs ml-1">{confirmPasswordError}</p>
+                      <p className="text-yellow-400 text-xs ml-1">{confirmPasswordError}</p>
                     )}
                   </div>
                   <button
