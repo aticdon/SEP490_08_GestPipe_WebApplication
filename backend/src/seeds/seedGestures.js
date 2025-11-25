@@ -9,7 +9,7 @@ const GestureSample = require('../models/GestureSample');
 
 const DEFAULT_CSV_PATH = path.resolve(
   __dirname,
-  '../../../../hybrid_realtime_pipeline/training_results/gesture_data_compact.csv'
+  '../../../../hybrid_realtime_pipeline/code/training_results/gesture_data_compact.csv'
 );
 
 const readCsv = (filePath) =>
@@ -25,7 +25,6 @@ const readCsv = (filePath) =>
             ? 'static'
             : 'dynamic';
         rows.push({
-          instance_id: Number(raw.instance_id),
           pose_label: raw.pose_label,
           gesture_type: gestureType,
           left_finger_state_0: Number(raw.left_finger_state_0),
@@ -38,16 +37,11 @@ const readCsv = (filePath) =>
           right_finger_state_2: Number(raw.right_finger_state_2),
           right_finger_state_3: Number(raw.right_finger_state_3),
           right_finger_state_4: Number(raw.right_finger_state_4),
-          motion_x_start: Number(raw.motion_x_start),
-          motion_y_start: Number(raw.motion_y_start),
-          motion_x_mid: Number(raw.motion_x_mid),
-          motion_y_mid: Number(raw.motion_y_mid),
-          motion_x_end: Number(raw.motion_x_end),
-          motion_y_end: Number(raw.motion_y_end),
           main_axis_x: Number(raw.main_axis_x),
           main_axis_y: Number(raw.main_axis_y),
           delta_x: Number(raw.delta_x),
           delta_y: Number(raw.delta_y),
+          accuracy: 0.95,
         });
       })
       .on('end', () => resolve(rows))

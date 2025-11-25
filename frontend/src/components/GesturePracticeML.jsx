@@ -5,6 +5,7 @@ import { Hands } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { X, PlayCircle, StopCircle, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 
 // Gesture templates từ CSV data thực tế
 const GESTURE_TEMPLATES = {
@@ -107,6 +108,46 @@ const GESTURE_TEMPLATES = {
     "delta_y": 0.0,
     "is_static": true,
     "description": "Home - Only thumb extended, static hold"
+  },
+  "end_present": {
+    "left_fingers": [0, 0, 0, 0, 0],
+    "right_fingers": [1, 1, 1, 1, 1],
+    "main_axis_x": 1,
+    "main_axis_y": 0,
+    "delta_x": -0.114914,
+    "delta_y": 0.0,
+    "is_static": false,
+    "description": "End present - All fingers extended, move right"
+  },
+  "start_present": {
+    "left_fingers": [0, 0, 0, 0, 0],
+    "right_fingers": [1, 1, 1, 1, 1],
+    "main_axis_x": 1,
+    "main_axis_y": 0,
+    "delta_x": 0.115876,
+    "delta_y": 0.0,
+    "is_static": false,
+    "description": "Start present - All fingers extended, move left"
+  },
+  "zoom_in_slide": {
+    "left_fingers": [0, 0, 0, 0, 0],
+    "right_fingers": [0, 1, 1, 0, 0],
+    "main_axis_x": 0,
+    "main_axis_y": 1,
+    "delta_x": 0.0,
+    "delta_y": -0.166767,
+    "is_static": false,
+    "description": "Zoom in slide - Index and middle extended, move up"
+  },
+  "zoom_out_slide": {
+    "left_fingers": [0, 0, 0, 0, 0],
+    "right_fingers": [0, 1, 1, 0, 0],
+    "main_axis_x": 0,
+    "main_axis_y": 1,
+    "delta_x": 0.0,
+    "delta_y": 0.189989,
+    "is_static": false,
+    "description": "Zoom out slide - Index and middle extended, move down"
   }
 };
 
@@ -139,6 +180,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   const handsRef = useRef(null);
   const cameraRef = useRef(null);
   const initializingRef = useRef(false);
+  const frameCountRef = useRef(0); // For throttling FPS
   
   // State management - WITH REF TRACKING
   const [practiceState, setPracticeState] = useState("IDLE");
@@ -156,6 +198,8 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   
   // Loading state
   const [loading, setLoading] = useState(true); // Show loading by default
+  const [gestureList, setGestureList] = useState([]); // List of available gestures
+  const [selectedGesture, setSelectedGesture] = useState(''); // Selected gesture name
   const frameDrawCountRef = useRef(0);
   // Detect first time user
   const [firstTime, setFirstTime] = useState(false);
@@ -164,6 +208,24 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       setFirstTime(true);
       localStorage.setItem('hasVisitedPractice', '1');
     }
+  }, []);
+  
+  // Fetch available gestures
+  useEffect(() => {
+    const fetchGestures = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/gestures/labels', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setGestureList(response.data);
+      } catch (error) {
+        console.error('Failed to fetch gestures:', error);
+        toast.error('Failed to load gestures');
+      }
+    };
+    fetchGestures();
   }, []);
   
   // Demo loading handler (move this inside the component)
@@ -401,8 +463,8 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     }
   }, [template?.right_fingers, staticHoldStartTime, staticRequiredDuration, gestureName]);
   
-  // Evaluate gesture - USE REFS WITH PROTECTION
-  const evaluateGesture = useCallback(() => {
+  // Evaluate gesture using ML prediction
+  const evaluateGesture = useCallback(async () => {
     // Prevent double evaluation with timestamp cooldown
     const now = Date.now();
     if (now - lastEvalTimeRef.current < 1000) {
@@ -411,7 +473,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     }
     
     lastEvalTimeRef.current = now;
-    console.log('🔍 Starting evaluation...');
+    console.log('🔍 Starting ML evaluation...');
     
     const currentSequence = gestureSequenceRef.current;
     console.log('🔍 Evaluating gesture with REF, sequence length:', currentSequence.length);
@@ -423,7 +485,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       return;
     }
     
-    if (!template) {
+    if (!gestureName) {
       setStatusMessage(t('gesturePractice.noTemplate'));
       setPracticeState("IDLE");
       practiceStateRef.current = "IDLE";
@@ -432,157 +494,99 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     
     setStatusMessage(t('gesturePractice.evaluating'));
     
-    // Calculate average RIGHT HAND finger states ONLY (left hand ignored completely)
-    const avgFingers = [0, 0, 0, 0, 0];
-    for (const frame of currentSequence) {
-      // frame.fingers contains ONLY right hand data - left hand never recorded
-      for (let i = 0; i < 5; i++) {
-        avgFingers[i] += frame.fingers[i];
-      }
-    }
-    for (let i = 0; i < 5; i++) {
-      avgFingers[i] = Math.round(avgFingers[i] / currentSequence.length);
-    }
-    
-    console.log('📊 RIGHT HAND EVALUATION ONLY:', {
-      sequenceLength: currentSequence.length,
-      rightHandAvgFingers: avgFingers,
-      expectedRightFingers: template.right_fingers,
-      isStatic: template.is_static,
-      note: 'Left hand completely ignored in evaluation'
-    });
-    
-    // Check finger match
-    const fingerMatch = template.right_fingers.every((expected, i) => expected === avgFingers[i]);
-    if (!fingerMatch) {
-      handleAttemptResult(false, t('gesturePractice.wrongFingers', { actual: avgFingers.join(','), expected: template.right_fingers.join(',') }), 'Wrong finger position');
-      return;
-    }
-    
-    // Check if static gesture - USE SEQUENCE-BASED EVALUATION
-    if (template.is_static) {
-      console.log('🔵 Evaluating static gesture using sequence data:', {
-        sequenceLength: currentSequence.length,
-        expectedFingers: template.right_fingers,
-        requiredDuration: staticRequiredDuration
-      });
-      
-      // Check if we have enough frames for static gesture (at least 0.5s of recording)
-      const minFrames = 15; // ~0.5s at 30fps
-      if (currentSequence.length < minFrames) {
-        console.log(`🔵 ❌ Not enough frames: ${currentSequence.length} < ${minFrames}`);
-        handleAttemptResult(false, t('gesturePractice.holdLonger'), 'Hold too short');
-        return;
-      }
-      
-      // Check if majority of frames have correct fingers
-      let matchingFrames = 0;
+    try {
+      // Calculate average RIGHT HAND finger states
+      const avgFingers = [0, 0, 0, 0, 0];
       for (const frame of currentSequence) {
-        const frameMatch = frame.fingers.every((f, i) => f === template.right_fingers[i]);
-        if (frameMatch) matchingFrames++;
+        for (let i = 0; i < 5; i++) {
+          avgFingers[i] += frame.fingers[i];
+        }
+      }
+      for (let i = 0; i < 5; i++) {
+        avgFingers[i] = Math.round(avgFingers[i] / currentSequence.length);
       }
       
-      const matchPercentage = (matchingFrames / currentSequence.length) * 100;
-      console.log(`🔵 Frame analysis: ${matchingFrames}/${currentSequence.length} = ${matchPercentage.toFixed(1)}% match`);
-      
-      if (matchPercentage < 70) { // Need 70% of frames to match
-        handleAttemptResult(false, t('gesturePractice.inconsistentFingers', { matchPercentage: matchPercentage.toFixed(0) }), 'Inconsistent gesture');
-        return;
-      }
-      
-      // Check hand movement during static hold
+      // Calculate motion features (matching training_session_ml.py)
+      let motionFeatures = {
+        delta_x: 0,
+        delta_y: 0,
+        main_axis_x: 0,
+        main_axis_y: 0,
+        raw_dx: 0,
+        raw_dy: 0,
+        delta_magnitude: 0,
+        motion_left: 0,
+        motion_right: 0,
+        motion_up: 0,
+        motion_down: 0
+      };
+
       if (currentSequence.length >= 2) {
         const startWrist = currentSequence[0].wrist;
-        let maxMovement = 0;
-        
-        for (const frame of currentSequence) {
-          const dx = frame.wrist.x - startWrist.x;
-          const dy = frame.wrist.y - startWrist.y;
-          const movement = Math.sqrt(dx * dx + dy * dy);
-          maxMovement = Math.max(maxMovement, movement);
+        const endWrist = currentSequence[currentSequence.length - 1].wrist;
+        const deltaX = -(endWrist.x - startWrist.x); // Flip for selfie camera (user facing)
+        const deltaY = endWrist.y - startWrist.y;
+        const deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        // Determine main axis (matching training script logic)
+        let mainX, mainY, deltaXWeighted, deltaYWeighted;
+        if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+          mainX = 1;
+          mainY = 0;
+          deltaXWeighted = deltaX;
+          deltaYWeighted = 0;
+        } else {
+          mainX = 0;
+          mainY = 1;
+          deltaXWeighted = 0;
+          deltaYWeighted = deltaY;
         }
-        
-        console.log(`🔵 Movement check: max = ${(maxMovement * 100).toFixed(1)}cm`);
-        
-        if (maxMovement > 0.05) { // 5cm threshold
-          handleAttemptResult(false, t('gesturePractice.tooMuchMovement', { movement: (maxMovement * 100).toFixed(1) }), 'Hand moved too much');
-          return;
+
+        motionFeatures = {
+          main_axis_x: mainX,
+          main_axis_y: mainY,
+          delta_x: deltaXWeighted,
+          delta_y: deltaYWeighted,
+          raw_dx: deltaX,
+          raw_dy: deltaY,
+          delta_magnitude: deltaMag,
+          motion_left: deltaX < 0 ? 1.0 : 0.0,
+          motion_right: deltaX > 0 ? 1.0 : 0.0,
+          motion_up: deltaY < 0 ? 1.0 : 0.0,
+          motion_down: deltaY > 0 ? 1.0 : 0.0
+        };
+      }
+      
+      // Call API to predict
+      const response = await axios.post('http://localhost:5000/api/gestures/practice/predict', {
+        left_fingers: [0, 0, 0, 0, 0], // Left hand ignored
+        right_fingers: avgFingers,
+        motion_features: motionFeatures,
+        target_gesture: gestureName,
+        duration: currentSequence.length * (1000/30) / 1000 // Duration in seconds
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
-      }
-      
-      // Success!
-      const durationMs = currentSequence.length * (1000/30); // Estimate duration
-      handleAttemptResult(true, t('gesturePractice.perfectStatic', { gestureName, matchPercentage: matchPercentage.toFixed(0), duration: (durationMs/1000).toFixed(1) }));
-      toast.success(t('gesturePractice.perfect', { gestureName }));
-    } else {
-      // Motion gesture using currentSequence
-      if (currentSequence.length < 3) {
-        handleAttemptResult(false, t('gesturePractice.tooFewFrames'), 'Motion too short');
-        return;
-      }
-      
-      const startWrist = currentSequence[0].wrist;
-      const endWrist = currentSequence[currentSequence.length - 1].wrist;
-      const deltaX = endWrist.x - startWrist.x;
-      const deltaY = endWrist.y - startWrist.y;
-      const deltaMag = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
-      if (deltaMag < 0.03) {
-        handleAttemptResult(false, t('gesturePractice.notEnoughMotion'), 'Motion too small');
-        return;
-      }
-      
-      // Check main direction (horizontal vs vertical)
-      const expectedMainX = template.main_axis_x;
-      const actualMainX = Math.abs(deltaX) >= Math.abs(deltaY) ? 1 : 0;
-      
-      console.log('🎯 Direction analysis:', {
-        deltaX: deltaX.toFixed(3),
-        deltaY: deltaY.toFixed(3),
-        deltaMag: deltaMag.toFixed(3),
-        expectedMainX,
-        actualMainX,
-        expectedDeltaX: template.delta_x,
-        expectedDeltaY: template.delta_y
       });
       
-      if (expectedMainX !== actualMainX) {
-        const expectedDir = expectedMainX ? 'horizontal' : 'vertical';
-        const actualDir = actualMainX ? 'horizontal' : 'vertical';
-        handleAttemptResult(false, t('gesturePractice.wrongDirection', { actual: actualDir, expected: expectedDir }), 'Wrong direction');
-        return;
-      }
+      const result = response.data;
       
-      // Check SPECIFIC direction within main axis (like Python script)
-      if (expectedMainX === 1) {
-        // Horizontal motion - check left/right with camera mirror
-        const expectedRight = template.delta_x > 0;
-        const actualRight = deltaX < 0; // Camera mirror: negative deltaX = move right
-        
-        if (expectedRight !== actualRight) {
-          const expectedDirStr = expectedRight ? 'right' : 'left';
-          const actualDirStr = actualRight ? 'right' : 'left';
-          handleAttemptResult(false, t('gesturePractice.wrongHorizontal', { actual: actualDirStr, expected: expectedDirStr }), 'Wrong horizontal direction');
-          return;
-        }
+      console.log('🤖 ML Evaluation result:', result);
+      
+      if (result.success) {
+        handleAttemptResult(true, result.reason_msg);
+        toast.success(t('gesturePractice.perfect', { gestureName }));
       } else {
-        // Vertical motion - check up/down
-        const expectedDown = template.delta_y > 0;
-        const actualDown = deltaY > 0;
-        
-        if (expectedDown !== actualDown) {
-          const expectedDirStr = expectedDown ? 'down' : 'up';
-          const actualDirStr = actualDown ? 'down' : 'up';
-          handleAttemptResult(false, t('gesturePractice.wrongVertical', { actual: actualDirStr, expected: expectedDirStr }), 'Wrong vertical direction');
-          return;
-        }
+        handleAttemptResult(false, result.reason_msg, result.reason_code);
+        toast.error(`Wrong: ${result.reason_msg}`);
       }
       
-      // All checks passed!
-      handleAttemptResult(true, t('gesturePractice.perfect', { gestureName }) + ` Direction: ${deltaMag.toFixed(3)} movement`);
-      toast.success(t('gesturePractice.perfect', { gestureName }));
+    } catch (error) {
+      console.error('Prediction error:', error);
+      handleAttemptResult(false, t('gesturePractice.evaluationError'), 'API Error');
     }
-  }, [gestureSequence, template, gestureName, staticHoldStartTime, staticRequiredDuration, handleAttemptResult, t]);
+  }, [gestureSequence, gestureName, handleAttemptResult, t]);
   
   // MediaPipe results handler
   const onResults = useCallback((results) => {
@@ -593,9 +597,23 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       return;
     }
     
+    // Throttle to ~15 FPS (process every 2nd frame) for better performance
+    frameCountRef.current += 1;
+    if (frameCountRef.current % 2 !== 0) {
+      return;
+    }
+    
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     canvasCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+    
+    // Check for hand presence
+    if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+      setCurrentHandInfo('❌ No hands detected - Please put your hands in front of the camera');
+      setStatusMessage('Waiting for hands...');
+      canvasCtx.restore();
+      return;
+    }
     
     if (results.multiHandLandmarks && results.multiHandedness) {
       let leftHand = null, rightHand = null;
@@ -616,8 +634,8 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         }
         
         // Draw landmarks with natural colors
-        const isUserLeftHand = classification.label === 'Right'; // MediaPipe "Right" = User's left
-        drawLandmarks(canvasCtx, landmarks, isUserLeftHand ? '#FFB347' : '#FF8C69');
+        // const isUserLeftHand = classification.label === 'Right'; // MediaPipe "Right" = User's left
+        // drawLandmarks(canvasCtx, landmarks, isUserLeftHand ? '#FFB347' : '#FF8C69');
       }
       
       processGestures(leftHand, rightHand);
@@ -779,10 +797,10 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         });
         
         hands.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 1,
-          minDetectionConfidence: 0.3,
-          minTrackingConfidence: 0.3
+          maxNumHands: 2,  // Detect both hands
+          modelComplexity: 0,  // Low complexity for speed
+          minDetectionConfidence: 0.3, // Lower for faster detection
+          minTrackingConfidence: 0.3 // Lower for faster tracking
         });
         
         hands.onResults(onResults);
@@ -799,8 +817,8 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
                 await handsRef.current.send({ image: videoRef.current });
               }
             },
-            width: 640,
-            height: 480
+            width: 320,
+            height: 240
           });
           
           cameraRef.current = camera;
@@ -873,6 +891,23 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   const resetStats = () => {
     setAttemptStats({ correct: 0, wrong: 0 });
     toast.info(t('gesturePractice.statsReset'));
+  };
+  
+  const endSession = () => {
+    // Cleanup MediaPipe and camera
+    if (cameraRef.current) {
+      cameraRef.current.stop();
+      cameraRef.current = null;
+    }
+    if (handsRef.current) {
+      handsRef.current.close();
+      handsRef.current = null;
+    }
+    setPracticeState('IDLE');
+    setAttemptHistory([]);
+    setAttemptStats({ correct: 0, wrong: 0 });
+    setStatusMessage(t('gesturePractice.sessionEnded'));
+    toast.info(t('gesturePractice.sessionEnded'));
   };
   
   if (!template) {
@@ -993,6 +1028,13 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
                   {t('gesturePractice.practiceAgain')}
                 </button>
                 <button
+                  onClick={endSession}
+                  className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all
+                             bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/20"
+                >
+                  {t('gesturePractice.endSession')}
+                </button>
+                <button
                   onClick={onClose}
                   className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all
                              bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10"
@@ -1021,7 +1063,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         {loading && <ModernSpinner firstTime={firstTime} />}
         
         <motion.div 
-          className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-[#1a1b26] shadow-2xl overflow-hidden"
+          className="relative w-full max-w-5xl rounded-2xl border border-white/10 bg-[#1a1b26] shadow-2xl overflow-hidden"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -1054,12 +1096,12 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
           
           {/* Camera Area */}
           <div className="p-6 bg-[#1a1b26]">
-            <div className="relative w-full max-w-xl mx-auto rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg">
+            <div className="relative w-[800px] h-[500px] mx-auto rounded-xl overflow-hidden border border-white/10 bg-black shadow-lg">
               <canvas
                 ref={canvasRef}
-                width={640}
-                height={480}
-                className="w-full h-auto block"
+                width={800}
+                height={500}
+                className="w-full h-[500px] block"
                 style={{ transform: 'scaleX(-1)' }}
               />
               <video
