@@ -1,13 +1,61 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { motion } from 'framer-motion';
 import authService from '../services/authService';
 import logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 import { useTheme } from '../utils/ThemeContext';
+
+// Custom Toast Component
+const CustomToast = ({ message, type, onClose, theme }) => {
+  const [visible, setVisible] = useState(false);
+
+  React.useEffect(() => {
+    // Show animation
+    setTimeout(() => setVisible(true), 10);
+    
+    // Auto hide after 3 seconds
+    const timer = setTimeout(() => {
+      setVisible(false);
+      setTimeout(onClose, 300); // Wait for animation
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const bgColor = theme === 'dark' ? 'bg-black/20' : 'bg-white/20';
+  const textColor = theme === 'dark' ? 'text-white' : 'text-gray-900';
+  const borderColor = theme === 'dark' ? 'border-white/30' : 'border-gray-300/50';
+
+  return (
+    <div 
+      className={`fixed top-6 right-6 z-[9999] transform transition-all duration-500 ease-out ${
+        visible ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-full opacity-0 scale-95'
+      }`}
+    >
+      <div className={`${bgColor} backdrop-blur-md ${textColor} px-6 py-4 rounded-2xl shadow-xl ${borderColor} border max-w-sm`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-xl mr-3">
+              {type === 'success' ? '✅' : '👋'}
+            </span>
+            <span className="font-medium text-sm leading-relaxed">{message}</span>
+          </div>
+          <button 
+            onClick={() => {
+              setVisible(false);
+              setTimeout(onClose, 300);
+            }}
+            className={`ml-4 ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-700'} transition-colors duration-200 rounded-full hover:bg-black/5 p-1`}
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Login = () => {
   const { theme } = useTheme();
@@ -23,6 +71,7 @@ const Login = () => {
     general: ''
   });
   const [loading, setLoading] = useState(false);
+  const [customToast, setCustomToast] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -73,26 +122,25 @@ const Login = () => {
       localStorage.setItem('admin', JSON.stringify(response.admin));
 
       // Show success toast
-      toast.success(`Welcome back, ${response.admin.fullName}! 🎉`, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+      setCustomToast({
+        message: `Welcome back, ${response.admin.fullName}! 🎉`,
+        type: 'success'
       });
 
-      // Redirect based on response
-      if (response.redirect === 'change-password') {
-        navigate('/change-password');
-      } else {
-        // Redirect based on role
-        if (response.admin.role === 'superadmin') {
-          navigate('/dashboard');
-        } else if (response.admin.role === 'admin') {
-          navigate('/user-list');
+      // Delay navigation to allow toast to show
+      setTimeout(() => {
+        // Redirect based on response
+        if (response.redirect === 'change-password') {
+          navigate('/change-password');
+        } else {
+          // Redirect based on role
+          if (response.admin.role === 'superadmin') {
+            navigate('/dashboard');
+          } else if (response.admin.role === 'admin') {
+            navigate('/user-list');
+          }
         }
-      }
+      }, 3500);
       
     } catch (err) {
       const errorData = err.response?.data;
@@ -135,7 +183,16 @@ const Login = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <ToastContainer theme="dark" />
+      {/* Custom Toast */}
+      {customToast && (
+        <CustomToast
+          message={customToast.message}
+          type={customToast.type}
+          theme={theme}
+          onClose={() => setCustomToast(null)}
+        />
+      )}
+      
       {/* Dark overlay with blur */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
       
@@ -168,7 +225,7 @@ const Login = () => {
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center"
+                className="mb-6 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-400 text-sm text-center"
               >
                 {errors.general}
               </motion.div>
@@ -187,13 +244,13 @@ const Login = () => {
                     onChange={handleChange}
                     className={`w-full pl-12 pr-5 py-3.5 bg-black/20 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all ${
                       errors.email 
-                        ? 'border-red-500/50 focus:border-red-500' 
+                        ? 'border-yellow-500/50 focus:border-yellow-500' 
                         : 'border-white/10 focus:border-cyan-500/50'
                     }`}
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-red-400 text-xs ml-1">{errors.email}</p>
+                  <p className="text-yellow-400 text-xs ml-1">{errors.email}</p>
                 )}
               </div>
 
@@ -209,7 +266,7 @@ const Login = () => {
                     onChange={handleChange}
                     className={`w-full pl-12 pr-12 py-3.5 bg-black/20 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all ${
                       errors.password 
-                        ? 'border-red-500/50 focus:border-red-500' 
+                        ? 'border-yellow-500/50 focus:border-yellow-500' 
                         : 'border-white/10 focus:border-cyan-500/50'
                     }`}
                   />
@@ -222,7 +279,7 @@ const Login = () => {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red-400 text-xs ml-1">{errors.password}</p>
+                  <p className="text-yellow-400 text-xs ml-1">{errors.password}</p>
                 )}
               </div>
 

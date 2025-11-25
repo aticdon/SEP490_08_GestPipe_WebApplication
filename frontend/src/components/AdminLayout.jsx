@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 // ===== THAY ĐỔI 1: Import thêm useLocation và Outlet =====
-import { useNavigate, Outlet, useLocation } from 'react-router-dom'; 
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 import backgroundLightImage from '../assets/backgrounds/background_lightheme.jpg';
@@ -12,11 +12,61 @@ import { Sun, Moon, ChevronDown, User } from 'lucide-react';
 import Sidebar from './Sidebar';
 import AdminSidebar from './AdminSidebar';
 import { useTheme } from '../utils/ThemeContext';
-import authService from '../services/authService'; 
+import authService from '../services/authService';
 // ===== THAY ĐỔI 2: Import framer-motion =====
 import { AnimatePresence, motion } from 'framer-motion';
 
-const AdminLayout = () => {
+// Custom Toast Component
+const CustomToast = ({ message, type, onClose, theme }) => {
+  console.log('CustomToast rendering:', { message, type, theme });
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    console.log('CustomToast useEffect running');
+    // Show animation
+    setTimeout(() => setVisible(true), 10);
+    
+    // Auto hide after 3 seconds
+    const timer = setTimeout(() => {
+      setVisible(false);
+      setTimeout(onClose, 300); // Wait for animation
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const bgColor = theme === 'dark' ? 'bg-black/20' : 'bg-white/20';
+  const textColor = theme === 'dark' ? 'text-white' : 'text-gray-900';
+  const borderColor = theme === 'dark' ? 'border-white/30' : 'border-gray-300/50';
+
+  return (
+    <div 
+      className={`fixed top-6 right-6 z-[9999] transform transition-all duration-500 ease-out ${
+        visible ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-full opacity-0 scale-95'
+      }`}
+    >
+      <div className={`${bgColor} backdrop-blur-md ${textColor} px-6 py-4 rounded-2xl shadow-xl ${borderColor} border max-w-sm`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-xl mr-3">
+              {type === 'success' ? '✅' : '👋'}
+            </span>
+            <span className="font-medium text-sm leading-relaxed">{message}</span>
+          </div>
+          <button 
+            onClick={() => {
+              setVisible(false);
+              setTimeout(onClose, 300);
+            }}
+            className={`ml-4 ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-700'} transition-colors duration-200 rounded-full hover:bg-black/5 p-1`}
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};const AdminLayout = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme(); 
   const { t } = useTranslation();
@@ -26,6 +76,9 @@ const AdminLayout = () => {
   const [admin, setAdmin] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const userDropdownRef = useRef();
+  
+  // Custom toast state
+  const [customToast, setCustomToast] = useState(null);
 
   // Tự lấy thông tin admin
   useEffect(() => {
@@ -57,8 +110,24 @@ const AdminLayout = () => {
 
   // Tự xử lý logout
   const handleLogout = () => {
+    console.log('handleLogout called');
+    // Get admin name for farewell message
+    const admin = JSON.parse(localStorage.getItem('admin') || '{}');
+    const adminName = admin.fullName || 'User';
+    
     authService.logout();
-    navigate('/');
+    
+    // Show farewell toast
+    console.log('Setting customToast:', { message: `Goodbye ${adminName}! 👋 See you soon!`, type: 'logout' });
+    setCustomToast({
+      message: `Goodbye ${adminName}! 👋 See you soon!`,
+      type: 'logout'
+    });
+    
+    // Delay navigation to allow toast to show
+    setTimeout(() => {
+      navigate('/');
+    }, 3500);
   };
 
   // Nếu chưa có admin (đang fetch), hiển thị loading
@@ -88,7 +157,29 @@ const AdminLayout = () => {
       />
 
       <div className="relative z-10 h-full flex flex-col">
-        <ToastContainer theme={theme === "dark" ? "dark" : "light"} />
+        <ToastContainer 
+          theme={theme === "dark" ? "dark" : "light"}
+          position="top-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          style={{ zIndex: 9999 }}
+        />
+        
+        {/* Custom Toast */}
+        {customToast && (
+          <CustomToast
+            message={customToast.message}
+            type={customToast.type}
+            theme={theme}
+            onClose={() => setCustomToast(null)}
+          />
+        )}
         
         {/* HEADER */}
         <header
