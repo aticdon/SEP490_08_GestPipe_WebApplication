@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const { PythonShell } = require('python-shell');
 const connectDB = require('./src/config/db');
 
 // Connect to Database
@@ -51,6 +52,52 @@ app.get('/', (req, res) => {
 // Test route without auth
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Test route works!' });
+});
+
+// Test gesture prediction without auth
+app.post('/api/test-predict', async (req, res) => {
+  try {
+    const { left_fingers, right_fingers, motion_features, target_gesture, duration } = req.body;
+
+    if (!left_fingers || !right_fingers || !motion_features || !target_gesture) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    console.log('🎯 Test Evaluating gesture:', target_gesture);
+
+    // Call Python script
+    const scriptPath = './src/utils/gesture_prediction.py';
+
+    const results = await new Promise((resolve, reject) => {
+      const pyshell = new PythonShell(scriptPath, {
+        mode: 'json',
+        pythonPath: 'python',
+        pythonOptions: ['-u'],
+        scriptPath: __dirname  // Set working directory to backend root
+      });
+
+      pyshell.send({
+        left_fingers, right_fingers, motion_features, target_gesture, duration: duration || 1.0
+      });
+
+      pyshell.on('message', (message) => {
+        resolve(message);
+      });
+
+      pyshell.on('error', (error) => {
+        reject(error);
+      });
+
+      pyshell.end((err) => {
+        if (err) reject(err);
+      });
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error('Test predict error:', error);
+    res.status(500).json({ message: 'Test prediction failed', error: error.message });
+  }
 });
 
 // Socket.IO connection handling

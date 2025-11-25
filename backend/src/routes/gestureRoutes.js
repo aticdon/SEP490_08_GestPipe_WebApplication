@@ -64,4 +64,7 @@ router.post('/admin-gesture-approve', onlySuper, adminGestureRequestController.a
 router.post('/admin-gesture-reject', onlySuper, adminGestureRequestController.rejectRequests);
 router.post('/admin-gesture-reset-active', allowView, adminGestureRequestController.resetAllToActive);
 
+// Practice prediction route
+router.post('/practice/predict', allowView, gestureController.predictGesture);
+
 module.exports = router;

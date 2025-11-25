@@ -1,4 +1,6 @@
 const GestureSample = require('../models/GestureSample');
+const path = require('path');
+const { PythonShell } = require('python-shell');
 
 const toPositiveInt = (value, fallback) => {
   const parsed = Number(value);
@@ -25,12 +27,15 @@ exports.listSamples = async (req, res) => {
 
     const [items, total] = await Promise.all([
       GestureSample.find(filter)
-        .sort({ instance_id: 1 })
+        .sort({ pose_label: 1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
       GestureSample.countDocuments(filter),
     ]);
+
+    console.log('🔍 Gestures in DB:', total, items.map(i => i.pose_label));
+    console.log('🔍 Items returned:', items.length);
 
     res.json({
       data: items,
@@ -116,4 +121,62 @@ exports.customizeGesture = async (req, res) => {
   return res.status(410).json({
     message: 'Legacy customization flow không còn hỗ trợ. Vui lòng sử dụng endpoint /api/gestures/customize/upload.',
   });
+};
+
+exports.predictGesture = async (req, res) => {
+  try {
+    const { left_fingers, right_fingers, motion_features, target_gesture, duration } = req.body;
+
+    if (!left_fingers || !right_fingers || !motion_features || !target_gesture) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    console.log('🎯 Evaluating gesture:', target_gesture);
+    console.log('📏 Left fingers:', left_fingers);
+    console.log('📏 Right fingers:', right_fingers);
+    console.log('📊 Motion features:', motion_features);
+
+    // Prepare data for Python script
+    const inputData = {
+      left_fingers,
+      right_fingers,
+      motion_features,
+      target_gesture,
+      duration: duration || 1.0
+    };
+
+    // Path to Python script
+    const scriptPath = path.resolve(__dirname, '../utils/gesture_prediction.py');
+    console.log('🔍 Script path:', scriptPath);
+    console.log('🔍 File exists:', require('fs').existsSync(scriptPath));
+
+    // Run Python script
+    const results = await new Promise((resolve, reject) => {
+      const pyshell = new PythonShell(scriptPath, {
+        mode: 'json',
+        pythonPath: 'python',
+        pythonOptions: ['-u'],
+      });
+
+      pyshell.send(inputData);
+
+      pyshell.on('message', (message) => {
+        resolve(message);
+      });
+
+      pyshell.on('error', (error) => {
+        reject(error);
+      });
+
+      pyshell.end((err) => {
+        if (err) reject(err);
+      });
+    });
+
+    console.log('✅ Evaluation result:', results);
+    res.json(results);
+  } catch (error) {
+    console.error('[gestureController.predictGesture] Error:', error);
+    res.status(500).json({ message: 'Prediction failed', error: error.message });
+  }
 };
