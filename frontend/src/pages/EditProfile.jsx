@@ -209,7 +209,7 @@ const EditProfile = () => {
 
   // Style input đồng bộ
   const getInputStyle = (fieldName) => `flex-1 px-4 py-2 rounded-lg border 
-                      ${errors[fieldName] ? 'border-red-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
+                      ${errors[fieldName] ? 'border-yellow-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
                       ${theme === 'dark' 
                         ? 'bg-gray-900/70 text-white placeholder:text-gray-500' 
                         : 'bg-white text-gray-900 placeholder:text-gray-400'} 
@@ -264,7 +264,7 @@ const EditProfile = () => {
                 />
               </div>
               {errors.fullName && (
-                <p className="text-red-500 text-sm ml-48 mt-1">{errors.fullName}</p>
+                <p className="text-yellow-500 text-sm ml-48 mt-1">{errors.fullName}</p>
               )}
             </div>
 
@@ -312,7 +312,7 @@ const EditProfile = () => {
                 />
               </div>
               {errors.phoneNumber && (
-                <p className="text-red-500 text-sm ml-48 mt-1">{errors.phoneNumber}</p>
+                <p className="text-yellow-500 text-sm ml-48 mt-1">{errors.phoneNumber}</p>
               )}
             </div>
 

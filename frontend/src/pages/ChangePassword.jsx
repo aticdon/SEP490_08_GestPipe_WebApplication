@@ -170,7 +170,7 @@ const ChangePassword = () => {
 
   // Style input đồng bộ
   const getInputStyle = (fieldName) => `w-full px-4 py-3 rounded-lg border 
-                      ${errors[fieldName] ? 'border-red-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
+                      ${errors[fieldName] ? 'border-yellow-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
                       ${theme === 'dark' 
                         ? 'bg-gray-900/70 text-white placeholder:text-gray-500' 
                         : 'bg-white text-gray-900 placeholder:text-gray-400'} 
@@ -213,7 +213,7 @@ const ChangePassword = () => {
             </button>
           </div>
           {errors.oldPassword && (
-            <p className="text-red-500 text-sm mt-1">{errors.oldPassword}</p>
+            <p className="text-yellow-500 text-sm mt-1">{errors.oldPassword}</p>
           )}
         </div>
 
@@ -242,7 +242,7 @@ const ChangePassword = () => {
             </button>
           </div>
           {errors.newPassword && (
-            <p className="text-red-500 text-sm mt-1">{errors.newPassword}</p>
+            <p className="text-yellow-500 text-sm mt-1">{errors.newPassword}</p>
           )}
         </div>
 
@@ -271,7 +271,7 @@ const ChangePassword = () => {
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+            <p className="text-yellow-500 text-sm mt-1">{errors.confirmPassword}</p>
           )}
         </div>
 
