@@ -28,8 +28,8 @@ const GesturePracticeMLPage = () => {
   const [isPracticing, setIsPracticing] = useState(false);
   const [stats, setStats] = useState({ correct: 0, wrong: 0, total: 0, accuracy: 0 });
   const [currentStatus, setCurrentStatus] = useState('Select a gesture to begin');
-  const [socket, setSocket] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const [frameCount, setFrameCount] = useState(0);
+  const [lastSentFrame, setLastSentFrame] = useState(0);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -41,7 +41,7 @@ const GesturePracticeMLPage = () => {
     const initCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 640, height: 480, facingMode: 'user' }
+          video: { width: 800, height: 500, facingMode: 'user' }
         });
         streamRef.current = stream;
         if (videoRef.current) {
@@ -58,7 +58,7 @@ const GesturePracticeMLPage = () => {
 
         hands.setOptions({
           maxNumHands: 1,
-          modelComplexity: 1,
+          modelComplexity: 0,  // Reduced from 1 to 0 for faster processing
           minDetectionConfidence: 0.5,
           minTrackingConfidence: 0.5
         });
@@ -96,8 +96,8 @@ const GesturePracticeMLPage = () => {
               await hands.send({ image: videoRef.current });
             }
           },
-          width: 640,
-          height: 480
+          width: 800,
+          height: 500
         });
 
         camera.start();
@@ -181,24 +181,32 @@ const GesturePracticeMLPage = () => {
   const sendFrameToServer = useCallback(() => {
     if (!videoRef.current || !socket || !isConnected) return;
 
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = 640;
-      canvas.height = 480;
+    setFrameCount(prev => {
+      const newCount = prev + 1;
+      // Only send every 3rd frame to reduce lag
+      if (newCount - lastSentFrame >= 3) {
+        setLastSentFrame(newCount);
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 800;
+          canvas.height = 500;
 
-      // Draw the current video frame to canvas
-      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          // Draw the current video frame to canvas
+          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-      // Convert to base64
-      const frameData = canvas.toDataURL('image/jpeg', 0.8);
+          // Convert to base64 with lower quality to reduce data size
+          const frameData = canvas.toDataURL('image/jpeg', 0.6);
 
-      // Send to server
-      socket.emit('frame', { frameData });
-    } catch (error) {
-      console.error('Error sending frame:', error);
-    }
-  }, [socket, isConnected]);
+          // Send to server
+          socket.emit('frame', { frameData });
+        } catch (error) {
+          console.error('Error sending frame:', error);
+        }
+      }
+      return newCount;
+    });
+  }, [socket, isConnected, lastSentFrame]);
 
   // Start practice session
   const startPractice = () => {
@@ -214,6 +222,8 @@ const GesturePracticeMLPage = () => {
 
     setIsPracticing(true);
     setCurrentStatus('Starting practice session...');
+    setFrameCount(0);
+    setLastSentFrame(0);
 
     socket.emit('start-practice', { gestureName: selectedGesture });
   };
@@ -284,16 +294,16 @@ const GesturePracticeMLPage = () => {
               <div className="relative">
                 <video
                   ref={videoRef}
-                  className="w-full h-96 bg-gray-900 rounded-lg"
+                  className="w-full h-[500px] bg-gray-900 rounded-lg"
                   autoPlay
                   muted
                   playsInline
                 />
                 <canvas
                   ref={canvasRef}
-                  className="absolute top-0 left-0 w-full h-96 pointer-events-none"
-                  width={640}
-                  height={480}
+                  className="absolute top-0 left-0 w-full h-[500px] pointer-events-none"
+                  width={800}
+                  height={500}
                 />
                 {isPracticing && (
                   <div className="absolute top-4 right-4">
