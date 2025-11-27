@@ -133,21 +133,34 @@ const CreateAdmin = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
 
+    // Validate individual fields but don't set individual errors
+    let missingFields = [];
+
     if (!formData.email) {
-      newErrors.email = t('notifications.fillRequiredFields');
+      missingFields.push(t('createAdmin.email'));
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = t('notifications.invalidEmailFormat');
     }
 
-    if (!formData.fullName) newErrors.fullName = t('notifications.fillRequiredFields');
+    if (!formData.fullName) {
+      missingFields.push(t('createAdmin.fullName'));
+    }
     
     if (!formData.phoneNumber) {
-      newErrors.phoneNumber = t('notifications.fillRequiredFields');
+      missingFields.push(t('createAdmin.phoneNumber'));
     } else if (!phoneRegex.test(formData.phoneNumber)) {
       newErrors.phoneNumber = t('notifications.invalidPhoneFormat');
     }
 
-    if (!formData.province) newErrors.province = t('notifications.fillRequiredFields');
+    if (!formData.province) {
+      missingFields.push(t('createAdmin.province'));
+    }
+
+    // Set combined error for missing required fields
+    if (missingFields.length > 0) {
+      newErrors.combined = t('notifications.fillRequiredFields');
+      newErrors.missingFields = missingFields;
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -203,7 +216,7 @@ const CreateAdmin = () => {
 
   // Input style đồng bộ
   const getInputStyle = (fieldName) => `w-full px-4 py-3 rounded-lg border 
-                      ${errors[fieldName] ? 'border-red-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
+                      ${errors[fieldName] ? 'border-yellow-500' : (theme === 'dark' ? 'border-gray-700' : 'border-gray-300')}
                       ${theme === 'dark' 
                         ? 'bg-gray-900/70 text-white placeholder:text-gray-500' 
                         : 'bg-white text-gray-900 placeholder:text-gray-400'} 
@@ -236,7 +249,7 @@ const CreateAdmin = () => {
                 {/* Email */}
                 <div>
                   <label className={labelStyle}>
-                    {t('createAdmin.email')} <span className="text-red-500">*</span>
+                    {t('createAdmin.email')} <span className="text-yellow-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -246,13 +259,13 @@ const CreateAdmin = () => {
                     placeholder="admin@example.com"
                     className={getInputStyle('email')}
                   />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  {errors.email && <p className="text-yellow-500 text-sm mt-1">{errors.email}</p>}
                 </div>
 
                 {/* Full Name */}
                 <div>
                   <label className={labelStyle}>
-                    {t('createAdmin.fullName')} <span className="text-red-500">*</span>
+                    {t('createAdmin.fullName')} <span className="text-yellow-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -262,13 +275,13 @@ const CreateAdmin = () => {
                     placeholder="John Doe"
                     className={getInputStyle('fullName')}
                   />
-                  {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
+                  {errors.fullName && <p className="text-yellow-500 text-sm mt-1">{errors.fullName}</p>}
                 </div>
 
                 {/* Phone Number */}
                 <div>
                   <label className={labelStyle}>
-                    {t('createAdmin.phoneNumber')} <span className="text-red-500">*</span>
+                    {t('createAdmin.phoneNumber')} <span className="text-yellow-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -278,13 +291,22 @@ const CreateAdmin = () => {
                     placeholder="0123456789"
                     className={getInputStyle('phoneNumber')}
                   />
-                  {errors.phoneNumber && <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>}
+                  {errors.phoneNumber && <p className="text-yellow-500 text-sm mt-1">{errors.phoneNumber}</p>}
                 </div>
+
+                {/* Combined Error Message - Displayed between Phone Number and Province */}
+                {errors.combined && (
+                  <div className="md:col-span-2 flex justify-center">
+                    <p className="text-yellow-500 text-sm font-medium bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                      {errors.combined}
+                    </p>
+                  </div>
+                )}
 
                 {/* Province */}
                 <div className="relative">
                   <label className={labelStyle}>
-                    {t('createAdmin.province')} <span className="text-red-500">*</span>
+                    {t('createAdmin.province')} <span className="text-yellow-500">*</span>
                   </label>
                   
                   <button
@@ -301,7 +323,7 @@ const CreateAdmin = () => {
                     </span>
                     <ChevronDown size={18} className="text-gray-400" />
                   </button>
-                  {errors.province && <p className="text-red-500 text-sm mt-1">{errors.province}</p>}
+                  {errors.province && <p className="text-yellow-500 text-sm mt-1">{errors.province}</p>}
 
                   {showProvinceDropdown && (
                     <div className={`absolute z-50 mt-2 w-full rounded-lg shadow-2xl border overflow-hidden

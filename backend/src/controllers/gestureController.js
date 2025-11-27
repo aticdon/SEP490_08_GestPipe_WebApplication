@@ -180,3 +180,90 @@ exports.predictGesture = async (req, res) => {
     res.status(500).json({ message: 'Prediction failed', error: error.message });
   }
 };
+
+exports.getGestureTemplates = async (req, res) => {
+  try {
+    // Aggregate gesture samples to create templates
+    const templates = await GestureSample.aggregate([
+      {
+        $group: {
+          _id: '$pose_label',
+          gesture_type: { $first: '$gesture_type' },
+          left_finger_0: { $first: '$left_finger_state_0' },
+          left_finger_1: { $first: '$left_finger_state_1' },
+          left_finger_2: { $first: '$left_finger_state_2' },
+          left_finger_3: { $first: '$left_finger_state_3' },
+          left_finger_4: { $first: '$left_finger_state_4' },
+          right_finger_0: { $first: '$right_finger_state_0' },
+          right_finger_1: { $first: '$right_finger_state_1' },
+          right_finger_2: { $first: '$right_finger_state_2' },
+          right_finger_3: { $first: '$right_finger_state_3' },
+          right_finger_4: { $first: '$right_finger_state_4' },
+          main_axis_x: { $first: '$main_axis_x' },
+          main_axis_y: { $first: '$main_axis_y' },
+          delta_x: { $first: '$delta_x' },
+          delta_y: { $first: '$delta_y' },
+          avg_accuracy: { $avg: '$accuracy' },
+          sample_count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          pose_label: '$_id',
+          gesture_type: 1,
+          left_fingers: [
+            '$left_finger_0',
+            '$left_finger_1',
+            '$left_finger_2',
+            '$left_finger_3',
+            '$left_finger_4'
+          ],
+          right_fingers: [
+            '$right_finger_0',
+            '$right_finger_1',
+            '$right_finger_2',
+            '$right_finger_3',
+            '$right_finger_4'
+          ],
+          main_axis_x: 1,
+          main_axis_y: 1,
+          delta_x: 1,
+          delta_y: 1,
+          is_static: {
+            $and: [
+              { $lt: [{ $abs: '$delta_x' }, 0.02] },
+              { $lt: [{ $abs: '$delta_y' }, 0.02] }
+            ]
+          },
+          avg_accuracy: 1,
+          sample_count: 1
+        }
+      },
+      {
+        $sort: { pose_label: 1 }
+      }
+    ]);
+
+    // Convert to template format
+    const templateMap = {};
+    templates.forEach(template => {
+      templateMap[template.pose_label] = {
+        left_fingers: template.left_fingers,
+        right_fingers: template.right_fingers,
+        main_axis_x: template.main_axis_x,
+        main_axis_y: template.main_axis_y,
+        delta_x: template.delta_x,
+        delta_y: template.delta_y,
+        is_static: template.is_static,
+        description: `${template.pose_label} - ${template.gesture_type} gesture (${template.sample_count} samples, ${Math.round(template.avg_accuracy * 100)}% accuracy)`
+      };
+    });
+
+    console.log(`📋 Loaded ${templates.length} gesture templates from database`);
+    res.json(templateMap);
+  } catch (error) {
+    console.error('[gestureController.getGestureTemplates] Error:', error);
+    res.status(500).json({ message: 'Failed to fetch gesture templates' });
+  }
+};

@@ -872,7 +872,7 @@ const translations = [
   { language: 'en', category: 'gesturePractice', key: 'goodWork', value: 'Good work! Keep practicing!' },
   { language: 'en', category: 'gesturePractice', key: 'keepPracticing', value: 'Keep practicing to improve!' },
   { language: 'en', category: 'gesturePractice', key: 'practiceAgain', value: 'Practice Again' },
-  { language: 'en', category: 'gesturePractice', key: 'attempts', value: 'attempts' },
+  { language: 'en', category: 'gesturePractice', key: 'attempts', value: 'practice attempts' },
   { language: 'en', category: 'gesturePractice', key: 'practiceStart', value: 'Practice {{gestureName}} - Close left fist to start' },
   { language: 'en', category: 'gesturePractice', key: 'gestureNotFound', value: 'Gesture Not Found' },
   { language: 'en', category: 'gesturePractice', key: 'gestureNotFoundDesc', value: 'The gesture "{{gestureName}}" is not available in the template library.' },

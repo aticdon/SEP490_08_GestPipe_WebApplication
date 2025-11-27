@@ -226,8 +226,24 @@ export const submitGestureForApproval = async () => {
   return response.data;
 };
 
+export const sendToDrive = async () => {
+  const response = await axios.post(
+    `${API_URL}/admin-gesture-send-drive`,
+    {},
+    { headers: authHeaders() }
+  );
+  return response.data;
+};
+
 export const deleteAllCustomedGestures = async () => {
   const response = await axios.delete(`${API_URL}/admin-gesture-delete`, {
+    headers: authHeaders(),
+  });
+  return response.data;
+};
+
+export const resetAllToActive = async () => {
+  const response = await axios.post(`${API_URL}/admin-gesture-reset-active`, {}, {
     headers: authHeaders(),
   });
   return response.data;
