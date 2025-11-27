@@ -50,19 +50,23 @@ adminGestureRequestSchema.pre('save', function(next) {
   next();
 });
 
-// Static method để tạo record mới cho admin với 10 gestures mặc định
+// Static method để tạo record mới cho admin với 14 gestures mặc định
 adminGestureRequestSchema.statics.createForAdmin = async function(adminId) {
   const defaultGestures = [
+    { gestureId: 'end', gestureName: 'End', status: 'ready' },
+    { gestureId: 'end_present', gestureName: 'End Present', status: 'ready' },
+    { gestureId: 'home', gestureName: 'Home', status: 'ready' },
     { gestureId: 'next_slide', gestureName: 'Next Slide', status: 'ready' },
     { gestureId: 'previous_slide', gestureName: 'Previous Slide', status: 'ready' },
-    { gestureId: 'home', gestureName: 'Home', status: 'ready' },
-    { gestureId: 'end', gestureName: 'End', status: 'ready' },
+    { gestureId: 'rotate_down', gestureName: 'Rotate Down', status: 'ready' },
     { gestureId: 'rotate_left', gestureName: 'Rotate Left', status: 'ready' },
     { gestureId: 'rotate_right', gestureName: 'Rotate Right', status: 'ready' },
     { gestureId: 'rotate_up', gestureName: 'Rotate Up', status: 'ready' },
-    { gestureId: 'rotate_down', gestureName: 'Rotate Down', status: 'ready' },
+    { gestureId: 'start_present', gestureName: 'Start Present', status: 'ready' },
     { gestureId: 'zoom_in', gestureName: 'Zoom In', status: 'ready' },
-    { gestureId: 'zoom_out', gestureName: 'Zoom Out', status: 'ready' }
+    { gestureId: 'zoom_in_slide', gestureName: 'Zoom In Slide', status: 'ready' },
+    { gestureId: 'zoom_out', gestureName: 'Zoom Out', status: 'ready' },
+    { gestureId: 'zoom_out_slide', gestureName: 'Zoom Out Slide', status: 'ready' }
   ];
 
   const request = new this({

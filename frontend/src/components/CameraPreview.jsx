@@ -30,7 +30,7 @@ const CameraPreview = ({ theme }) => {
       console.error('Camera error', err);
       setError(
         err.message ||
-          t('cameraPreview.cameraError')
+          t('cameraPreview.cameraError', { defaultValue: 'Camera error occurred.' })
       );
       setIsActive(false);
     }
@@ -64,14 +64,14 @@ const CameraPreview = ({ theme }) => {
               theme === 'dark' ? 'text-white' : 'text-gray-900'
             }`}
           >
-            {t('cameraPreview.title')}
+            {t('cameraPreview.title', { defaultValue: 'Live Camera Feed' })}
           </h3>
           <p
             className={`text-sm ${
               theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
-            {t('cameraPreview.description')}
+            {t('cameraPreview.description', { defaultValue: 'Real-time gesture recognition using MediaPipe' })}
           </p>
         </div>
         <button
@@ -83,7 +83,7 @@ const CameraPreview = ({ theme }) => {
               : 'bg-cyan-500 text-white hover:bg-cyan-600'
           }`}
         >
-          {isActive ? t('cameraPreview.stopCamera') : t('cameraPreview.startCamera')}
+          {isActive ? t('cameraPreview.stopCamera', { defaultValue: 'Stop Camera' }) : t('cameraPreview.startCamera', { defaultValue: 'Start Camera' })}
         </button>
       </div>
 
@@ -102,7 +102,7 @@ const CameraPreview = ({ theme }) => {
         />
         {!isActive && (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-300 bg-black/60">
-            {t('cameraPreview.cameraInactive')}
+            {t('cameraPreview.cameraInactive', { defaultValue: 'Camera is inactive. Click to start.' })}
           </div>
         )}
       </div>
@@ -110,7 +110,7 @@ const CameraPreview = ({ theme }) => {
       {error && (
         <p className="text-sm text-red-400">
           {error ||
-            t('cameraPreview.cameraBlocked')}
+            t('cameraPreview.cameraBlocked', { defaultValue: 'Camera access blocked. Please allow camera access.' })}
         </p>
       )}
     </div>

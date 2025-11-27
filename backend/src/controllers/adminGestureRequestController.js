@@ -3,6 +3,7 @@ const Admin = require('../models/Admin');
 const GestureSample = require('../models/GestureSample');
 const path = require('path');
 const fs = require('fs/promises');
+const { spawn } = require('child_process');
 
 // Get all gesture requests for current admin
 exports.getAdminGestureRequests = async (req, res) => {
@@ -423,3 +424,118 @@ const resetGesturesToActive = async (targetAdminId) => {
 
 // Export helper function for internal use
 exports.resetGesturesToActive = resetGesturesToActive;
+
+// Send custom gestures to Google Drive
+exports.sendToDrive = async (req, res) => {
+  try {
+    const adminId = req.admin.id || req.admin._id;
+
+    // Find the admin's gesture request document
+    const request = await AdminGestureRequest.findOne({ adminId });
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'No gesture requests found'
+      });
+    }
+
+    // Check if there are any customed gestures
+    const customedGestures = request.gestures.filter(g => g.status === 'customed');
+    if (customedGestures.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No custom gestures to send'
+      });
+    }
+
+    console.log(`[sendToDrive] Sending ${customedGestures.length} custom gestures to Drive for admin ${adminId}`);
+
+    // Get absolute path to Python script
+    const scriptPath = path.resolve(__dirname, '../../services/upload_custom_gestures.py');
+    const projectRoot = path.resolve(__dirname, '../../../../');
+
+    console.log(`[sendToDrive] Script path: ${scriptPath}`);
+    console.log(`[sendToDrive] Project root: ${projectRoot}`);
+
+    // Call Python script to upload to Drive
+    const pythonProcess = spawn('python', [
+      scriptPath,
+      adminId
+    ], {
+      cwd: projectRoot,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, PYTHONPATH: projectRoot }
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    pythonProcess.on('close', async (code) => {
+      console.log(`[sendToDrive] Python process exited with code: ${code}`);
+      console.log(`[sendToDrive] stdout: ${stdout}`);
+      console.log(`[sendToDrive] stderr: ${stderr}`);
+
+      if (code === 0) {
+        console.log('[sendToDrive] Successfully uploaded to Drive');
+
+        // Delete local files after successful upload
+        try {
+          const userFolder = path.join(__dirname, '../../../../hybrid_realtime_pipeline/code', `user_${adminId}`);
+          await fs.rm(userFolder, { recursive: true, force: true });
+          console.log(`[sendToDrive] Deleted local folder: ${userFolder}`);
+        } catch (deleteError) {
+          console.warn('[sendToDrive] Failed to delete local files:', deleteError);
+        }
+
+        // Set all gestures to blocked and add blocked timestamp
+        request.gestures.forEach(gesture => {
+          gesture.status = 'blocked';
+          gesture.blockedAt = new Date();
+        });
+
+        await request.save();
+
+        res.json({
+          success: true,
+          message: 'Successfully sent to Drive, please wait 15 minutes before continuing to customize',
+          data: {
+            uploadedCount: customedGestures.length,
+            blockedUntil: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now
+          }
+        });
+      } else {
+        console.error('[sendToDrive] Python script failed:', stderr);
+        res.status(500).json({
+          success: false,
+          message: 'Failed to upload to Drive',
+          error: stderr
+        });
+      }
+    });
+
+    pythonProcess.on('error', (error) => {
+      console.error('[sendToDrive] Failed to start Python process:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to start upload process',
+        error: error.message
+      });
+    });
+
+  } catch (error) {
+    console.error('Error sending to Drive:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send to Drive',
+      error: error.message
+    });
+  }
+};

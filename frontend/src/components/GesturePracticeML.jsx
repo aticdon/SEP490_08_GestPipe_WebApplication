@@ -170,7 +170,7 @@ function ModernSpinner({ firstTime }) {
 function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   const { t } = useTranslation();
   // Debug gesture name
-  console.log('🎯 GesturePracticeMLFixed received gestureName:', gestureName);
+  console.log('🎯 GesturePracticeML received gestureName:', gestureName);
   console.log('🎨 Theme received:', theme);
   console.log('📋 Available templates:', Object.keys(GESTURE_TEMPLATES));
   
@@ -467,16 +467,17 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   const evaluateGesture = useCallback(async () => {
     // Prevent double evaluation with timestamp cooldown
     const now = Date.now();
-    if (now - lastEvalTimeRef.current < 1000) {
+    if (now - lastEvalTimeRef.current < 1500) {
       console.log('⚠️ Evaluation cooldown active, skipping...');
       return;
     }
     
     lastEvalTimeRef.current = now;
-    console.log('🔍 Starting ML evaluation...');
+    // Reduce logging for performance
+    // console.log('🔍 Starting ML evaluation...');
     
     const currentSequence = gestureSequenceRef.current;
-    console.log('🔍 Evaluating gesture with REF, sequence length:', currentSequence.length);
+    // console.log('🔍 Evaluating gesture with REF, sequence length:', currentSequence.length);
     
     if (currentSequence.length === 0) {
       setStatusMessage(t('gesturePractice.noData'));
@@ -597,9 +598,9 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       return;
     }
     
-    // Throttle to ~15 FPS (process every 2nd frame) for better performance
+    // Throttle to ~10 FPS (process every 3rd frame) for better performance
     frameCountRef.current += 1;
-    if (frameCountRef.current % 2 !== 0) {
+    if (frameCountRef.current % 3 !== 0) {
       return;
     }
     
@@ -730,6 +731,8 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         console.log('✋ REF-BASED: STOPPING RECORDING');
         practiceStateRef.current = "EVALUATING";
         setPracticeState("EVALUATING");
+        // UPDATE STATE WITH RECORDED DATA FROM REF
+        setGestureSequence([...gestureSequenceRef.current]);
         setTimeout(() => evaluateGesture(), 100);
         info += '🔍 EVALUATING! ';
       }
@@ -745,16 +748,18 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
           timestamp: Date.now()
         };
         
-        const newSequence = [...gestureSequenceRef.current, frameData];
-        setGestureSequence(newSequence);
-        gestureSequenceRef.current = newSequence;
+        // ACCUMULATE IN REF ONLY - NO STATE UPDATE DURING RECORDING
+        gestureSequenceRef.current.push(frameData);
         
         if (template.is_static) {
-          console.log(`🔵 CALLING handleStaticGesture - rightFingers: [${rightFingers.join(',')}]`);
+          // Reduce logging frequency for performance
+          if (gestureSequenceRef.current.length % 5 === 0) { // Log every 5 frames
+            console.log(`🔵 CALLING handleStaticGesture - rightFingers: [${rightFingers.join(',')}]`);
+          }
           handleStaticGesture(rightFingers, wrist, Date.now());
           info += ` 🔵 STATIC:${getStaticProgress()}`;
         } else {
-          info += ` 🔴 FRAMES:${newSequence.length}`;
+          info += ` 🔴 FRAMES:${gestureSequenceRef.current.length}`;
         }
       }
       
@@ -799,8 +804,8 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
         hands.setOptions({
           maxNumHands: 2,  // Detect both hands
           modelComplexity: 0,  // Low complexity for speed
-          minDetectionConfidence: 0.3, // Lower for faster detection
-          minTrackingConfidence: 0.3 // Lower for faster tracking
+          minDetectionConfidence: 0.5, // Increased for better performance
+          minTrackingConfidence: 0.5 // Increased for better performance
         });
         
         hands.onResults(onResults);
@@ -1010,33 +1015,10 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    console.log('🔄 Practice Again clicked - resetting all states');
-                    setShowFinalResult(false);
-                    setAttemptCount(0);
-                    setAttemptStats({ correct: 0, wrong: 0 });
-                    setAttemptHistory([]); // Reset error history
-                    setPracticeState("IDLE");
-                    practiceStateRef.current = "IDLE";
-                    setStatusMessage(t('gesturePractice.practiceStart', { gestureName }));
-                  }}
-                  className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all
-                             bg-cyan-500 hover:bg-cyan-400 text-white shadow-lg shadow-cyan-500/20"
-                >
-                  {t('gesturePractice.practiceAgain')}
-                </button>
-                <button
-                  onClick={endSession}
-                  className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all
-                             bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/20"
-                >
-                  {t('gesturePractice.endSession')}
-                </button>
+              <div className="flex justify-center pt-2">
                 <button
                   onClick={onClose}
-                  className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all
+                  className="py-2.5 px-6 rounded-xl font-semibold text-sm transition-all
                              bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10"
                 >
                   {t('common.close')}

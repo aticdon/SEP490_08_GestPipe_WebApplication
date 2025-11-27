@@ -23,6 +23,7 @@ const onlySuper = authMiddleware.authorize('superadmin');
 router.get('/', allowView, gestureController.listSamples);
 router.get('/labels', allowView, gestureController.listLabels);
 router.get('/stats', allowView, gestureController.stats);
+router.get('/templates', allowView, gestureController.getGestureTemplates);
 router.get('/model-status', allowView, gestureTrainingController.getModelStatus);
 router.get('/model-info', allowView, gestureInferenceController.getModelInfo);
 router.get('/model-test', allowView, gestureInferenceController.testModel);
@@ -59,6 +60,7 @@ router.get('/admin-gesture-requests', allowView, adminGestureRequestController.g
 router.get('/admin-gesture-status', allowView, adminGestureRequestController.getGestureStatuses);
 router.post('/admin-gesture-request', allowView, adminGestureRequestController.createOrUpdateRequest);
 router.post('/admin-gesture-submit', allowView, adminGestureRequestController.submitForApproval);
+router.post('/admin-gesture-send-drive', allowView, adminGestureRequestController.sendToDrive);
 router.delete('/admin-gesture-delete', allowView, adminGestureRequestController.deleteAllCustomed);
 router.post('/admin-gesture-approve', onlySuper, adminGestureRequestController.approveRequests);
 router.post('/admin-gesture-reject', onlySuper, adminGestureRequestController.rejectRequests);
