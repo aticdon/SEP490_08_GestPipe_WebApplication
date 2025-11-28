@@ -42,6 +42,8 @@ const adminGestureRequestSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  collection: "AdminGestureRequests"
 });
 
 // Update updatedAt khi save

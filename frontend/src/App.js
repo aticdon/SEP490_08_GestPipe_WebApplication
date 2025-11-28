@@ -64,6 +64,18 @@ function App() {
             <Route path="/" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             
+            {/* Route không có layout */}
+            <Route path="/" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route 
+              path="/change-password" 
+              element={
+                <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                  <ChangePassword />
+                </ProtectedRoute>
+              } 
+            />
+            
             {/* ===== CÁC ROUTE CÓ LAYOUT CHUNG ===== */}
             <Route element={<AdminLayoutRoute />}>
               
@@ -148,14 +160,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                     <EditProfile />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/change-password" 
-                element={
-                  <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                    <ChangePassword />
                   </ProtectedRoute>
                 } 
               />

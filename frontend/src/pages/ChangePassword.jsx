@@ -6,10 +6,10 @@ import { toast, ToastContainer } from 'react-toastify'; // Chỉ cần ToastCont
 import 'react-toastify/dist/ReactToastify.css';
 import authService from '../services/authService';
 import { useTheme } from '../utils/ThemeContext';
-import Logo from '../assets/images/Logo.png';
 import backgroundImage from '../assets/backgrounds/background.jpg';
 import backgroundLightImage from '../assets/backgrounds/background_lightheme.jpg';
 import { motion } from 'framer-motion'; // Thêm motion
+import Logo from '../assets/images/Logo.png'; // Thêm Logo
 
 // Hiệu ứng
 const pageVariants = {
@@ -333,11 +333,6 @@ const ChangePassword = () => {
           variants={pageVariants}
           transition={pageVariants.transition}
         >
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <img src={Logo} alt="GestPipe" className="h-32" />
-          </div>
-
           {/* Warning Message */}
           <div className={`mb-6 p-4 rounded-lg border ${
             theme === 'dark'
@@ -356,21 +351,38 @@ const ChangePassword = () => {
     );
   }
 
-  // Trường hợp 2: Đổi mật khẩu bình thường (CÓ LAYOUT)
-  // Trang này được gọi từ <AdminLayoutRoute>
+  // Trường hợp 2: Đổi mật khẩu bình thường (CÓ LOGO)
+  // Trang này được gọi trực tiếp, không có layout
   return (
-    <motion.main 
-      className="flex-1 overflow-y-auto p-8 font-montserrat flex flex-col items-center justify-center"
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={pageVariants}
-      transition={pageVariants.transition}
+    <div 
+      className="h-screen flex flex-col items-center justify-center p-8 relative pb-32"
+      style={{
+        backgroundImage: `url(${theme === 'dark' ? backgroundImage : backgroundLightImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
     >
-      <div className="w-full max-w-2xl mx-auto">
+      {/* Overlay */}
+      <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-black/80' : 'bg-white/80'}`}></div>
+      <ToastContainer theme={theme === 'dark' ? 'dark' : 'light'} />
+      
+      <motion.div 
+        className="relative z-10 w-full max-w-2xl flex flex-col items-center mx-auto"
+        initial="initial"
+        animate="animate"
+        variants={pageVariants}
+        transition={pageVariants.transition}
+      >
+        {/* Logo */}
+        <div className="mb-8 pointer-events-none select-none">
+          <img src={Logo} alt="GestPipe" className="h-20 object-contain" />
+        </div>
+
+        {/* Form */}
         {renderChangePasswordForm()}
-      </div>
-    </motion.main>
+      </motion.div>
+    </div>
   );
 };
 

@@ -34,7 +34,7 @@ const DefaultGestureSchema = new mongoose.Schema({
     default: {}
   }
 }, {
-  collection: "defaultgestures"
+  collection: "DefaultGestures"
 });
 
 module.exports = mongoose.model("DefaultGesture", DefaultGestureSchema);

@@ -249,16 +249,21 @@ const UserList = () => {
   const fetchUsers = useCallback(async () => {
     try {
       const data = await userService.fetchAllUsers();
-      const mapped = data.map(u => ({
-        id: u._id || u.id,
-        email: u.email,
-        phoneNumber: u.phoneNumber || u.phone_number || "-",
-        createDate: u.createdDate || u.created_at,
-        status: STATUS_MAP[u.status] || "inactive",
-        isLocked: u.status === "blocked",
-      }));
+      const mapped = data.map(u => {
+        const mappedUser = {
+          id: u._id || u.id,
+          email: u.email,
+          phoneNumber: u.phoneNumber || u.phone_number || "-",
+          fullName: u.fullName || u.full_name || "-",
+          createDate: u.createdDate || u.created_at,
+          status: STATUS_MAP[u.status] || "inactive",
+          isLocked: u.status === "blocked",
+        };
+        return mappedUser;
+      });
       setUsers(mapped);
-    } catch {
+    } catch (error) {
+      console.error('❌ Error fetching users:', error);
       toast.error(t('userList.failedToLoadUsers'));
     }
   }, []);
@@ -328,7 +333,7 @@ const UserList = () => {
       const keyword = searchTerm.toLowerCase();
       const matchSearch =
         u.email.toLowerCase().includes(keyword) ||
-        u.phoneNumber.toLowerCase().includes(keyword);
+        u.fullName.toLowerCase().includes(keyword);
       const dataStatus = filterType === 'locked' ? 'blocked' : filterType;
       const matchFilter = filterType === "all" || u.status === dataStatus;
       return matchSearch && matchFilter;
@@ -445,7 +450,7 @@ const UserList = () => {
               <thead className="bg-gray-200 dark:bg-gradient-table-header dark:from-header-start-gray dark:to-header-end-gray text-black dark:text-white border-b border-gray-300 dark:border-white/10">
                 <tr>
                   <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[25%]">{t('userList.email')}</th>
-                  <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('userList.phoneNumber')}</th>
+                  <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('userList.name')}</th>
                   <th className="px-4 py-5 text-left text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('userList.createDate')}</th>
                   <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[20%]">{t('userList.status')}</th>
                   <th className="px-4 py-5 text-center text-sm font-extrabold uppercase tracking-wider whitespace-nowrap w-[15%]">{t('userList.action')}</th>
@@ -476,8 +481,8 @@ const UserList = () => {
                     </td>
                     <td className="px-4 py-4 w-[20%] text-left">
                       <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
-                        <Phone size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
-                        <span className="truncate">{u.phoneNumber}</span>
+                        <Users size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
+                        <span className="truncate">{u.fullName}</span>
                       </div>
                     </td>
                     <td className="px-4 py-4 w-[20%] text-left">

@@ -30,7 +30,7 @@ const SessionSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  collection: "session"
+  collection: "Session"
 });
 
 module.exports = mongoose.model("Session", SessionSchema);

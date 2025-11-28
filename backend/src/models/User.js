@@ -52,7 +52,7 @@ const UserSchema = new mongoose.Schema({
     default: false
   }
 }, {
-  collection: "users", // Đặt tên collection
+  collection: "Users", // Đặt tên collection
 });
 
 module.exports = mongoose.model("User", UserSchema);

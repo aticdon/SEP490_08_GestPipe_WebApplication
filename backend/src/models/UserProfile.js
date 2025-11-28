@@ -38,7 +38,7 @@
       type: String
     }
   }, {
-    collection: "userprofiles"
+    collection: "User_Profiles"
   });
 
   module.exports = mongoose.model("UserProfile", UserProfileSchema);

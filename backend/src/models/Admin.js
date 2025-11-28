@@ -69,17 +69,9 @@ const AdminSchema = new mongoose.Schema({
     enum: ['enabled', 'disabled'],
     default: 'enabled'
   }
-  ,
-  resetPasswordOTP: {
-    type: String,
-    default: null
-  },
-  resetPasswordOTPExpires: {
-    type: Date,
-    default: null
-  }
 }, {
-  timestamps: true // Automatically manages createdAt and updatedAt
+  timestamps: true, // Automatically manages createdAt and updatedAt
+  collection: 'Admins' // Specify collection name
 });
 
 // Hash password before saving using SHA256
