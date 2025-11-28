@@ -178,14 +178,6 @@ export const rejectCustomizationRequest = async (requestId, reason) => {
   return response.data;
 };
 
-export const getAdminGestureSamples = async (adminId) => {
-  const response = await axios.get(
-    `${API_URL}/customize/samples/${adminId}`,
-    { headers: authHeaders() }
-  );
-  return response.data;
-};
-
 // Admin Gesture Request APIs
 export const getAdminGestureRequests = async () => {
   const response = await axios.get(`${API_URL}/admin-gesture-requests`, {

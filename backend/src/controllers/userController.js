@@ -21,7 +21,7 @@ exports.getAllUsers = async (req, res) => {
     const users = await User.aggregate([
       { $match: filter },
       { $lookup: {
-          from: "userprofiles",
+          from: "User_Profiles",
           localField: "_id",
           foreignField: "user_id",
           as: "profile"
@@ -33,7 +33,8 @@ exports.getAllUsers = async (req, res) => {
           email: 1,
           created_at: 1,
           account_status: 1,
-          "profile.phone_number": 1
+          "profile.phone_number": 1,
+          "profile.full_name": 1
         }
       }
     ]);
@@ -43,6 +44,7 @@ exports.getAllUsers = async (req, res) => {
       id: u._id,
       email: u.email,
       phoneNumber: u.profile?.phone_number || '',
+      fullName: u.profile?.full_name || '',
       createdDate: u.created_at,
       status: u.account_status
       // Toggle status FE tự xử lý (account_status === 'blocked' thì là khoá đóng, còn lại là mở)

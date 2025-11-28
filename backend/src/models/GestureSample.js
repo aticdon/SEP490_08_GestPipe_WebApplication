@@ -18,9 +18,8 @@ const gestureSampleSchema = new mongoose.Schema(
     main_axis_y: Number,
     delta_x: Number,
     delta_y: Number,
-    accuracy: { type: Number, default: 0.95 },
   },
-  { timestamps: true }
+  { timestamps: true, collection: "GestureSamples" }
 );
 
 module.exports = mongoose.model('GestureSample', gestureSampleSchema);

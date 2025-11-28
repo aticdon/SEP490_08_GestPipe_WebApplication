@@ -12,7 +12,7 @@
     admin_id: { type: mongoose.Types.ObjectId, ref: 'User' },
     created_at: { type: Date, default: Date.now }
   }, {
-    collection: "versions"
+    collection: "Version"
   });
 
   module.exports = mongoose.model("Version", VersionSchema);

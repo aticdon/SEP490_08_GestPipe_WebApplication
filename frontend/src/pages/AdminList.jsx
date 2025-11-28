@@ -162,7 +162,8 @@ const AdminList = () => {
 
   const filteredAdmins = admins.filter(admin => {
     const matchesSearch = admin.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          admin.email.toLowerCase().includes(searchTerm.toLowerCase());
+                          admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (admin.phoneNumber && admin.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = filterStatus === 'all' || admin.accountStatus === filterStatus;
     return matchesSearch && matchesStatus;
   });

@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const OTP = require('../models/OTP');
 const { formatAdminDocument, formatDateTimeWithOffset } = require('../utils/dateFormatter');
 
 // @desc    Reset password after OTP verified
@@ -19,8 +20,9 @@ exports.resetForgotPassword = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ success: false, message: 'Admin not found' });
     }
-    // Chỉ cho đổi mật khẩu nếu OTP đã được xác thực (resetPasswordOTP == null và resetPasswordOTPExpires == null)
-    if (admin.resetPasswordOTP || admin.resetPasswordOTPExpires) {
+    // Check if OTP has been verified (OTP record should have null values after verification)
+    const otpRecord = await OTP.findOne({ adminId: admin._id });
+    if (!otpRecord || otpRecord.resetPasswordOTP || otpRecord.resetPasswordOTPExpires) {
       return res.status(400).json({ success: false, message: 'OTP not verified yet' });
     }
     admin.password = newPassword; // Sẽ được hash bởi pre-save hook
@@ -42,21 +44,30 @@ exports.verifyForgotPasswordOTP = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email and OTP are required', errorType: 'missing_fields' });
     }
     const admin = await Admin.findOne({ email });
-    if (!admin || !admin.resetPasswordOTP || !admin.resetPasswordOTPExpires) {
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Admin not found', errorType: 'admin_not_found' });
+    }
+    
+    // Find OTP record for this admin
+    const otpRecord = await OTP.findOne({ adminId: admin._id });
+    if (!otpRecord || !otpRecord.resetPasswordOTP || !otpRecord.resetPasswordOTPExpires) {
       return res.status(400).json({ success: false, message: 'OTP not found or expired', errorType: 'otp_not_found' });
     }
+    
     // Check OTP and expiry
     const now = new Date();
-    if (admin.resetPasswordOTP !== otp) {
+    if (otpRecord.resetPasswordOTP !== otp) {
       return res.status(401).json({ success: false, message: 'Invalid OTP', errorType: 'invalid_otp' });
     }
-    if (admin.resetPasswordOTPExpires < now) {
+    if (otpRecord.resetPasswordOTPExpires < now) {
       return res.status(401).json({ success: false, message: 'OTP expired', errorType: 'otp_expired' });
     }
-    // Mark OTP as verified (optional: clear OTP)
-    admin.resetPasswordOTP = null;
-    admin.resetPasswordOTPExpires = null;
-    await admin.save();
+    
+    // Mark OTP as verified (clear OTP)
+    otpRecord.resetPasswordOTP = null;
+    otpRecord.resetPasswordOTPExpires = null;
+    await otpRecord.save();
+    
     return res.status(200).json({ success: true, message: 'OTP verified. You can now reset your password.' });
   } catch (error) {
     console.error('Verify forgot password OTP error:', error);
@@ -82,9 +93,22 @@ exports.sendForgotPasswordOTP = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     // Set expiry 5 minutes
     const expires = new Date(Date.now() + 5 * 60 * 1000);
-    admin.resetPasswordOTP = otp;
-    admin.resetPasswordOTPExpires = expires;
-    await admin.save();
+    
+    // Save OTP to OTP collection
+    let otpRecord = await OTP.findOne({ adminId: admin._id });
+    if (otpRecord) {
+      otpRecord.resetPasswordOTP = otp;
+      otpRecord.resetPasswordOTPExpires = expires;
+      await otpRecord.save();
+    } else {
+      otpRecord = new OTP({
+        adminId: admin._id,
+        resetPasswordOTP: otp,
+        resetPasswordOTPExpires: expires
+      });
+      await otpRecord.save();
+    }
+    
     console.log(`✅ [ForgotPassword] OTP generated for ${email}: ${otp}`);
     try {
       await sendMail({

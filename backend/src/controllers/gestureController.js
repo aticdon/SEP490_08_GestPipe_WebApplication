@@ -1,4 +1,5 @@
 const GestureSample = require('../models/GestureSample');
+const GestureType = require('../models/GestureType');
 const path = require('path');
 const { PythonShell } = require('python-shell');
 
@@ -21,7 +22,7 @@ exports.listSamples = async (req, res) => {
     if (poseLabel) {
       filter.pose_label = poseLabel;
     }
-    if (gestureType && ['static', 'dynamic'].includes(gestureType)) {
+    if (gestureType) {
       filter.gesture_type = gestureType;
     }
 
@@ -34,11 +35,19 @@ exports.listSamples = async (req, res) => {
       GestureSample.countDocuments(filter),
     ]);
 
-    console.log('🔍 Gestures in DB:', total, items.map(i => i.pose_label));
-    console.log('🔍 Items returned:', items.length);
+    // Transform data to match expected format for frontend
+    const transformedItems = items.map(item => ({
+      ...item,
+      instance_id: item._id.toString(),
+      // GestureSample already has gesture_type field, no need to populate
+      gesture_type: item.gesture_type || 'static',
+    }));
+
+    console.log('🔍 Gestures in DB:', total, transformedItems.map(i => i.pose_label));
+    console.log('🔍 Items returned:', transformedItems.length);
 
     res.json({
-      data: items,
+      data: transformedItems,
       pagination: {
         page,
         limit,
@@ -74,6 +83,7 @@ exports.stats = async (_req, res) => {
       { $sort: { samples: -1 } },
     ]);
 
+    const totalGestures = await GestureSample.countDocuments();
     const typeBreakdown = await GestureSample.aggregate([
       {
         $group: {
@@ -83,6 +93,7 @@ exports.stats = async (_req, res) => {
       },
     ]);
 
+    // Calculate motion center from GestureSample data
     const motionCenter = await GestureSample.aggregate([
       {
         $group: {

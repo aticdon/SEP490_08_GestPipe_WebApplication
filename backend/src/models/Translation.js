@@ -19,7 +19,8 @@ const translationSchema = new mongoose.Schema({
     required: true,
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'Translations' // Specify collection name
 });
 
 // Compound index for efficient queries

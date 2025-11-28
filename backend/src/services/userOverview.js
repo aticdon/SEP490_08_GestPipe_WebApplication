@@ -188,7 +188,7 @@ async function getTopCategoryStats() {
     // Join sang Category để lấy tên
     {
       $lookup: {
-        from: "category",
+        from: "Category",
         localField: "_id",
         foreignField: "_id",
         as: "category"
