@@ -87,6 +87,21 @@ const adminService = {
       }
     );
     return response.data;
+  },
+
+  // Approve gesture request (SuperAdmin only)
+  approveGestureRequest: async (userId) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(
+      `${API_URL}/approve-gesture/${userId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
   }
 };
 

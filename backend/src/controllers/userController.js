@@ -33,6 +33,7 @@ exports.getAllUsers = async (req, res) => {
           email: 1,
           created_at: 1,
           account_status: 1,
+          gesture_request_status: 1,
           "profile.phone_number": 1,
           "profile.full_name": 1
         }
@@ -46,7 +47,8 @@ exports.getAllUsers = async (req, res) => {
       phoneNumber: u.profile?.phone_number || '',
       fullName: u.profile?.full_name || '',
       createdDate: u.created_at,
-      status: u.account_status
+      status: u.account_status,
+      gesture_request_status: u.gesture_request_status || 'pending'
       // Toggle status FE tự xử lý (account_status === 'blocked' thì là khoá đóng, còn lại là mở)
     }));
 

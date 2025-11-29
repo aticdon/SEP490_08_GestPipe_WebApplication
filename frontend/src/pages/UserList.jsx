@@ -7,11 +7,12 @@ import Swal from 'sweetalert2';
 import { motion } from 'framer-motion'; 
 import { 
   Lock, Unlock, Search as SearchIcon, ChevronDown, Eye, Loader2, X, Users, Filter, UserCheck, UserX,
-  Mail, Phone, Calendar
+  Mail, Phone, Calendar, CheckCircle
 } from 'lucide-react'; 
 // Services
 import authService from '../services/authService';
 import userService from '../services/userService';
+import adminService from '../services/adminService';
 // Theme Context
 import { useTheme } from '../utils/ThemeContext'; 
 
@@ -231,6 +232,7 @@ const UserList = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const filterDropdownRef = useRef(); 
   const [togglingId, setTogglingId] = useState(null);
+  const [approvingId, setApprovingId] = useState(null);
   
   // State cho Popup
   const [showDetailPopup, setShowDetailPopup] = useState(false);
@@ -258,10 +260,20 @@ const UserList = () => {
           createDate: u.createdDate || u.created_at,
           status: STATUS_MAP[u.status] || "inactive",
           isLocked: u.status === "blocked",
+          gestureRequestStatus: u.gesture_request_status,
         };
+        console.log('User mapping:', { id: mappedUser.id, email: mappedUser.email, gestureStatus: mappedUser.gestureRequestStatus });
         return mappedUser;
       });
-      setUsers(mapped);
+      
+      // Sort: users with gesture_request_status = "disable" come first
+      const sorted = mapped.sort((a, b) => {
+        if (a.gestureRequestStatus === 'disable' && b.gestureRequestStatus !== 'disable') return -1;
+        if (a.gestureRequestStatus !== 'disable' && b.gestureRequestStatus === 'disable') return 1;
+        return 0;
+      });
+      
+      setUsers(sorted);
     } catch (error) {
       console.error('❌ Error fetching users:', error);
       toast.error(t('userList.failedToLoadUsers'));
@@ -310,6 +322,46 @@ const UserList = () => {
       toast.error(t('userList.failedToUpdateStatus'));
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  // APPROVE GESTURE REQUEST
+  const handleApprove = async (userId) => {
+    const result = await Swal.fire({
+      title: 'Approve Gesture Request',
+      html: 'Are you sure you want to approve this gesture request? This will start the automated training pipeline.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Approve',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#6b7280',
+      
+      background: 'rgba(0,0,0,0.7)',
+      backdrop: `rgba(0,0,0,0.4) backdrop-blur-sm`,
+      width: '450px',
+      customClass: {
+        container: 'pl-72',
+        popup: 'font-montserrat rounded-2xl border border-white/20 bg-black/70 backdrop-blur-lg text-white',
+        title: 'text-white',
+        htmlContainer: 'text-gray-300',
+        confirmButton: 'font-semibold',
+        cancelButton: 'font-semibold'
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
+    setApprovingId(userId);
+    try {
+      await adminService.approveGestureRequest(userId);
+      toast.success('Gesture request approved successfully');
+      fetchUsers(); // Tải lại danh sách
+    } catch (error) {
+      console.error('Approve error:', error);
+      toast.error('Failed to approve gesture request');
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -525,6 +577,21 @@ const UserList = () => {
                         >
                           {togglingId === u.id ? <Loader2 size={18} className="animate-spin"/> : (u.isLocked ? <Unlock size={18} /> : <Lock size={18} />)}
                         </button>
+                        {u.gestureRequestStatus === 'disable' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); 
+                              handleApprove(u.id);
+                            }}
+                            disabled={approvingId === u.id} 
+                            className={`p-2 rounded-lg transition-all duration-200
+                                       ${approvingId === u.id ? 'cursor-not-allowed opacity-50' : ''}
+                                       text-emerald-500 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-300`}
+                            title="Approved"
+                          >
+                            {approvingId === u.id ? <Loader2 size={18} className="animate-spin"/> : <CheckCircle size={18} />}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -550,6 +617,43 @@ const UserList = () => {
         onClose={() => setShowDetailPopup(false)}
         onLockToggle={handleToggleLock} 
       />
+
+      {/* LOADING OVERLAY FOR APPROVE GESTURE REQUEST */}
+      {approvingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-2xl border border-gray-200 dark:border-gray-700"
+          >
+            <div className="mb-6">
+              <Loader2 size={48} className="animate-spin text-blue-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Processing Gesture Request
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Please wait while we process the gesture training pipeline...
+              </p>
+            </div>
+
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+              <div className="flex items-center mb-2">
+                <div className="text-yellow-600 dark:text-yellow-400 mr-2">⚠️</div>
+                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">
+                  Important Warning
+                </h3>
+              </div>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                <strong>Do not close this browser window or navigate away</strong> during the training process. The pipeline may take several minutes to complete.
+              </p>
+            </div>
+
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              This process includes: data validation, downloading, preparation, model training, and upload.
+            </div>
+          </motion.div>
+        </div>
+      )}
     </>
   );
 };

@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const fs = require('fs');
 const Admin = require('../models/Admin');
 const { sendMail } = require('../utils/mailer');
 const { formatAdminDocument } = require('../utils/dateFormatter');
@@ -359,6 +360,143 @@ exports.getProfile = async (req, res) => {
 
   } catch (error) {
     console.error('Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// @desc    Approve gesture request for user (SuperAdmin only)
+// @route   POST /api/admin/approve-gesture/:userId
+// @access  Private (SuperAdmin)
+exports.approveGestureRequest = async (req, res) => {
+  try {
+    console.log('🚀 Approve Gesture Request called for user:', req.params.userId);
+    console.log('🕒 Timestamp:', new Date().toISOString());
+
+    const { userId } = req.params;
+    const User = require('../models/User');
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user has gesture_request_status = 'disable'
+    if (user.gesture_request_status !== 'disable') {
+      return res.status(400).json({
+        success: false,
+        message: 'User does not have a pending gesture request'
+      });
+    }
+
+    // Set status to processing (use updateOne to avoid validation)
+    await User.updateOne({ _id: userId }, { gesture_request_status: 'processing' });
+
+    // Import required modules
+    const path = require('path');
+    const { runPythonScript } = require('../utils/pythonRunner');
+
+    const BACKEND_SERVICES_DIR = path.resolve(
+      __dirname,
+      '..',
+      '..',
+      'services'
+    );
+
+    const CODE_DIR = path.resolve(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      '..',
+      'hybrid_realtime_pipeline',
+      'code'
+    );
+
+    try {
+      // Step 0: Check if user data exists on Google Drive
+      console.log('[approveGestureRequest] Step 0: Checking user data on Google Drive...');
+      await runPythonScript('check_drive_data.py', [userId], BACKEND_SERVICES_DIR);
+
+      // Step 1: Download user data from Google Drive
+      console.log('[approveGestureRequest] Step 1: Downloading user data...');
+      await runPythonScript('download_user_data.py', ['--user-id', userId], BACKEND_SERVICES_DIR);
+
+      // Step 2: Prepare user data
+      console.log('[approveGestureRequest] Step 2: Preparing user data...');
+      await runPythonScript('prepare_user_data.py', [`user_${userId}`], CODE_DIR);
+
+      // Step 3: Train model
+      console.log('[approveGestureRequest] Step 3: Training model...');
+      const userFolderPath = path.join(CODE_DIR, `user_${userId}`);
+      
+      // Copy training script to user folder
+      const trainScriptSrc = path.join(CODE_DIR, 'train_motion_svm_all_models.py');
+      const trainScriptDst = path.join(userFolderPath, 'train_motion_svm_all_models.py');
+      await fs.promises.copyFile(trainScriptSrc, trainScriptDst);
+      
+      // Run training with dataset parameter
+      await runPythonScript('train_motion_svm_all_models.py', ['--dataset', 'gesture_data_custom_full.csv'], userFolderPath);
+
+      // Step 4: Upload trained model and cleanup
+      console.log('[approveGestureRequest] Step 4: Uploading trained model and cleanup...');
+      
+      // Copy upload script to user folder
+      const uploadScriptSrc = path.join(BACKEND_SERVICES_DIR, 'upload_trained_model.py');
+      const uploadScriptDst = path.join(userFolderPath, 'upload_trained_model.py');
+      await fs.promises.copyFile(uploadScriptSrc, uploadScriptDst);
+      
+      // Copy required dependencies for upload script
+      const oauthServiceSrc = path.join(BACKEND_SERVICES_DIR, 'google_drive_oauth_service.py');
+      const oauthServiceDst = path.join(userFolderPath, 'google_drive_oauth_service.py');
+      await fs.promises.copyFile(oauthServiceSrc, oauthServiceDst);
+      
+      const credentialsSrc = path.join(BACKEND_SERVICES_DIR, 'credentials.json');
+      const credentialsDst = path.join(userFolderPath, 'credentials.json');
+      await fs.promises.copyFile(credentialsSrc, credentialsDst);
+      
+      const tokenSrc = path.join(BACKEND_SERVICES_DIR, 'token.json');
+      const tokenDst = path.join(userFolderPath, 'token.json');
+      await fs.promises.copyFile(tokenSrc, tokenDst);
+      
+      await runPythonScript('upload_trained_model.py', ['--user-id', userId], userFolderPath);
+
+      // Step 5: Cleanup local user directory
+      console.log('[approveGestureRequest] Step 5: Cleaning up local user directory...');
+      
+      await runPythonScript('cleanup_user_directory.py', ['--user-id', userId], BACKEND_SERVICES_DIR);
+
+      // Update user status to 'pending' (use updateOne to avoid validation)
+      await User.updateOne({ _id: userId }, { gesture_request_status: 'pending' });
+
+      console.log('[approveGestureRequest] Pipeline completed successfully for user:', userId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Gesture request approved and pipeline completed successfully'
+      });
+
+    } catch (pipelineError) {
+      console.error('[approveGestureRequest] Pipeline failed:', pipelineError);
+      
+      // Reset status to 'disable' on failure (use updateOne to avoid validation)
+      await User.updateOne({ _id: userId }, { gesture_request_status: 'disable' });
+
+      res.status(500).json({
+        success: false,
+        message: 'Pipeline execution failed',
+        error: pipelineError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('Approve gesture request error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'

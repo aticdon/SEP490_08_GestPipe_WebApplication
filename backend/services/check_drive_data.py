@@ -7,7 +7,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from services.google_drive_service import GoogleDriveService
+from google_drive_oauth_service import GoogleDriveOAuthService
 
 def check_user_drive_data(user_id):
     """
@@ -18,7 +18,7 @@ def check_user_drive_data(user_id):
     """
     try:
         # Initialize Google Drive service
-        drive_service = GoogleDriveService()
+        drive_service = GoogleDriveOAuthService()
 
         # Search for UploadGesture folder
         print("Searching for UploadGesture folder...")

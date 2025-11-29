@@ -17,7 +17,6 @@ const Sidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
     { id: 'gestures', label: t('sidebar.gestureController', { defaultValue: 'Gesture Controller' }), icon: Hand, path: '/gestures' },
     // { id: 'gesture-practice-ml', label: t('sidebar.mlGesturePractice', { defaultValue: 'ML Gesture Practice' }), icon: Hand, path: '/gesture-practice-ml' },
     // ========================
-    { id: 'custom-requests', label: 'Custom Gesture Requests', icon: FileCheck, path: '/custom-requests' },
     { id: 'admin', label: t('sidebar.adminManagement', { defaultValue: 'Admin Management' }), icon: UserCog, path: '/admin-list' },
     { id: 'user', label: t('sidebar.userManagement', { defaultValue: 'User Management' }), icon: UserIcon, path: '/user-list' },
     { id: 'versions', label: t('sidebar.version', { defaultValue: 'Version' }), icon: Layers, path: '/version-list' },
