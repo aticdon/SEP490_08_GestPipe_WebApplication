@@ -2433,6 +2433,102 @@
   },
   {
     "_id": {
+      "$oid": "69005e2ffb61ac18ead6889f"
+    },
+    "language": "en",
+    "category": "userList",
+    "key": "approveGesture",
+    "value": "Approved",
+    "__v": 0,
+    "createdAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69005e2ffb61ac18ead688a0"
+    },
+    "language": "en",
+    "category": "userList",
+    "key": "approveGestureTitle",
+    "value": "Approve Gesture Request",
+    "__v": 0,
+    "createdAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69005e2ffb61ac18ead688a1"
+    },
+    "language": "en",
+    "category": "userList",
+    "key": "approveGestureConfirm",
+    "value": "Are you sure you want to approve this gesture request? This will start the automated training pipeline.",
+    "__v": 0,
+    "createdAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69005e2ffb61ac18ead688a2"
+    },
+    "language": "en",
+    "category": "userList",
+    "key": "yesApprove",
+    "value": "Yes, Approve",
+    "__v": 0,
+    "createdAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69005e2ffb61ac18ead688a3"
+    },
+    "language": "en",
+    "category": "userList",
+    "key": "gestureApproved",
+    "value": "Gesture request approved successfully",
+    "__v": 0,
+    "createdAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69005e2ffb61ac18ead688a4"
+    },
+    "language": "en",
+    "category": "userList",
+    "key": "approveFailed",
+    "value": "Failed to approve gesture request",
+    "__v": 0,
+    "createdAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-29T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
       "$oid": "69005e2ffb61ac18ead68899"
     },
     "language": "vi",

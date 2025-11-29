@@ -3,7 +3,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, Hand, UserCog, User as UserIcon, Layers } from 'lucide-react';
+import { LayoutGrid, Hand, UserCog, User as UserIcon, Layers, FileCheck } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher'; 
 
 const Sidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)

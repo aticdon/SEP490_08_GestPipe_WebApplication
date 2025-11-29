@@ -142,9 +142,68 @@ exports.approveRequest = async (req, res) => {
   requestDoc.status = 'processing';
   await requestDoc.save();
 
+  try {
+    // Step 0: Check if user data exists on Google Drive
+    console.log('[approveRequest] Step 0: Checking user data on Google Drive...');
+    await runPythonScript('check_drive_data.py', [requestDoc.adminId], BACKEND_SERVICES_DIR);
+
+    // Step 1: Download user data from Google Drive
+    console.log('[approveRequest] Step 1: Downloading user data...');
+    await runPythonScript('download_user_data.py', ['--user-id', requestDoc.adminId], BACKEND_SERVICES_DIR);
+
+    // Step 2: Prepare user data
+    console.log('[approveRequest] Step 2: Preparing user data...');
+    await runPythonScript('prepare_user_data.py', ['--user-id', requestDoc.adminId], PIPELINE_CODE_DIR);
+
+    // Step 3: Train model in user folder
+    console.log('[approveRequest] Step 3: Training model...');
+    const userFolderPath = path.join(ROOT_DIR, 'hybrid_realtime_pipeline', 'code', `user_${requestDoc.adminId}`);
+    const trainingScriptSrc = path.join(PIPELINE_CODE_DIR, 'train_motion_svm_all_models.py');
+    const trainingScriptDest = path.join(userFolderPath, 'train_motion_svm_all_models.py');
+    
+    // Move training script into user folder
+    await fs.copyFile(trainingScriptSrc, trainingScriptDest);
+    
     try {
-      const userFolder = `user_${requestDoc.adminId}`;
-      await runPythonScript('upload_user_folder.py', ['--user-id', requestDoc.adminId], PIPELINE_CODE_DIR);    const artifactPaths = buildArtifactPaths(requestDoc.adminId);
+      await runPythonScript('train_motion_svm_all_models.py', ['--dataset', 'gesture_data_custom_full.csv'], userFolderPath);
+      console.log('[approveRequest] Training completed successfully');
+    } finally {
+      // Move script back to original location
+      try {
+        await fs.copyFile(trainingScriptDest, trainingScriptSrc);
+        await fs.unlink(trainingScriptDest);
+      } catch (moveBackError) {
+        console.error('[approveRequest] Failed to move script back:', moveBackError);
+      }
+    }
+
+    // Step 4: Upload trained results to Google Drive and cleanup
+    console.log('[approveRequest] Step 4: Uploading trained model and cleanup...');
+    
+    // Cleanup: remove raw_data folder and extra CSV files before upload
+    const rawDataPath = path.join(userFolderPath, 'raw_data');
+    const csv1Path = path.join(userFolderPath, `gesture_data_custom_${requestDoc.adminId}.csv`);
+    const csv2Path = path.join(userFolderPath, 'gesture_data_custom_full.csv');
+    
+    for (const cleanupPath of [rawDataPath, csv1Path, csv2Path]) {
+      try {
+        const stats = await fs.stat(cleanupPath);
+        if (stats.isDirectory()) {
+          await fs.rm(cleanupPath, { recursive: true, force: true });
+        } else {
+          await fs.unlink(cleanupPath);
+        }
+        console.log(`[approveRequest] Cleaned up: ${path.basename(cleanupPath)}`);
+      } catch (error) {
+        console.warn(`[approveRequest] Failed to cleanup ${cleanupPath}:`, error.message);
+      }
+    }
+    
+    await runPythonScript('upload_trained_model.py', ['--user-id', requestDoc.adminId], BACKEND_SERVICES_DIR);
+
+    // Set gesture_request_status to 'pending' (training completed successfully)
+    await Admin.findByIdAndUpdate(requestDoc.adminId, { gesture_request_status: 'pending' });
+    console.log('[approveRequest] Status updated to pending for user:', requestDoc.adminId);
 
     await CustomGestureRequest.findByIdAndUpdate(id, {
       status: 'approved',

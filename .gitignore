@@ -37,6 +37,9 @@ Thumbs.db
 # Backend specific
 backend/node_modules/
 backend/.env
+backend/services/service_account.json
+backend/services/token.json
+backend/services/credentials.json
 
 # Frontend specific
 frontend/node_modules/
