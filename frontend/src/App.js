@@ -21,6 +21,7 @@ import Gestures from './pages/Gestures';
 // import GesturePracticeMLPage from './pages/GesturePracticeMLPage';
 import VersionList from './pages/VersionList'; 
 import AdminGestures from './pages/AdminGestures';
+import CustomGestureRequests from './components/CustomGestureRequests';
 
 // Protected Route Component (Giữ nguyên)
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -84,6 +85,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['superadmin']}>
                     <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/custom-requests" 
+                element={
+                  <ProtectedRoute allowedRoles={['superadmin']}>
+                    <CustomGestureRequests />
                   </ProtectedRoute>
                 } 
               />
