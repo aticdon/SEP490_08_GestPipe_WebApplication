@@ -219,7 +219,7 @@ const Gestures = ({ showCustomTab = false }) => {
 
   // Define loadGestureStatuses function
   const loadGestureStatuses = useCallback(async () => {
-    if (!admin || admin.role !== 'admin') return;
+    if (!admin || !['admin', 'superadmin'].includes(admin.role)) return;
 
     try {
       const response = await getGestureStatusesOfAdmin(admin.id || admin._id);
@@ -438,8 +438,8 @@ const Gestures = ({ showCustomTab = false }) => {
   // Define tabs - Only Overview and Custom for admin
   const tabs = [
     { id: 'overview', label: t('gestures.overview', { defaultValue: 'Overview' }), icon: Database },
-    // Add Custom tab for admin only (not superadmin)
-    ...(admin?.role === 'admin' ? [{ id: 'custom', label: 'Custom', icon: Settings }] : [])
+    // Add Custom tab for admin and superadmin
+    ...(['admin', 'superadmin'].includes(admin?.role) ? [{ id: 'custom', label: 'Custom', icon: Settings }] : [])
   ];
 
   return (
@@ -724,7 +724,7 @@ const Gestures = ({ showCustomTab = false }) => {
           </div>
 
           {/* Send to Drive Button */}
-          {admin?.role === 'admin' && gestureStatuses.some(g => g.status === 'customed') && (
+          {['admin', 'superadmin'].includes(admin?.role) && gestureStatuses.some(g => g.status === 'customed') && (
             <div className="flex justify-center mt-6">
               <button
                 onClick={handleSendToDrive}
@@ -778,7 +778,7 @@ const Gestures = ({ showCustomTab = false }) => {
         </>
       )}
 
-      {activeTab === 'custom' && admin?.role === 'admin' && (
+      {activeTab === 'custom' && ['admin', 'superadmin'].includes(admin?.role) && (
         <>
           {/* KHỐI FILTER + SEARCH - Giữ nguyên */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 flex-shrink-0 bg-white/60 dark:bg-black/20 p-4 rounded-2xl border border-gray-200 dark:border-white/5 backdrop-blur-sm relative z-30">
@@ -992,7 +992,7 @@ const Gestures = ({ showCustomTab = false }) => {
       )}
 
       {/* Send to Drive Button - Show when there are customized gestures */}
-      {admin?.role === 'admin' && gestureStatuses.some(g => g.status === 'customed') && (
+      {['admin', 'superadmin'].includes(admin?.role) && gestureStatuses.some(g => g.status === 'customed') && (
         <div className="flex justify-center mt-6">
           <button
             onClick={handleSendToDrive}

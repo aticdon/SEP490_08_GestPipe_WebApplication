@@ -68,6 +68,10 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     enum: ['enabled', 'disabled'],
     default: 'enabled'
+  },
+  lastCustomizationTime: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true, // Automatically manages createdAt and updatedAt
