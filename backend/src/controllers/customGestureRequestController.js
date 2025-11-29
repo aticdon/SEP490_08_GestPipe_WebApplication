@@ -179,6 +179,26 @@ exports.approveRequest = async (req, res) => {
 
     // Step 4: Upload trained results to Google Drive and cleanup
     console.log('[approveRequest] Step 4: Uploading trained model and cleanup...');
+    
+    // Cleanup: remove raw_data folder and extra CSV files before upload
+    const rawDataPath = path.join(userFolderPath, 'raw_data');
+    const csv1Path = path.join(userFolderPath, `gesture_data_custom_${requestDoc.adminId}.csv`);
+    const csv2Path = path.join(userFolderPath, 'gesture_data_custom_full.csv');
+    
+    for (const cleanupPath of [rawDataPath, csv1Path, csv2Path]) {
+      try {
+        const stats = await fs.stat(cleanupPath);
+        if (stats.isDirectory()) {
+          await fs.rm(cleanupPath, { recursive: true, force: true });
+        } else {
+          await fs.unlink(cleanupPath);
+        }
+        console.log(`[approveRequest] Cleaned up: ${path.basename(cleanupPath)}`);
+      } catch (error) {
+        console.warn(`[approveRequest] Failed to cleanup ${cleanupPath}:`, error.message);
+      }
+    }
+    
     await runPythonScript('upload_trained_model.py', ['--user-id', requestDoc.adminId], BACKEND_SERVICES_DIR);
 
     // Set gesture_request_status to 'pending' (training completed successfully)
