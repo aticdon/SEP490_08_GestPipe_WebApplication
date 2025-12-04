@@ -41,10 +41,24 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
     });
   };
 
-  const formatAccuracy = (acc) => {
+  const formatAccuracy = (acc, versionItem) => {
+    // If this is a gesture set, always show 92%
+    if (versionItem && versionItem.gestureSetType === 'gestureset') {
+      return '92%';
+    }
+    
     if (acc === undefined || acc === null || acc === '') return t('common.notAvailable');
     if (typeof acc === 'string' && acc.includes('%')) return acc;
     return `${acc}%`;
+  };
+
+  const formatReleaseName = (releaseName, versionItem) => {
+    // If this is a gesture set, format the name nicely
+    if (versionItem && versionItem.gestureSetType === 'gestureset' && versionItem.gestureSetName) {
+      return `Gesture Set: ${versionItem.gestureSetName}`;
+    }
+    
+    return releaseName;
   };
 
   const popupRef = useRef();
@@ -69,11 +83,11 @@ const VersionDetailPopup = ({ show, detail, onClose }) => {
       descriptionText = detail.description?.text || t('common.notAvailable');
     }
     infoRows = [
-      { label: t('versionList.releaseName'), value: detail.releaseName },
+      { label: t('versionList.releaseName'), value: formatReleaseName(detail.releaseName, detail) },
       { label: t('versionList.version'), value: detail.version },
       { label: t('versionList.releaseDate'), value: formatDate(detail.releaseDate) },
       { label: t('versionList.numberOfDownloads'), value: formatNumber(detail.downloads) },
-      { label: t('versionList.accuracy'), value: formatAccuracy(detail.accuracy) },
+      { label: t('versionList.accuracy'), value: formatAccuracy(detail.accuracy, detail) },
       { label: t('versionList.status'), value: t(`versionList.${detail.status}`) },
     ];
   }
@@ -199,10 +213,24 @@ const VersionList = () => {
     });
   };
 
-  const formatAccuracy = (acc) => {
+  const formatAccuracy = (acc, versionItem) => {
+    // If this is a gesture set, always show 92%
+    if (versionItem && versionItem.gestureSetType === 'gestureset') {
+      return '92%';
+    }
+    
     if (acc === undefined || acc === null || acc === '') return t('common.notAvailable');
     if (typeof acc === 'string' && acc.includes('%')) return acc;
     return `${acc}%`;
+  };
+
+  const formatReleaseName = (releaseName, versionItem) => {
+    // If this is a gesture set, format the name nicely
+    if (versionItem && versionItem.gestureSetType === 'gestureset' && versionItem.gestureSetName) {
+      return `Gesture Set: ${versionItem.gestureSetName}`;
+    }
+    
+    return releaseName;
   };
 
   const [versions, setVersions] = useState([]);
@@ -345,7 +373,7 @@ const VersionList = () => {
                           <span className="text-black dark:text-white font-bold text-sm">{v.version}</span>
                         </td>
                         <td className="px-4 py-4 w-[16%]">
-                          <span className="text-gray-800 dark:text-gray-300 font-medium text-sm truncate block">{v.release_name}</span>
+                          <span className="text-gray-800 dark:text-gray-300 font-medium text-sm truncate block">{formatReleaseName(v.release_name, v)}</span>
                         </td>
                         <td className="px-4 py-4 w-[20%]">
                           <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm">
@@ -362,7 +390,7 @@ const VersionList = () => {
                         <td className="px-4 py-4 w-[14%]">
                           <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 text-sm truncate">
                             <Activity size={14} className="text-gray-600 dark:text-gray-500 shrink-0" />
-                            <span className="truncate">{formatAccuracy(v.accuracy)}</span>
+                            <span className="truncate">{formatAccuracy(v.accuracy, v)}</span>
                           </div>
                         </td>
                         <td className="px-4 py-4 w-[13%] text-center">

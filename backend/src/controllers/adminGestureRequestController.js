@@ -5,6 +5,9 @@ const path = require('path');
 const fs = require('fs/promises');
 const { spawn } = require('child_process');
 
+// Debug logging control
+const DEBUG_LOGS = false;
+
 // Get all gesture requests for current admin
 exports.getAdminGestureRequests = async (req, res) => {
   try {
@@ -39,8 +42,7 @@ exports.getGestureStatuses = async (req, res) => {
     if (req.admin.role === 'superadmin' && req.query.adminId) {
       adminId = req.query.adminId;
     }
-    console.log('[getGestureStatuses] adminId from JWT:', req.admin.id || req.admin._id);
-    console.log('[getGestureStatuses] target adminId:', adminId);
+    // Admin ID logs removed to reduce spam
 
     let request = await AdminGestureRequest.findOne({ adminId });
 
@@ -49,8 +51,37 @@ exports.getGestureStatuses = async (req, res) => {
       request = await AdminGestureRequest.createForAdmin(adminId);
     }
 
-    // Check if any gesture is blocked (waiting for approval)
-    const hasBlockedGestures = request.gestures.some(g => g.status === 'blocked');
+    // Check global cooldown from admin's lastCustomizationTime
+    const now = new Date();
+    let globalCooldownActive = false;
+    
+    // Get admin to check lastCustomizationTime
+    const admin = await Admin.findById(adminId);
+    if (admin && admin.lastCustomizationTime) {
+      const timeDiff = now.getTime() - new Date(admin.lastCustomizationTime).getTime();
+      const cooldownMs = 15 * 60 * 1000; // 15 minutes
+      globalCooldownActive = timeDiff < cooldownMs;
+      
+      // If global cooldown expired, auto-unblock all gestures and clear timestamp
+      if (!globalCooldownActive) {
+        let needsSave = false;
+        request.gestures.forEach(g => {
+          if (g.status === 'blocked') {
+            g.status = 'ready';
+            g.blockedAt = null;
+            needsSave = true;
+          }
+        });
+        
+        if (needsSave) {
+          await request.save();
+          // Clear global cooldown timestamp
+          await Admin.findByIdAndUpdate(adminId, { lastCustomizationTime: null });
+        }
+      }
+    }
+
+    const hasBlockedGestures = globalCooldownActive || request.gestures.some(g => g.status === 'blocked');
     const hasCustomedGestures = request.gestures.some(g => g.status === 'customed');
 
     res.json({
@@ -59,7 +90,9 @@ exports.getGestureStatuses = async (req, res) => {
         requests: request.gestures,
         hasBlockedGestures,
         hasCustomedGestures,
-        canCustom: !hasBlockedGestures
+        canCustom: !hasBlockedGestures,
+        globalCooldownActive,
+        cooldownEndTime: admin?.lastCustomizationTime ? new Date(new Date(admin.lastCustomizationTime).getTime() + 15 * 60 * 1000) : null
       }
     });
   } catch (error) {
@@ -149,14 +182,14 @@ exports.submitForApproval = async (req, res) => {
 
     // Update all gestures to blocked (not just customed ones)
     let modifiedCount = 0;
-    console.log('[submitForApproval] Before update - gesture statuses:', request.gestures.map(g => ({ id: g.gestureId, status: g.status })));
+    if (DEBUG_LOGS) console.log('[submitForApproval] Before update - gesture statuses:', request.gestures.map(g => ({ id: g.gestureId, status: g.status })));
     request.gestures.forEach(gesture => {
       // Update ALL gestures to blocked, regardless of current status
       gesture.status = 'blocked';
       gesture.blockedAt = new Date();
       modifiedCount++;
     });
-    console.log('[submitForApproval] After update - all gestures set to blocked, modifiedCount:', modifiedCount);
+    if (DEBUG_LOGS) console.log('[submitForApproval] After update - all gestures set to blocked, modifiedCount:', modifiedCount);
 
     await request.save();
 
@@ -272,6 +305,15 @@ exports.approveRequests = async (req, res) => {
 
     await request.save();
 
+    // Reset cooldown timestamp when gestures are approved
+    try {
+      const Admin = require('../models/Admin');
+      await Admin.findByIdAndUpdate(adminId, { lastCustomizationTime: null });
+      console.log(`[approveRequests] Reset cooldown timestamp for admin ${adminId}`);
+    } catch (cooldownError) {
+      console.warn('[approveRequests] Failed to reset cooldown timestamp:', cooldownError);
+    }
+
     res.json({
       success: true,
       message: `Approved ${modifiedCount} gestures for admin`,
@@ -313,6 +355,15 @@ exports.rejectRequests = async (req, res) => {
       { status: 'ready', updatedAt: new Date() }
     );
 
+    // Reset cooldown timestamp when gestures are rejected
+    try {
+      const Admin = require('../models/Admin');
+      await Admin.findByIdAndUpdate(adminId, { lastCustomizationTime: null });
+      console.log(`[rejectRequests] Reset cooldown timestamp for admin ${adminId}`);
+    } catch (cooldownError) {
+      console.warn('[rejectRequests] Failed to reset cooldown timestamp:', cooldownError);
+    }
+
     res.json({
       success: true,
       message: `Rejected ${result.modifiedCount} gestures for admin`,
@@ -336,6 +387,15 @@ exports.resetAllToActive = async (req, res) => {
     
     await resetGesturesToActive(targetAdminId);
 
+    // Reset cooldown timestamp when gestures are reset
+    try {
+      const Admin = require('../models/Admin');
+      await Admin.findByIdAndUpdate(targetAdminId, { lastCustomizationTime: null });
+      console.log(`[resetAllToActive] Reset cooldown timestamp for admin ${targetAdminId}`);
+    } catch (cooldownError) {
+      console.warn('[resetAllToActive] Failed to reset cooldown timestamp:', cooldownError);
+    }
+
     res.json({
       success: true,
       message: `Reset gestures to active (ready) status`,
@@ -353,7 +413,7 @@ exports.resetAllToActive = async (req, res) => {
 
 // Helper function to reset gestures without req/res
 const resetGesturesToActive = async (targetAdminId) => {
-  console.log('[resetGesturesToActive] Called with adminId:', targetAdminId, 'type:', typeof targetAdminId);
+  if (DEBUG_LOGS) console.log('[resetGesturesToActive] Called with adminId:', targetAdminId, 'type:', typeof targetAdminId);
   
   // Ensure targetAdminId is a valid ObjectId
   if (typeof targetAdminId === 'string') {
@@ -369,12 +429,12 @@ const resetGesturesToActive = async (targetAdminId) => {
     throw new Error('Invalid adminId');
   }
 
-  console.log('[resetGesturesToActive] Looking for AdminGestureRequest with adminId:', targetAdminId);
+  if (DEBUG_LOGS) console.log('[resetGesturesToActive] Looking for AdminGestureRequest with adminId:', targetAdminId);
 
   // Find the target admin's gesture request document
   let request = await AdminGestureRequest.findOne({ adminId: targetAdminId });
 
-  console.log('[resetGesturesToActive] Found request:', request ? 'YES' : 'NO');
+  if (DEBUG_LOGS) console.log('[resetGesturesToActive] Found request:', request ? 'YES' : 'NO');
   if (request) {
     console.log('[resetGesturesToActive] Request _id:', request._id);
     console.log('[resetGesturesToActive] Request adminId:', request.adminId);
@@ -396,7 +456,7 @@ const resetGesturesToActive = async (targetAdminId) => {
 
   // Reset all gestures to ready (active)
   let modifiedCount = 0;
-  console.log('[resetGesturesToActive] About to reset gestures. Current statuses:');
+  if (DEBUG_LOGS) console.log('[resetGesturesToActive] About to reset gestures. Current statuses:');
   request.gestures.forEach((gesture, index) => {
     console.log(`  [${index}] ${gesture.gestureId}: ${gesture.status}`);
     if (gesture.status !== 'ready') {
@@ -411,7 +471,7 @@ const resetGesturesToActive = async (targetAdminId) => {
     }
   });
 
-  console.log('[resetGesturesToActive] Modified count:', modifiedCount);
+  if (DEBUG_LOGS) console.log('[resetGesturesToActive] Modified count:', modifiedCount);
   try {
     await request.save();
     console.log('[resetGesturesToActive] Successfully saved to database');
@@ -486,6 +546,15 @@ exports.sendToDrive = async (req, res) => {
       if (code === 0) {
         console.log('[sendToDrive] Successfully uploaded to Drive');
 
+        // Update cooldown timestamp for admin
+        try {
+          const Admin = require('../models/Admin');
+          await Admin.findByIdAndUpdate(adminId, { lastCustomizationTime: new Date() });
+          console.log(`[sendToDrive] Updated cooldown timestamp for admin ${adminId}`);
+        } catch (cooldownError) {
+          console.warn('[sendToDrive] Failed to update cooldown timestamp:', cooldownError);
+        }
+
         // Delete local files after successful upload
         try {
           const userFolder = path.join(__dirname, '../../../../hybrid_realtime_pipeline/code', `user_${adminId}`);
@@ -508,7 +577,7 @@ exports.sendToDrive = async (req, res) => {
           message: 'Successfully sent to Drive, please wait 15 minutes before continuing to customize',
           data: {
             uploadedCount: customedGestures.length,
-            blockedUntil: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now
+            blockedUntil: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
           }
         });
       } else {

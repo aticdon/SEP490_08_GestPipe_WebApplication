@@ -60,6 +60,18 @@ const CustomToast = ({ message, type, onClose, theme }) => {
 const Login = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
+  
+  // Debug theme and ensure proper initialization
+  React.useEffect(() => {
+    console.log('Login component theme:', theme);
+    
+    // Ensure document class is applied immediately
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
   const [formData, setFormData] = useState({
     email: '',
     password: ''

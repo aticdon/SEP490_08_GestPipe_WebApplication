@@ -174,7 +174,7 @@ async function getAgeStats() {
 // =============================
 // 7. Top Category Stats
 // =============================
-async function getTopCategoryStats() {
+async function getTopCategoryStats(language = 'en') {
   const topCategories = await Session.aggregate([
     {
       $group: {
@@ -200,7 +200,7 @@ async function getTopCategoryStats() {
   // Chuẩn hoá dữ liệu output
   return topCategories.map(cat => ({
     category_id: cat._id,
-    name: cat.category.name?.en || cat.category.name?.vi || "Unknown",
+    name: cat.category.name?.[language] || cat.category.name?.en || cat.category.name?.vi || "Unknown", // Use requested language
     total_sessions: cat.count
   }));
 }

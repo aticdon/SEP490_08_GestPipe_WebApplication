@@ -192,6 +192,37 @@ class GoogleDriveOAuthService:
         except HttpError as e:
             print(f"[ERROR] Error downloading file: {e}")
             return None
+
+    def move_file(self, file_id, new_parent_id):
+        """
+        Move a file to a new parent folder
+
+        Args:
+            file_id (str): ID of the file to move
+            new_parent_id (str): ID of the new parent folder
+
+        Returns:
+            dict: Updated file metadata if successful, None if failed
+        """
+        try:
+            # Get the current parents
+            file = self.service.files().get(fileId=file_id, fields='parents').execute()
+            previous_parents = ",".join(file.get('parents', []))
+            
+            # Move the file to the new parent
+            file = self.service.files().update(
+                fileId=file_id,
+                addParents=new_parent_id,
+                removeParents=previous_parents,
+                fields='id, parents'
+            ).execute()
+            
+            print(f"[MOVE] File moved successfully: {file_id}")
+            return file
+            
+        except HttpError as e:
+            print(f"[ERROR] Error moving file: {e}")
+            return None
         except Exception as e:
             print(f"[ERROR] Unexpected error downloading file: {e}")
             return None

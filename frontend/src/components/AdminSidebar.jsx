@@ -4,7 +4,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 // ===== THAY ĐỔI ICON Ở ĐÂY =====
-import { Gamepad2, User as UserIcon, Layers } from 'lucide-react'; // Bỏ Home, Users, Settings
+import { Gamepad2, User as UserIcon, Layers, Package } from 'lucide-react'; // Bỏ Home, Users, Settings
 import LanguageSwitcher from './LanguageSwitcher';
 
 const AdminSidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
@@ -26,6 +26,12 @@ const AdminSidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLay
     //   icon: Gamepad2, // Sử dụng cùng icon
     //   path: '/gesture-practice-ml',
     // },
+    {
+      id: 'gesture-set-management',
+      label: t('sidebar.gestureSetManagement', { defaultValue: 'Gesture Set Management' }),
+      icon: Package,
+      path: '/gesture-set-management',
+    },
     {
       id: 'user',
       label: t('sidebar.userManagement', { defaultValue: 'User Management' }), // Đồng bộ key

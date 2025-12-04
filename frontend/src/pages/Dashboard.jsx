@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import dashboardService from '../services/dashboardService'; 
 import { toast } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css';
@@ -122,7 +123,7 @@ const UserOverviewTab = ({ theme }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await dashboardService.fetchDashboardUser();
+        const res = await dashboardService.fetchDashboardUser(i18n.language);
         if (res.success) {
           setStats(res.data);
         }
@@ -134,7 +135,7 @@ const UserOverviewTab = ({ theme }) => {
       }
     };
     loadData();
-  }, []);
+  }, [i18n.language, t]); // Re-fetch when language changes
 
   if (loading) return <LoadingState />;
   if (!stats) return <EmptyState message={t('dashboard.noDataAvailable')} />;

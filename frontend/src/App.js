@@ -21,6 +21,7 @@ import Gestures from './pages/Gestures';
 // import GesturePracticeMLPage from './pages/GesturePracticeMLPage';
 import VersionList from './pages/VersionList'; 
 import AdminGestures from './pages/AdminGestures';
+import GestureSetManagement from './components/GestureSetManagement';
 
 // Protected Route Component (Giữ nguyên)
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -142,6 +143,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                     <VersionList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/gesture-set-management"
+                element={
+                  <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
+                    <GestureSetManagement />
                   </ProtectedRoute>
                 }
               />
