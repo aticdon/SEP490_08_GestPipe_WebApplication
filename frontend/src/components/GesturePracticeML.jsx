@@ -292,6 +292,11 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     } else {
       setAttemptStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
     }
+    
+    // Reset static gesture timer after each attempt
+    setStaticHoldStartTime(null);
+    staticHoldStartTimeRef.current = null;
+    setStaticPositions([]);
   }, [maxAttempts]);
 
   
@@ -307,6 +312,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
   const [staticHoldStartTime, setStaticHoldStartTime] = useState(null);
   const [staticPositions, setStaticPositions] = useState([]);
   const staticRequiredDuration = 1000;
+  const staticHoldStartTimeRef = useRef(null);
   
   // Map gesture names from database to template names
   const gestureNameMapping = {
@@ -422,13 +428,21 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     return fingers;
   }, []);
   
-  // Static progress calculation
+  // Static progress calculation with countdown
   const getStaticProgress = useCallback(() => {
-    if (!staticHoldStartTime) return "0%";
-    const elapsed = Date.now() - staticHoldStartTime;
+    if (!staticHoldStartTimeRef.current) return "0%";
+    const elapsed = Date.now() - staticHoldStartTimeRef.current;
     const progress = Math.min(100, (elapsed / staticRequiredDuration) * 100);
     return `${Math.round(progress)}%`;
-  }, [staticHoldStartTime, staticRequiredDuration]);
+  }, [staticRequiredDuration]);
+
+  // Get remaining time in seconds
+  const getRemainingTime = useCallback(() => {
+    if (!staticHoldStartTimeRef.current) return 1.0;
+    const elapsed = Date.now() - staticHoldStartTimeRef.current;
+    const remaining = Math.max(0, (staticRequiredDuration - elapsed) / 1000);
+    return remaining.toFixed(1);
+  }, [staticRequiredDuration]);
   
   // Handle static gesture - FIXED LOGIC
   const handleStaticGesture = useCallback((rightFingers, wrist, currentTime) => {
@@ -443,25 +457,28 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     console.log(`🔵 Static ${gestureName}: [${rightFingers.join(',')}] vs [${targetFingers.join(',')}] = ${fingersMatch ? '✅ MATCH' : '❌ NO MATCH'}`);
     
     if (fingersMatch) {
-      if (!staticHoldStartTime) {
+      if (!staticHoldStartTimeRef.current) {
         console.log('🔵 ✅ MATCH! Starting timer...');
-        setStaticHoldStartTime(currentTime);
+        const startTime = currentTime;
+        setStaticHoldStartTime(startTime);
+        staticHoldStartTimeRef.current = startTime;
         setStaticPositions([{ x: wrist.x, y: wrist.y }]);
       } else {
         setStaticPositions(prev => [...prev, { x: wrist.x, y: wrist.y }]);
-        const holdDuration = currentTime - staticHoldStartTime;
+        const holdDuration = currentTime - staticHoldStartTimeRef.current;
         if (holdDuration % 200 < 50) { // Log every ~200ms
           console.log(`🔵 ⏱️ Holding: ${(holdDuration/1000).toFixed(1)}s / 1.0s`);
         }
       }
     } else {
-      if (staticHoldStartTime) {
+      if (staticHoldStartTimeRef.current) {
         console.log('🔵 ❌ Lost match - timer reset');
         setStaticHoldStartTime(null);
+        staticHoldStartTimeRef.current = null;
         setStaticPositions([]);
       }
     }
-  }, [template?.right_fingers, staticHoldStartTime, staticRequiredDuration, gestureName]);
+  }, [template?.right_fingers, gestureName]);
   
   // Evaluate gesture using ML prediction
   const evaluateGesture = useCallback(async () => {
@@ -473,11 +490,8 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     }
     
     lastEvalTimeRef.current = now;
-    // Reduce logging for performance
-    // console.log('🔍 Starting ML evaluation...');
     
     const currentSequence = gestureSequenceRef.current;
-    // console.log('🔍 Evaluating gesture with REF, sequence length:', currentSequence.length);
     
     if (currentSequence.length === 0) {
       setStatusMessage(t('gesturePractice.noData'));
@@ -496,6 +510,29 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     setStatusMessage(t('gesturePractice.evaluating'));
     
     try {
+      // SPECIAL HANDLING FOR STATIC GESTURES
+      if (template?.is_static && staticHoldStartTimeRef.current) {
+        const holdDuration = now - staticHoldStartTimeRef.current;
+        console.log(`🔵 Evaluating static gesture: hold duration ${(holdDuration/1000).toFixed(1)}s`);
+        
+        if (holdDuration >= staticRequiredDuration) {
+          console.log('🔵 ✅ Static gesture held long enough - SUCCESS!');
+          handleAttemptResult(true, 'Perfect static gesture hold!');
+          toast.success(t('gesturePractice.perfect', { gestureName }));
+          
+          // Reset sequence for next attempt
+          gestureSequenceRef.current = [];
+          return;
+        } else {
+          console.log(`🔵 ❌ Static gesture not held long enough: ${(holdDuration/1000).toFixed(1)}s < 1.0s`);
+          handleAttemptResult(false, `Hold longer: ${(holdDuration/1000).toFixed(1)}s < 1.0s`, 'INSUFFICIENT_HOLD');
+          
+          // Reset sequence for next attempt
+          gestureSequenceRef.current = [];
+          return;
+        }
+      }
+      
       // Calculate average RIGHT HAND finger states
       const avgFingers = [0, 0, 0, 0, 0];
       for (const frame of currentSequence) {
@@ -587,7 +624,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
       console.error('Prediction error:', error);
       handleAttemptResult(false, t('gesturePractice.evaluationError'), 'API Error');
     }
-  }, [gestureSequence, gestureName, handleAttemptResult, t]);
+  }, [gestureSequence, gestureName, handleAttemptResult, t, template, staticRequiredDuration]);
   
   // MediaPipe results handler
   const onResults = useCallback((results) => {
@@ -771,7 +808,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     setPrevLeftFist(currentLeftFist);
     prevLeftFistRef.current = currentLeftFist;
     setCurrentHandInfo(info);
-  }, [practiceState, prevLeftFist, template, gestureName, getFingerStates, handleStaticGesture, getStaticProgress, gestureSequence.length, evaluateGesture]);
+  }, [practiceState, prevLeftFist, template, gestureName, getFingerStates, handleStaticGesture, getStaticProgress, getRemainingTime, gestureSequence.length, evaluateGesture]);
   
   // Initialize MediaPipe with better cleanup
   useEffect(() => {
@@ -1112,6 +1149,50 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
                 {template?.description && (
                   <p className="text-sm text-gray-400 mt-1">
                     {template.description}
+                    {template.is_static && (
+                      <span className="block text-cyan-400 text-xs mt-1 font-medium">
+                        💡 This is a static gesture - hold the pose for 1 second
+                      </span>
+                    )}
+                  </p>
+                )}
+                
+                {/* Static Gesture Progress Bar */}
+                {template?.is_static && staticHoldStartTimeRef.current && (
+                  <div className="mt-4">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <span className="text-sm text-cyan-400 font-medium">Hold Progress</span>
+                      <span className="text-lg font-bold text-white">{getRemainingTime()}s</span>
+                      <span className="text-sm text-gray-400">remaining</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-100 ease-linear rounded-full ${
+                          parseInt(getStaticProgress()) >= 100 
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 animate-pulse' 
+                            : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                        }`}
+                        style={{ 
+                          width: getStaticProgress(),
+                          boxShadow: parseInt(getStaticProgress()) >= 100 
+                            ? '0 0 15px rgba(34, 197, 94, 0.8)' 
+                            : '0 0 10px rgba(6, 182, 212, 0.5)'
+                        }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {parseInt(getStaticProgress()) >= 100 
+                        ? '✅ Gesture completed! Hold steady...' 
+                        : 'Hold the gesture steady until timer reaches 0'
+                      }
+                    </p>
+                  </div>
+                )}
+                
+                {/* Debug Info (only in development) */}
+                {process.env.NODE_ENV === 'development' && currentHandInfo && (
+                  <p className="text-xs text-gray-500 mt-2 font-mono">
+                    {currentHandInfo}
                   </p>
                 )}
               </div>

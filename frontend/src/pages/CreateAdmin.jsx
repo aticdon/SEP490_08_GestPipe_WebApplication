@@ -294,15 +294,6 @@ const CreateAdmin = () => {
                   {errors.phoneNumber && <p className="text-yellow-500 text-sm mt-1">{errors.phoneNumber}</p>}
                 </div>
 
-                {/* Combined Error Message - Displayed between Phone Number and Province */}
-                {errors.combined && (
-                  <div className="md:col-span-2 flex justify-center">
-                    <p className="text-yellow-500 text-sm font-medium bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                      {errors.combined}
-                    </p>
-                  </div>
-                )}
-
                 {/* Province */}
                 <div className="relative">
                   <label className={labelStyle}>
@@ -350,6 +341,15 @@ const CreateAdmin = () => {
                   )}
                 </div>
               </div>
+
+              {/* Combined Error Message - Displayed at the end, between fields and buttons */}
+              {errors.combined && (
+                <div className="flex justify-center mt-6">
+                  <p className="text-yellow-500 text-sm font-medium bg-yellow-50 dark:bg-yellow-900/20 px-6 py-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    {errors.combined}
+                  </p>
+                </div>
+              )}
 
               {/* Buttons */}
               <div className="flex gap-4 pt-4 justify-end">

@@ -6,6 +6,7 @@ const execFileAsync = util.promisify(execFile);
 
 const AdminCustomGesture = require('../models/AdminCustomGesture');
 const AdminGestureRequest = require('../models/AdminGestureRequest');
+const Admin = require('../models/Admin');
 
 const PIPELINE_CODE_DIR = path.resolve(__dirname, '../../../..', 'hybrid_realtime_pipeline', 'code');
 
@@ -331,6 +332,21 @@ exports.uploadCustomGesture = async (req, res) => {
       return res.status(400).json({ message: 'Missing sample data.' });
     }
 
+    // Check cooldown
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin not found.' });
+    }
+    if (admin.lastCustomizationTime) {
+      const timeDiff = Date.now() - new Date(admin.lastCustomizationTime).getTime();
+      const cooldownMs = 15 * 60 * 1000; // 15 minutes
+      if (timeDiff < cooldownMs) {
+        const remainingMs = cooldownMs - timeDiff;
+        const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+        return res.status(429).json({ message: `Cooldown active. Please wait ${remainingMinutes} minutes before customizing again.` });
+      }
+    }
+
     console.log(
       `[uploadCustomGesture] admin=${adminId} gesture=${gestureName} samples=${samples.length}`
     );
@@ -470,6 +486,10 @@ exports.uploadCustomGesture = async (req, res) => {
       console.warn('[uploadCustomGesture] Final operations failed:', finalErr.message);
       // Continue anyway, raw file is saved
     }
+
+    // Update cooldown timestamp
+    admin.lastCustomizationTime = new Date();
+    await admin.save();
 
     return res.status(200).json({
       message: 'Custom gesture accepted and saved.',

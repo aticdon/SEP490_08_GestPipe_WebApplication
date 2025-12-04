@@ -472,8 +472,24 @@ exports.approveGestureRequest = async (req, res) => {
       
       await runPythonScript('cleanup_user_directory.py', ['--user-id', userId], BACKEND_SERVICES_DIR);
 
-      // Update user status to 'pending' (use updateOne to avoid validation)
-      await User.updateOne({ _id: userId }, { gesture_request_status: 'pending' });
+      // Update user status to 'locked' for 15 minutes cooldown
+      await User.updateOne({ _id: userId }, { 
+        gesture_request_status: 'locked',
+        locked_until: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now
+      });
+
+      // Schedule status reset after 15 minutes
+      setTimeout(async () => {
+        try {
+          await User.updateOne({ _id: userId }, { 
+            gesture_request_status: 'active',
+            locked_until: null
+          });
+          console.log(`[approveGestureRequest] User ${userId} status reset to active after 15 minutes cooldown`);
+        } catch (error) {
+          console.error(`[approveGestureRequest] Failed to reset user ${userId} status:`, error);
+        }
+      }, 15 * 60 * 1000); // 15 minutes
 
       console.log('[approveGestureRequest] Pipeline completed successfully for user:', userId);
 
