@@ -7,9 +7,10 @@ const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
 });
 
-export const fetchDashboardUser = async () => {
+export const fetchDashboardUser = async (language = 'en') => {
   const response = await axios.get(`${API_URL}/user-overview`, {
     headers: authHeaders(),
+    params: { language }
   });
   return response.data;
 };

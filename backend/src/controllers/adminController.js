@@ -257,27 +257,32 @@ exports.updateProfile = async (req, res) => {
     const { id } = req.params;
     const { fullName, birthday, phoneNumber, province, uiLanguage } = req.body;
 
-    // Validation
-    if (!fullName || fullName.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'Full name is required'
-      });
-    }
+    // Only validate if the fields are being updated (not for language-only updates)
+    const isLanguageOnlyUpdate = uiLanguage && !fullName && !phoneNumber && !birthday && !province;
+    
+    // Validation (skip if only updating language)
+    if (!isLanguageOnlyUpdate) {
+      if (!fullName || fullName.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Full name is required'
+        });
+      }
 
-    if (!phoneNumber || phoneNumber.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'Phone number is required'
-      });
-    }
+      if (!phoneNumber || phoneNumber.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number is required'
+        });
+      }
 
-    // Validate phone number format: exactly 10 digits
-    if (!/^\d{10}$/.test(phoneNumber.trim())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Phone number must be exactly 10 digits'
-      });
+      // Validate phone number format: exactly 10 digits
+      if (!/^\d{10}$/.test(phoneNumber.trim())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number must be exactly 10 digits'
+        });
+      }
     }
 
     // Check if admin exists
@@ -475,7 +480,7 @@ exports.approveGestureRequest = async (req, res) => {
       // Update user status to 'locked' for 15 minutes cooldown
       await User.updateOne({ _id: userId }, { 
         gesture_request_status: 'locked',
-        locked_until: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now
+        locked_until: new Date(Date.now() + 1 * 60 * 1000) // 1 minute for testing
       });
 
       // Schedule status reset after 15 minutes
@@ -489,7 +494,7 @@ exports.approveGestureRequest = async (req, res) => {
         } catch (error) {
           console.error(`[approveGestureRequest] Failed to reset user ${userId} status:`, error);
         }
-      }, 15 * 60 * 1000); // 15 minutes
+      }, 1 * 60 * 1000); // 1 minute for testing
 
       console.log('[approveGestureRequest] Pipeline completed successfully for user:', userId);
 

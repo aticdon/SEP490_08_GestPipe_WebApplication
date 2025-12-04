@@ -196,7 +196,7 @@ function GestureCustomization({
     }
   }, [gestureName, admin, isGestureBlocked]);
 
-  // Load gesture status for blocking logic
+  // Load gesture status for blocking logic - DISABLED FOR TESTING
   useEffect(() => {
     const loadGestureStatus = async () => {
       if (!admin) return;
@@ -206,6 +206,7 @@ function GestureCustomization({
         
         // Check if this specific gesture is blocked or customed
         const thisGestureRequest = response.data.requests?.find(r => r.gestureId === gestureName);
+        console.log(`[GestureCustomization] Gesture ${gestureName} status:`, thisGestureRequest?.status);
         setIsGestureBlocked(thisGestureRequest?.status === 'blocked' || thisGestureRequest?.status === 'customed');
       } catch (error) {
         console.warn('Failed to load gesture status:', error);
@@ -318,7 +319,6 @@ function GestureCustomization({
               const successMsg = resp?.message || t('gestureCustomization.uploadedSuccess');
               setTempMessage(t('gestureCustomization.uploadedSuccessShort'));
               setTempMessageType('success');
-              toast.success(t('gestureCustomization.customizationUploaded', { gestureName }));
               toast.success(t('gestureCustomization.customizationUploaded', { gestureName }));
               if (onCompleted) {
                 onCompleted(gestureName);
@@ -528,9 +528,19 @@ function GestureCustomization({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`rounded-xl shadow-xl max-w-2xl w-full ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+      <div className={`rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
         <div className={`flex justify-between items-center p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-          <h2 className="text-xl font-bold">{t('gestureCustomization.title', { gestureName })}</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-bold">{t('gestureCustomization.title', 'Tùy chỉnh cử chỉ: {{gestureName}}', { gestureName })}</h2>
+            {/* Sample Counter */}
+            <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
+              samples.length >= REQUIRED_SAMPLES 
+                ? 'bg-green-600/20 text-green-400 border border-green-500/30'
+                : 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+            }`}>
+              {samples.length}/{REQUIRED_SAMPLES} {t('gestureCustomization.samples', 'mẫu')}
+            </div>
+          </div>
           <button onClick={onClose} className={`p-2 rounded-full ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
             <X size={24} />
           </button>
@@ -556,33 +566,49 @@ function GestureCustomization({
               </div>
             </div>
           )}
-          <canvas
-            ref={canvasRef}
-            width={640}
-            height={480}
-            className="w-full rounded-lg border border-gray-600"
-            style={{ transform: 'scaleX(-1)' }}
-          />
-          <video ref={videoRef} className="hidden" autoPlay playsInline muted />
-          <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-white text-sm ${
-            tempMessageType === 'error' 
-              ? 'bg-red-600/90' 
-              : tempMessageType === 'success'
-                ? 'bg-green-600/90'
-                : 'bg-black/60'
-          }`}>
-            {tempMessage || statusMessage}
+          
+          {/* Main video area with larger size similar to training */}
+          <div className="flex justify-center">
+            <canvas
+              ref={canvasRef}
+              width={640}
+              height={480}
+              className="rounded-lg shadow-lg"
+              style={{ 
+                transform: 'scaleX(-1)',
+                width: '640px',
+                height: '480px',
+                display: 'block'
+              }}
+            />
+            <video ref={videoRef} className="hidden" autoPlay playsInline muted />
           </div>
+        </div>
+
+        <div className="p-4 flex flex-col items-center gap-4 w-full">
+          {/* Status messages */}
+          {(tempMessage || statusMessage) && (
+            <div className={`w-full px-4 py-2 rounded-lg text-sm font-medium text-center ${
+              tempMessageType === 'error' 
+                ? 'bg-red-100 text-red-800 border border-red-300' 
+                : tempMessageType === 'success'
+                  ? 'bg-green-100 text-green-800 border border-green-300'
+                  : theme === 'dark' 
+                    ? 'bg-gray-700 text-gray-200'
+                    : 'bg-gray-100 text-gray-800'
+            }`}>
+              {tempMessage || statusMessage}
+            </div>
+          )}
+          
           {showError && (
-            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-red-900/90 text-red-100 text-sm max-w-xs text-center">
+            <div className="w-full px-4 py-2 rounded-lg bg-red-100 text-red-800 border border-red-300 text-sm text-center">
               {message}
             </div>
           )}
-        </div>
-
-        <div className="p-4 flex flex-col items-center gap-4 border-t border-gray-700 w-full">
+          
           {status === 'success' && (
-            <div className="w-full mt-2 px-4 py-2 rounded bg-green-900/80 text-green-100 text-sm">
+            <div className="w-full px-4 py-2 rounded bg-green-900/80 text-green-100 text-sm">
               <strong>{t('common.success')}:</strong> {message}
             </div>
           )}

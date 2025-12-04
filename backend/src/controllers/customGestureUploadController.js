@@ -332,11 +332,12 @@ exports.uploadCustomGesture = async (req, res) => {
       return res.status(400).json({ message: 'Missing sample data.' });
     }
 
-    // Check cooldown
+    // Check cooldown - DISABLED FOR TESTING
     const admin = await Admin.findById(adminId);
     if (!admin) {
       return res.status(404).json({ message: 'Admin not found.' });
     }
+    // Check global cooldown
     if (admin.lastCustomizationTime) {
       const timeDiff = Date.now() - new Date(admin.lastCustomizationTime).getTime();
       const cooldownMs = 15 * 60 * 1000; // 15 minutes

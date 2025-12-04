@@ -32,6 +32,7 @@ const practiceRoutes = require('./src/routes/practiceRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const versionRoutes = require('./src/routes/versionRoutes');
+const gestureSetRoutes = require('./src/routes/gestureSetRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -43,6 +44,7 @@ app.use('/api/gestures', gestureRoutes);
 app.use('/api/practice', practiceRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/versions', versionRoutes);
+app.use('/api/gesture-sets', gestureSetRoutes);
 
 // Simple route for testing
 app.get('/', (req, res) => {

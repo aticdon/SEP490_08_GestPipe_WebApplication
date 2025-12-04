@@ -226,6 +226,13 @@ const Gestures = ({ showCustomTab = false }) => {
       if (response.success) {
         setGestureStatuses(response.data.requests);
         setCanCustom(response.data.canCustom);
+        
+        // Use global cooldown from API response
+        if (response.data.globalCooldownActive && response.data.cooldownEndTime) {
+          setCooldownEndTime(new Date(response.data.cooldownEndTime));
+        } else {
+          setCooldownEndTime(null);
+        }
       }
     } catch (error) {
       console.warn('Failed to load gesture statuses:', error);
@@ -318,18 +325,37 @@ const Gestures = ({ showCustomTab = false }) => {
 
   // Handle cooldown timer for Send to Drive
   useEffect(() => {
-    if (cooldownEndTime) {
-      const interval = setInterval(() => {
-        if (new Date() >= cooldownEndTime) {
-          setCanCustom(true);
-          setCooldownEndTime(null);
-          toast.success('You can now customize gestures again');
+    const interval = setInterval(() => {
+      let shouldRefresh = false;
+      
+      // Check global cooldown
+      if (cooldownEndTime && new Date() >= cooldownEndTime) {
+        setCanCustom(true);
+        setCooldownEndTime(null);
+        toast.success('You can now customize gestures again');
+        shouldRefresh = true;
+      }
+      
+      // Check individual gesture blocked times
+      gestureStatuses.forEach(gesture => {
+        if (gesture.status === 'blocked' && gesture.blockedAt) {
+          const blockedTime = new Date(gesture.blockedAt);
+          const unblockTime = new Date(blockedTime.getTime() + 1 * 60 * 1000); // 1 minute for testing
+          
+          if (new Date() >= unblockTime) {
+            shouldRefresh = true;
+          }
         }
-      }, 1000); // Check every second
+      });
+      
+      // Refresh gesture statuses if needed
+      if (shouldRefresh) {
+        loadGestureStatuses();
+      }
+    }, 1000); // Check every second
 
-      return () => clearInterval(interval);
-    }
-  }, [cooldownEndTime]);
+    return () => clearInterval(interval);
+  }, [cooldownEndTime, gestureStatuses]);
   
   const filteredGestures = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -390,22 +416,42 @@ const Gestures = ({ showCustomTab = false }) => {
   };
   const getGestureStatus = (gestureName) => {
     const status = gestureStatuses.find(g => g.gestureId === gestureName);
-    console.log(`getGestureStatus(${gestureName}):`, status ? status.status : 'not found, defaulting to ready');
     return status ? status.status : 'ready'; // Default to 'ready' if not found
+  };
+
+  const getGestureData = (gestureName) => {
+    return gestureStatuses.find(g => g.gestureId === gestureName);
+  };
+
+  const getGestureRemainingTime = (gestureName) => {
+    const gestureData = getGestureData(gestureName);
+    if (!gestureData || !gestureData.blockedAt) return null;
+    
+    const blockedTime = new Date(gestureData.blockedAt);
+    const now = new Date();
+    const unblockTime = new Date(blockedTime.getTime() + 1 * 60 * 1000); // 1 minute for testing
+    
+    if (now >= unblockTime) return null; // Expired
+    
+    const totalSeconds = Math.ceil((unblockTime - now) / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    
+    return { minutes, seconds, totalSeconds };
   };
 
   const handleSendToDrive = async () => {
     try {
       setSendToDriveLoading(true);
-      toast.info('Sending files to Drive, please wait...');
+      toast.info(t('gestures.sendingFiles', { defaultValue: 'Sending files to Drive...' }));
 
       const response = await sendToDrive();
       if (response.success) {
-        toast.success('Successfully sent to Drive, please wait 15 minutes before continuing to customize');
+        toast.success(t('gestures.sentSuccessfully', { defaultValue: 'Successfully sent to Drive!' }));
 
-        // Set cooldown period - disable custom buttons for 15 minutes
-        setCanCustom(false);
-        setCooldownEndTime(new Date(Date.now() + 15 * 60 * 1000)); // 15 minutes from now
+        // Global cooldown disabled for testing - only per-gesture cooldown active
+        // setCanCustom(false);
+        // setCooldownEndTime(new Date(Date.now() + 15 * 60 * 1000)); // 15 minutes
 
         // Refresh gesture statuses after submission
         const updatedStatuses = await getGestureStatusesOfAdmin(admin.id || admin._id);
@@ -413,11 +459,11 @@ const Gestures = ({ showCustomTab = false }) => {
           setGestureStatuses(updatedStatuses.data.requests);
         }
       } else {
-        toast.error(response.message || 'Failed to send to Drive');
+        toast.error(response.message || t('gestures.sendFailed', { defaultValue: 'Failed to send to Drive' }));
       }
     } catch (error) {
       console.error('Error sending to Drive:', error);
-      toast.error('Error sending to Drive');
+      toast.error(t('gestures.sendError', { defaultValue: 'Error sending to Drive' }));
     } finally {
       setSendToDriveLoading(false);
     }
@@ -439,7 +485,7 @@ const Gestures = ({ showCustomTab = false }) => {
   const tabs = [
     { id: 'overview', label: t('gestures.overview', { defaultValue: 'Overview' }), icon: Database },
     // Add Custom tab for admin and superadmin
-    ...(['admin', 'superadmin'].includes(admin?.role) ? [{ id: 'custom', label: 'Custom', icon: Settings }] : [])
+    ...(['admin', 'superadmin'].includes(admin?.role) ? [{ id: 'custom', label: t('gestures.custom', { defaultValue: 'Custom' }), icon: Settings }] : [])
   ];
 
   return (
@@ -740,7 +786,7 @@ const Gestures = ({ showCustomTab = false }) => {
                 ) : (
                   <Zap size={16} />
                 )}
-                {sendToDriveLoading ? 'Sending to Drive...' : `Send to Drive (${gestureStatuses.filter(g => g.status === 'customed').length} customized)`}
+                {sendToDriveLoading ? t('gestures.sendingToDrive', { defaultValue: 'Sending to Drive...' }) : `${t('gestures.sendToDrive', { defaultValue: 'Send to Drive' })} (${gestureStatuses.filter(g => g.status === 'customed').length} ${t('gestures.customized', { defaultValue: 'customized' }).toLowerCase()})`}
               </button>
             </div>
           )}
@@ -881,10 +927,10 @@ const Gestures = ({ showCustomTab = false }) => {
             <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="w-1 h-5 bg-cyan-500 rounded-full"></span>
-                  Custom Gestures
+                  {t('gestures.customGestures', { defaultValue: 'Custom Gestures' })}
                </h3>
                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Customize existing gestures for your needs
+                  {t('gestures.customizeDescription', { defaultValue: 'Customize existing gestures for your needs' })}
                </p>
             </div>
             
@@ -906,8 +952,8 @@ const Gestures = ({ showCustomTab = false }) => {
                       <tr>
                         <th className="px-6 py-4 font-montserrat font-extrabold text-left text-sm uppercase tracking-wider w-[25%]">{t('gestures.poseLabel', { defaultValue: 'Pose Label' })}</th>
                         <th className="px-6 py-4 font-montserrat font-extrabold text-left text-sm uppercase tracking-wider w-[25%]">{t('gestures.columnType', { defaultValue: 'Type' })}</th>
-                        <th className="px-6 py-4 font-montserrat font-extrabold text-left text-sm uppercase tracking-wider w-[25%]">Status</th>
-                        <th className="px-6 py-4 font-montserrat font-extrabold text-left text-sm uppercase tracking-wider w-[25%]">Actions</th>
+                        <th className="px-6 py-4 font-montserrat font-extrabold text-left text-sm uppercase tracking-wider w-[25%]">{t('gestures.status', { defaultValue: 'Status' })}</th>
+                        <th className="px-6 py-4 font-montserrat font-extrabold text-left text-sm uppercase tracking-wider w-[25%]">{t('gestures.actions', { defaultValue: 'Actions' })}</th>
                       </tr>
                     </thead>
                   </table>
@@ -953,10 +999,10 @@ const Gestures = ({ showCustomTab = false }) => {
                                     : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
                               }`}>
                                 {getGestureStatus(gesture.pose_label) === 'ready'
-                                  ? 'Ready'
+                                  ? t('gestures.ready', { defaultValue: 'Ready' })
                                   : getGestureStatus(gesture.pose_label) === 'customed'
-                                    ? 'Customized'
-                                    : 'Blocked'}
+                                    ? t('gestures.customized', { defaultValue: 'Customized' })
+                                    : t('gestures.blocked', { defaultValue: 'Blocked' })}
                               </span>
                             </td>
                             <td className="px-6 py-4 w-[25%]">
@@ -970,13 +1016,28 @@ const Gestures = ({ showCustomTab = false }) => {
                                               : 'bg-gray-400/20 text-gray-500 border border-gray-400/30 cursor-not-allowed'
                                             }`}
                               >
-                                {getGestureStatus(gesture.pose_label) === 'customed' 
-                                  ? 'Customized' 
-                                  : getGestureStatus(gesture.pose_label) === 'blocked'
-                                    ? (!canCustom && cooldownEndTime ? `Wait ${Math.ceil((cooldownEndTime - new Date()) / 1000 / 60)}m` : 'Blocked')
-                                    : !canCustom && cooldownEndTime
-                                      ? `Wait ${Math.ceil((cooldownEndTime - new Date()) / 1000 / 60)}m`
-                                      : 'Custom'}
+                                {(() => {
+                                  const status = getGestureStatus(gesture.pose_label);
+                                  const timeData = getGestureRemainingTime(gesture.pose_label);
+                                  
+                                  if (status === 'customed') {
+                                    return t('gestures.customized', { defaultValue: 'Customized' });
+                                  } else if (status === 'blocked') {
+                                    if (timeData && timeData.totalSeconds > 0) {
+                                      return timeData.minutes > 0 
+                                        ? `${t('gestures.wait', { defaultValue: 'Wait' })} ${timeData.minutes}:${timeData.seconds.toString().padStart(2, '0')}`
+                                        : `${t('gestures.wait', { defaultValue: 'Wait' })} ${timeData.seconds}s`;
+                                    } else {
+                                      // Time expired, should refresh to set as ready
+                                      setTimeout(() => loadGestureStatuses(), 100);
+                                      return t('gestures.blocked', { defaultValue: 'Blocked' });
+                                    }
+                                  } else if (!canCustom && cooldownEndTime) {
+                                    return `${t('gestures.wait', { defaultValue: 'Wait' })} ${Math.ceil((cooldownEndTime - new Date()) / 1000 / 60)}m`;
+                                  } else {
+                                    return t('gestures.customize', { defaultValue: 'Custom' });
+                                  }
+                                })()}
                               </button>
                             </td>
                           </tr>
@@ -1008,7 +1069,7 @@ const Gestures = ({ showCustomTab = false }) => {
             ) : (
               <Zap size={16} />
             )}
-            {sendToDriveLoading ? 'Sending to Drive...' : `Send to Drive (${gestureStatuses.filter(g => g.status === 'customed').length} customized)`}
+            {sendToDriveLoading ? t('gestures.sendingToDrive', { defaultValue: 'Sending to Drive...' }) : `${t('gestures.sendToDrive', { defaultValue: 'Send to Drive' })} (${gestureStatuses.filter(g => g.status === 'customed').length} ${t('gestures.customized', { defaultValue: 'customized' }).toLowerCase()})`}
           </button>
         </div>
       )}
@@ -1045,7 +1106,6 @@ const Gestures = ({ showCustomTab = false }) => {
           }}
           onCompleted={(gestureData) => {
             console.log('Custom gesture completed:', gestureData);
-            toast.success(`Custom gesture "${gestureData.gestureName}" completed!`);
             // Refresh gesture statuses after successful customization
             loadGestureStatuses();
             setShowCustomModal(false);

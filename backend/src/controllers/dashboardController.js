@@ -17,13 +17,15 @@ const {
 exports.getUserOverviewStats = async (req, res) => {
   try {
     // Sử dụng Promise.allSettled để đảm bảo luôn trả về dữ liệu (rỗng nếu lỗi)
+    const language = req.query.language || 'en'; // Get language from query params
+    
     const results = await Promise.allSettled([
       getUserStats(),
       getGenderStats(),
       getOccupationStats(),
       getAddressStats(),
       getAgeStats(),
-      getTopCategoryStats(),
+      getTopCategoryStats(language), // Pass language to function
       getUserRequestStats()
     ]);
 
