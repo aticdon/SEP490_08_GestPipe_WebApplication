@@ -11,19 +11,20 @@ const { normalizeOccupation } = require('../utils/normalizeOccupation');
 async function getUserStats() {
   const now = new Date();
   const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-  const [totalUsers, thisMonthUsers, lastMonthUsers, onlineUsers] = await Promise.all([
+  const [totalUsers, thisMonthUsers, onlineUsers] = await Promise.all([
     User.countDocuments(),
     User.countDocuments({ created_at: { $gte: startOfThisMonth } }),
-    User.countDocuments({ created_at: { $gte: startOfLastMonth, $lt: endOfLastMonth } }),
     User.countDocuments({ account_status: "activeonline" })
   ]);
 
-  const growthRate = lastMonthUsers > 0
-    ? (((thisMonthUsers - lastMonthUsers) / lastMonthUsers) * 100).toFixed(1)
-    : (thisMonthUsers > 0 ? 100 : 0);
+  // Tính toán tỷ lệ tăng trưởng dựa trên tổng số user (Total Users Growth)
+  // Nếu không có user mới trong tháng này, growthRate sẽ là 0%
+  const previousTotalUsers = totalUsers - thisMonthUsers;
+
+  const growthRate = previousTotalUsers > 0
+    ? ((thisMonthUsers / previousTotalUsers) * 100).toFixed(1)
+    : (totalUsers > 0 ? 100 : 0);
 
   return { totalUsers, growthRate, onlineUsers };
 }
@@ -178,7 +179,7 @@ async function getAddressStats() {
 async function getAgeStats() {
   const profiles = await UserProfile.find({ birth_date: { $ne: null } }, "birth_date");
 
-  const groups = { "16-24": 0, "25-34": 0, "35-50": 0, "50+": 0 };
+  const groups = { "13-24": 0, "25-34": 0, "35-50": 0, "50+": 0 };
   const now = new Date();
 
   profiles.forEach(p => {
@@ -193,7 +194,7 @@ async function getAgeStats() {
       age--;
     }
 
-    if (age >= 16 && age <= 24) groups["16-24"]++;
+    if (age >= 13 && age <= 24) groups["13-24"]++;
     else if (age >= 25 && age <= 34) groups["25-34"]++;
     else if (age >= 35 && age <= 50) groups["35-50"]++;
     else if (age > 50) groups["50+"]++;
@@ -202,7 +203,7 @@ async function getAgeStats() {
   const total = Object.values(groups).reduce((a, b) => a + b, 0) || 1;
 
   return {
-    "16-24": ((groups["16-24"] / total) * 100).toFixed(1),
+    "13-24": ((groups["13-24"] / total) * 100).toFixed(1),
     "25-34": ((groups["25-34"] / total) * 100).toFixed(1),
     "35-50": ((groups["35-50"] / total) * 100).toFixed(1),
     "50+": ((groups["50+"] / total) * 100).toFixed(1)
@@ -251,22 +252,30 @@ async function getUserRequestStats() {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
-  // Sửa query cho đúng kiểu dữ liệu
+  // Helper function to create status query for both schema versions
+  const getStatusQuery = (statuses) => ({
+    $or: [
+      { "status.state": { $in: statuses } },
+      { "status.en": { $in: statuses } }
+    ]
+  });
+
+  // Sửa query cho đúng kiểu dữ liệu (hỗ trợ cả status.state và status.en)
   const [totalRequests, todayRequests, submitRequests, successfulRequests] = await Promise.all([
-    // Tổng số request có state là "Submit" hoặc "Successful"
-    UserGestureRequest.countDocuments({ "status.state": { $in: ["Submit", "Successful"] } }),
+    // Tổng số request có state là "Submit", "Success", "Customed", "Canceled"
+    UserGestureRequest.countDocuments(getStatusQuery(["Submit", "Success", "Customed", "Canceled"])),
     
-    // Tổng số request hôm nay với state là "Submit"
+    // Tổng số request hôm nay với state là "Submit" hoặc "Canceled"
     UserGestureRequest.countDocuments({ 
-      "status.state": "Submit",
+      ...getStatusQuery(["Submit", "Canceled"]),
       created_at: { $gte: startOfToday, $lt: endOfToday }
     }),
 
-    // Tổng số request với state là "Submit"
-    UserGestureRequest.countDocuments({ "status.state": "Submit" }),
+    // Tổng số request với state là "Submit" hoặc "Customed"
+    UserGestureRequest.countDocuments(getStatusQuery(["Submit", "Customed"])),
 
-    // Tổng số request với state là "Successful"
-    UserGestureRequest.countDocuments({ "status.state": "Successful" })
+    // Tổng số request với state là "Successful" (Success) hoặc "Customed"
+    UserGestureRequest.countDocuments(getStatusQuery(["Success", "Customed"]))
   ]);
 
   return {

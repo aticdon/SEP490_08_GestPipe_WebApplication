@@ -31,7 +31,7 @@ const UserGestureRequestSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  collection: "usergesturerequests"
+  collection: "UserGestureRequests"
 });
 
 module.exports = mongoose.model("UserGestureRequest", UserGestureRequestSchema);

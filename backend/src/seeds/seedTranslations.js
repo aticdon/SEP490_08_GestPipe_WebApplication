@@ -38,14 +38,14 @@ const translations = [
 
   // Dashboard - Stats Cards
   { language: 'vi', category: 'dashboard', key: 'totalUsers', value: 'Tổng số người dùng' },
-  { language: 'vi', category: 'dashboard', key: 'comparedLastMonth', value: 'So với tháng trước' },
+  { language: 'vi', category: 'dashboard', key: 'comparedLastMonth', value: 'Tăng trưởng tháng này' },
   { language: 'vi', category: 'dashboard', key: 'onlineUsers', value: 'Đang trực tuyến' },
   { language: 'vi', category: 'dashboard', key: 'accuracyRate', value: 'Tỷ lệ chính xác' },
   { language: 'vi', category: 'dashboard', key: 'customActions', value: 'Lượt tùy chỉnh thao tác' },
   { language: 'vi', category: 'dashboard', key: 'todayCount', value: '+56 Today' },
 
   { language: 'en', category: 'dashboard', key: 'totalUsers', value: 'Total Users' },
-  { language: 'en', category: 'dashboard', key: 'comparedLastMonth', value: 'Compared to last month' },
+  { language: 'en', category: 'dashboard', key: 'comparedLastMonth', value: 'Monthly Growth' },
   { language: 'en', category: 'dashboard', key: 'onlineUsers', value: 'Online Users' },
   { language: 'en', category: 'dashboard', key: 'accuracyRate', value: 'Accuracy Rate' },
   { language: 'en', category: 'dashboard', key: 'customActions', value: 'Custom Actions' },
@@ -73,16 +73,20 @@ const translations = [
   { language: 'en', category: 'dashboard', key: 'student', value: 'Student' },
 
   { language: 'vi', category: 'dashboard', key: 'age', value: 'Tuổi' },
-  { language: 'vi', category: 'dashboard', key: 'age16_24', value: '16 - 24' },
+  { language: 'vi', category: 'dashboard', key: 'age16_24', value: '13 - 24' },
   { language: 'vi', category: 'dashboard', key: 'age25_34', value: '25 - 34' },
   { language: 'vi', category: 'dashboard', key: 'age35_50', value: '35 - 50' },
   { language: 'vi', category: 'dashboard', key: 'age50plus', value: '50+' },
+  { language: 'vi', category: 'dashboard', key: '13-24', value: '13 - 24' },
+  { language: 'vi', category: 'dashboard', key: '16-24', value: '13 - 24' },
   
   { language: 'en', category: 'dashboard', key: 'age', value: 'Age' },
-  { language: 'en', category: 'dashboard', key: 'age16_24', value: '16 - 24' },
+  { language: 'en', category: 'dashboard', key: 'age16_24', value: '13 - 24' },
   { language: 'en', category: 'dashboard', key: 'age25_34', value: '25 - 34' },
   { language: 'en', category: 'dashboard', key: 'age35_50', value: '35 - 50' },
   { language: 'en', category: 'dashboard', key: 'age50plus', value: '50+' },
+  { language: 'en', category: 'dashboard', key: '13-24', value: '13 - 24' },
+  { language: 'en', category: 'dashboard', key: '16-24', value: '13 - 24' },
 
   { language: 'vi', category: 'dashboard', key: 'cities', value: 'Thành phố khác' },
   { language: 'vi', category: 'dashboard', key: 'hoChiMinh', value: 'Hồ Chí Minh' },
@@ -589,6 +593,8 @@ const translations = [
   { language: 'vi', category: 'versionList', key: 'Release', value: 'Phát hành' },
   { language: 'vi', category: 'versionList', key: 'Stop', value: 'Dừng' },
   { language: 'vi', category: 'versionList', key: 'active', value: 'Hoạt động' },
+  { language: 'vi', category: 'versionList', key: 'Active', value: 'Hoạt động' },
+  { language: 'vi', category: 'versionList', key: 'stop', value: 'Dừng' },
 
   { language: 'en', category: 'versionList', key: 'releaseName', value: 'Release Name:' },
   { language: 'en', category: 'versionList', key: 'version', value: 'Version:' },
@@ -614,6 +620,8 @@ const translations = [
   { language: 'en', category: 'versionList', key: 'Release', value: 'Release' },
   { language: 'en', category: 'versionList', key: 'Stop', value: 'Stop' },
   { language: 'en', category: 'versionList', key: 'active', value: 'Active' },
+  { language: 'en', category: 'versionList', key: 'Active', value: 'Active' },
+  { language: 'en', category: 'versionList', key: 'stop', value: 'Stop' },
 
   // Dashboard - Missing keys
   { language: 'vi', category: 'dashboard', key: 'topCategories', value: 'Danh mục hàng đầu' },
@@ -1205,6 +1213,16 @@ const translations = [
   { language: 'vi', category: 'gesture', key: 'Swipe_Right', value: 'Vuốt phải' },
   { language: 'vi', category: 'gesture', key: 'Swipe_Up', value: 'Vuốt lên' },
   { language: 'vi', category: 'gesture', key: 'Swipe_Down', value: 'Vuốt xuống' },
+  { language: 'vi', category: 'gesture', key: 'previous_slide', value: 'Slide trước' },
+  { language: 'vi', category: 'gesture', key: 'next_slide', value: 'Slide tiếp theo' },
+  { language: 'vi', category: 'gesture', key: 'zoom_out', value: 'Thu nhỏ' },
+  { language: 'vi', category: 'gesture', key: 'zoom_in', value: 'Phóng to' },
+  { language: 'vi', category: 'gesture', key: 'home', value: 'Trang chủ' },
+  { language: 'vi', category: 'gesture', key: 'rotate_left', value: 'Xoay trái' },
+  { language: 'vi', category: 'gesture', key: 'rotate_right', value: 'Xoay phải' },
+  { language: 'vi', category: 'gesture', key: 'rotate_up', value: 'Xoay lên' },
+  { language: 'vi', category: 'gesture', key: 'rotate_down', value: 'Xoay xuống' },
+  { language: 'vi', category: 'gesture', key: 'zoom_out_slide', value: 'Thu nhỏ Slide' },
   
   { language: 'en', category: 'gesture', key: 'Thumb_Up', value: 'Thumb Up' },
   { language: 'en', category: 'gesture', key: 'Thumb_Down', value: 'Thumb Down' },
@@ -1216,6 +1234,16 @@ const translations = [
   { language: 'en', category: 'gesture', key: 'Swipe_Right', value: 'Swipe Right' },
   { language: 'en', category: 'gesture', key: 'Swipe_Up', value: 'Swipe Up' },
   { language: 'en', category: 'gesture', key: 'Swipe_Down', value: 'Swipe Down' },
+  { language: 'en', category: 'gesture', key: 'previous_slide', value: 'Previous Slide' },
+  { language: 'en', category: 'gesture', key: 'next_slide', value: 'Next Slide' },
+  { language: 'en', category: 'gesture', key: 'zoom_out', value: 'Zoom Out' },
+  { language: 'en', category: 'gesture', key: 'zoom_in', value: 'Zoom In' },
+  { language: 'en', category: 'gesture', key: 'home', value: 'Home' },
+  { language: 'en', category: 'gesture', key: 'rotate_left', value: 'Rotate Left' },
+  { language: 'en', category: 'gesture', key: 'rotate_right', value: 'Rotate Right' },
+  { language: 'en', category: 'gesture', key: 'rotate_up', value: 'Rotate Up' },
+  { language: 'en', category: 'gesture', key: 'rotate_down', value: 'Rotate Down' },
+  { language: 'en', category: 'gesture', key: 'zoom_out_slide', value: 'Zoom Out Slide' },
 
   // Gesture Set Management
   { language: 'vi', category: 'gestureSetManagement', key: 'title', value: 'Quản lý bộ cử chỉ' },

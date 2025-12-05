@@ -8,9 +8,9 @@ let PYTHON_BIN = process.env.PYTHON_BIN;
 if (!PYTHON_BIN || !fs.existsSync(PYTHON_BIN)) {
   // Try common Python installation paths
   const possiblePaths = [
-    'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python311\\python.exe',
-    'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python312\\python.exe',
-    'C:\\Users\\DLCH\\AppData\\Local\\Programs\\Python\\Python313\\python.exe',
+    'C:\\Users\\Imtha\\AppData\\Local\\Programs\\Python\\Python311\\python.exe',
+    'C:\\Users\\Imtha\\AppData\\Local\\Programs\\Python\\Python312\\python.exe',
+    'C:\\Users\\Imtha\\AppData\\Local\\Programs\\Python\\Python313\\python.exe',
     'python.exe', // Use PATH
     'python3.exe' // Use PATH
   ];

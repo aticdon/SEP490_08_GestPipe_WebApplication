@@ -34,7 +34,7 @@ const UserGestureConfigSchema = new mongoose.Schema({
     default: {}
   }
 }, {
-  collection: "usergestureconfigs"
+  collection: "UserGestureConfigs"
 });
 
 module.exports = mongoose.model("UserGestureConfig", UserGestureConfigSchema);

@@ -24,7 +24,7 @@ async function getDefaultGestureAccuracyOverview() {
   let averageAccuracy = totalAccuracy / totalCount;
 
   // Quy đổi sang phần trăm nguyên
-  averageAccuracy = Math.round(averageAccuracy * 100); // từ 0.94 --> 94, từ 1.0 --> 100
+  averageAccuracy = Math.round(averageAccuracy * 100);
 
   return {
     averageAccuracy
@@ -75,21 +75,34 @@ async function getGestureUse() {
  * Kết quả: [{ pose_label, count }]
  */
 async function getTop5CustomUserGestures() {
-  // Aggregate để đếm số lần mỗi pose_label xuất hiện với status.state = "Successful"
-  const pipeline = [
-    { $match: { "status.state": "Successful" } },
-    { $group: { _id: "$pose_label", count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 5 }
-  ];
+  try {
+    // Aggregate để đếm số lần mỗi pose_label xuất hiện với status là Successful/Success/Customed/approved
+    // Hỗ trợ cả cấu trúc cũ (status.state) và mới (status.en)
+    const pipeline = [
+      { 
+        $match: { 
+          $or: [
+            { "status.state": { $in: ["Successful", "approved", "Success"] } },
+            { "status.en": { $in: ["Successful", "Success", "Customed", "approved"] } }
+          ]
+        } 
+      },
+      { $group: { _id: "$pose_label", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ];
 
-  const results = await UserGestureRequest.aggregate(pipeline);
+    const results = await UserGestureRequest.aggregate(pipeline);
 
-  // Trả về danh sách [{ pose_label, count }]
-  return results.map(item => ({
-    pose_label: item._id,
-    count: item.count
-  }));
+    // Trả về danh sách [{ pose_label, count }]
+    return results.map(item => ({
+      pose_label: item._id,
+      count: item.count
+    }));
+  } catch (error) {
+    console.error("Error in getTop5CustomUserGestures:", error);
+    return [];
+  }
 }
 
 module.exports = {

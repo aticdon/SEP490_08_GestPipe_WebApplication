@@ -39,7 +39,7 @@ exports.getUserOverviewStats = async (req, res) => {
     const genderPercent    = getOrFallback(1, { male: 0, female: 0, other: 0 });
     const occupationPercent= getOrFallback(2, []);
     const cityPercent      = getOrFallback(3, []);
-    const agePercent       = getOrFallback(4, { "16-24": 0, "25-34": 0, "35-50": 0, "50+": 0 });
+    const agePercent       = getOrFallback(4, { "13-24": 0, "25-34": 0, "35-50": 0, "50+": 0 });
     const topCategories    = getOrFallback(5, []);
     const userRequestStats = getOrFallback(6, { totalRequests: 0, todayRequests: 0, submitRequests: 0, successfulRequests: 0 });
 
