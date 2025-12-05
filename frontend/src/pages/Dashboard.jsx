@@ -153,7 +153,7 @@ const UserOverviewTab = ({ theme }) => {
   }));
 
   const occupationData = stats.occupationPercent.map(o => ({
-    name: t(`dashboard.${o.occupation.toLowerCase()}`) || o.occupation,
+    name: t(`dashboard.${o.occupation}`) || o.occupation,
     value: parseFloat(o.percent),
   }));
 

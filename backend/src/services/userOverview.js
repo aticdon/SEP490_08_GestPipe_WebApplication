@@ -32,91 +32,129 @@ async function getUserStats() {
 // 2. Gender Stats
 // =============================
 async function getGenderStats() {
+  // Chỉ lấy users có gender hợp lệ (không null, không rỗng, không phải "null")
   const genderAgg = await UserProfile.aggregate([
+    { $match: { 
+      gender: { 
+        $ne: null, 
+        $ne: "", 
+        $ne: "null",
+        $exists: true 
+      } 
+    }},
     { $group: { _id: "$gender", count: { $sum: 1 } } }
   ]);
 
-  const genderCounts = { male: 0, female: 0, other: 0 };
+  // Lọc và chỉ giữ những gender rõ ràng
+  const validGenders = { male: 0, female: 0, other: 0 };
 
   genderAgg.forEach(g => {
-    if (["male", "female", "other"].includes(g._id)) {
-      genderCounts[g._id] = g.count;
-    } else {
-      genderCounts.other += g.count;
+    const gender = g._id ? g._id.toLowerCase() : null;
+    
+    if (gender === "male") {
+      validGenders.male = g.count;
+    } else if (gender === "female") {
+      validGenders.female = g.count;
+    } else if (gender === "other") {
+      validGenders.other = g.count;
     }
+    // Bỏ qua các gender không rõ ràng khác
   });
 
-  const total = genderCounts.male + genderCounts.female + genderCounts.other || 1;
+  const total = validGenders.male + validGenders.female + validGenders.other;
+  
+  // Nếu không có user nào có gender hợp lệ thì return 0 all
+  if (total === 0) {
+    return { male: "0.0", female: "0.0", other: "0.0" };
+  }
 
   return {
-    male: ((genderCounts.male / total) * 100).toFixed(1),
-    female: ((genderCounts.female / total) * 100).toFixed(1),
-    other: ((genderCounts.other / total) * 100).toFixed(1)
+    male: ((validGenders.male / total) * 100).toFixed(1),
+    female: ((validGenders.female / total) * 100).toFixed(1),
+    other: ((validGenders.other / total) * 100).toFixed(1)
   };
 }
 
 // =============================
-// 3. Occupation Stats
+// 3. Occupation Stats (excluding null/empty)
 // =============================
 async function getOccupationStats() {
-  const profiles = await UserProfile.find({ occupation: { $ne: null } }, "occupation");
+  // Lấy profiles có occupation hợp lệ (không null, không rỗng, không phải "null")
+  const profiles = await UserProfile.find({ 
+    occupation: { 
+      $ne: null, 
+      $ne: "", 
+      $ne: "null" 
+    } 
+  }, "occupation");
 
-  const total = profiles.length;
-  const counts = {};
-
+  // Lọc và normalize chỉ những occupation hợp lệ
+  const validOccupations = [];
   profiles.forEach(p => {
     const normalized = normalizeOccupation(p.occupation);
-    counts[normalized] = (counts[normalized] || 0) + 1;
+    // Chỉ thêm vào nếu không phải "other" (tức là có occupation rõ ràng)
+    if (normalized !== "other") {
+      validOccupations.push(normalized);
+    }
+  });
+
+  const total = validOccupations.length;
+  if (total === 0) return [];
+
+  const counts = {};
+  validOccupations.forEach(occupation => {
+    counts[occupation] = (counts[occupation] || 0) + 1;
   });
 
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
-  const topN = 3;
-  const top = sorted.filter(([group]) => group !== "Other").slice(0, topN);
-
-  let otherCount = 0;
-  sorted.slice(topN).forEach(([group, count]) => {
-    if (group !== "Other") otherCount += count;
-  });
-  otherCount += counts["Other"] || 0;
-
-  const percent = top.map(([group, count]) => ({
+  // Lấy tất cả occupation hợp lệ, không giới hạn top N
+  const percent = sorted.map(([group, count]) => ({
     occupation: group,
     percent: ((count / total) * 100).toFixed(1)
   }));
-
-  if (otherCount > 0) {
-    percent.push({
-      occupation: "Other",
-      percent: ((otherCount / total) * 100).toFixed(1)
-    });
-  }
 
   return percent;
 }
 
 // =============================
-// 4. Address Stats (top 3 city)
+// 4. Address Stats (top 5 city)
 // =============================
 async function getAddressStats() {
   const profiles = await UserProfile.find(
-    { address: { $ne: null, $ne: "" } },
+    { 
+      address: { 
+        $ne: null, 
+        $ne: "", 
+        $ne: "null",
+        $ne: "Chọn Tỉnh/Thành phố" 
+      } 
+    },
     "address"
   );
 
   const total = profiles.length;
+  if (total === 0) return [];
+
   const counts = {};
 
   profiles.forEach(p => {
-    const addr = p.address.trim();
-    if (!addr) return;
+    let addr = p.address?.trim();
+    if (!addr || addr === "null") return;
+    
+    // Rút gọn tên địa chỉ để hiển thị đẹp hơn
+    addr = addr
+      .replace(/^Thành phố\s+/i, "TP. ")
+      .replace(/^Tỉnh\s+/i, "")
+      .replace(/^Huyện\s+/i, "H. ");
+      
     counts[addr] = (counts[addr] || 0) + 1;
   });
 
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  const top = sorted.slice(0, 3);
+  const top = sorted.slice(0, 5); // Hiển thị top 5 instead of 3
 
-  let otherCount = sorted.slice(3)
+  let otherCount = sorted.slice(5)
     .reduce((sum, [_, val]) => sum + val, 0);
 
   const percent = top.map(([address, count]) => ({
@@ -126,7 +164,7 @@ async function getAddressStats() {
 
   if (otherCount > 0) {
     percent.push({
-      address: "Other",
+      address: "Khác",
       percent: ((otherCount / total) * 100).toFixed(1)
     });
   }
