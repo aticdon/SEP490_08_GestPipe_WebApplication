@@ -14,6 +14,7 @@ const translations = [
   { language: 'vi', category: 'sidebar', key: 'mlGesturePractice', value: 'Luyện tập cử chỉ ML' },
   { language: 'vi', category: 'sidebar', key: 'gestureController', value: 'Quản lý cử chỉ' },
   { language: 'vi', category: 'sidebar', key: 'gestureSetManagement', value: 'Quản lý bộ cử chỉ' },
+  { language: 'vi', category: 'common', key: 'close', value: 'Đóng' },
 
   { language: 'en', category: 'sidebar', key: 'dashboard', value: 'Dashboard' },
   { language: 'en', category: 'sidebar', key: 'home', value: 'Home' },
@@ -24,6 +25,7 @@ const translations = [
   { language: 'en', category: 'sidebar', key: 'mlGesturePractice', value: 'ML Gesture Practice' },
   { language: 'en', category: 'sidebar', key: 'gestureController', value: 'Gesture Controller' },
   { language: 'en', category: 'sidebar', key: 'gestureSetManagement', value: 'Gesture Set Management' },
+  { language: 'en', category: 'common', key: 'close', value: 'Close' },
 
 // Dashboard - Tabs
   { language: 'vi', category: 'dashboard', key: 'title', value: 'Tổng quan' },
@@ -66,11 +68,31 @@ const translations = [
   { language: 'vi', category: 'dashboard', key: 'teacher', value: 'Giáo viên' },
   { language: 'vi', category: 'dashboard', key: 'engineer', value: 'Kỹ sư' },
   { language: 'vi', category: 'dashboard', key: 'student', value: 'Sinh viên' },
+  { language: 'vi', category: 'dashboard', key: 'itSoftware', value: 'CNTT & Phần mềm' },
+  { language: 'vi', category: 'dashboard', key: 'teacherProfessor', value: 'Giảng viên / Giáo sư' },
+  { language: 'vi', category: 'dashboard', key: 'hospitalityTourism', value: 'Du lịch & Khách sạn' },
+  { language: 'vi', category: 'dashboard', key: 'designer', value: 'Thiết kế' },
+  { language: 'vi', category: 'dashboard', key: 'nurse', value: 'Y tá' },
+  { language: 'vi', category: 'dashboard', key: 'doctor', value: 'Bác sĩ' },
+  { language: 'vi', category: 'dashboard', key: 'marketing', value: 'Marketing' },
+  { language: 'vi', category: 'dashboard', key: 'sales', value: 'Kinh doanh / Bán hàng' },
+  { language: 'vi', category: 'dashboard', key: 'finance', value: 'Tài chính' },
+  { language: 'vi', category: 'dashboard', key: 'business', value: 'Kinh doanh' },
   
   { language: 'en', category: 'dashboard', key: 'occupation', value: 'Occupation' },
   { language: 'en', category: 'dashboard', key: 'teacher', value: 'Teacher' },
   { language: 'en', category: 'dashboard', key: 'engineer', value: 'Engineer' },
   { language: 'en', category: 'dashboard', key: 'student', value: 'Student' },
+  { language: 'en', category: 'dashboard', key: 'itSoftware', value: 'IT & Software' },
+  { language: 'en', category: 'dashboard', key: 'teacherProfessor', value: 'Teacher / Professor' },
+  { language: 'en', category: 'dashboard', key: 'hospitalityTourism', value: 'Hospitality & Tourism' },
+  { language: 'en', category: 'dashboard', key: 'designer', value: 'Designer' },
+  { language: 'en', category: 'dashboard', key: 'nurse', value: 'Nurse' },
+  { language: 'en', category: 'dashboard', key: 'doctor', value: 'Doctor' },
+  { language: 'en', category: 'dashboard', key: 'marketing', value: 'Marketing' },
+  { language: 'en', category: 'dashboard', key: 'sales', value: 'Sales' },
+  { language: 'en', category: 'dashboard', key: 'finance', value: 'Finance' },
+  { language: 'en', category: 'dashboard', key: 'business', value: 'Business' },
 
   { language: 'vi', category: 'dashboard', key: 'age', value: 'Tuổi' },
   { language: 'vi', category: 'dashboard', key: 'age16_24', value: '13 - 24' },
@@ -459,6 +481,14 @@ const translations = [
   { language: 'en', category: 'dashboard', key: 'failedToLoadVersion', value: 'Failed to load version data' },
   { language: 'en', category: 'dashboard', key: 'noNewFeatures', value: 'No new features' },
 
+  { language: 'vi', category: 'dashboard', key: 'activeNow', value: 'Đang hoạt động' },
+  { language: 'vi', category: 'dashboard', key: 'systemDefined', value: 'Hệ thống định nghĩa' },
+  { language: 'vi', category: 'dashboard', key: 'userDefined', value: 'Người dùng định nghĩa' },
+
+  { language: 'en', category: 'dashboard', key: 'activeNow', value: 'Active Now' },
+  { language: 'en', category: 'dashboard', key: 'systemDefined', value: 'System Defined' },
+  { language: 'en', category: 'dashboard', key: 'userDefined', value: 'User Defined' },
+
   // User List - Additional translations
   { language: 'vi', category: 'userList', key: 'activeOnline', value: 'Hoạt động Online' },
   { language: 'vi', category: 'userList', key: 'activeOffline', value: 'Hoạt động Offline' },
@@ -591,10 +621,10 @@ const translations = [
   { language: 'vi', category: 'versionList', key: 'viewDetails', value: 'Xem chi tiết' },
   { language: 'vi', category: 'versionList', key: 'noVersionsFound', value: 'Không tìm thấy phiên bản nào' },
   { language: 'vi', category: 'versionList', key: 'Release', value: 'Phát hành' },
-  { language: 'vi', category: 'versionList', key: 'Stop', value: 'Dừng' },
+  { language: 'vi', category: 'versionList', key: 'Inactive', value: 'Ngừng hoạt động' },
   { language: 'vi', category: 'versionList', key: 'active', value: 'Hoạt động' },
   { language: 'vi', category: 'versionList', key: 'Active', value: 'Hoạt động' },
-  { language: 'vi', category: 'versionList', key: 'stop', value: 'Dừng' },
+  { language: 'vi', category: 'versionList', key: 'inactive', value: 'Ngừng hoạt động' },
 
   { language: 'en', category: 'versionList', key: 'releaseName', value: 'Release Name:' },
   { language: 'en', category: 'versionList', key: 'version', value: 'Version:' },
@@ -618,10 +648,10 @@ const translations = [
   { language: 'en', category: 'versionList', key: 'viewDetails', value: 'View details' },
   { language: 'en', category: 'versionList', key: 'noVersionsFound', value: 'No versions found' },
   { language: 'en', category: 'versionList', key: 'Release', value: 'Release' },
-  { language: 'en', category: 'versionList', key: 'Stop', value: 'Stop' },
+  { language: 'en', category: 'versionList', key: 'Inactive', value: 'Inactive' },
   { language: 'en', category: 'versionList', key: 'active', value: 'Active' },
   { language: 'en', category: 'versionList', key: 'Active', value: 'Active' },
-  { language: 'en', category: 'versionList', key: 'stop', value: 'Stop' },
+  { language: 'en', category: 'versionList', key: 'inactive', value: 'Inactive' },
 
   // Dashboard - Missing keys
   { language: 'vi', category: 'dashboard', key: 'topCategories', value: 'Danh mục hàng đầu' },

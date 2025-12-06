@@ -1058,7 +1058,7 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
                   className="py-2.5 px-6 rounded-xl font-semibold text-sm transition-all
                              bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10"
                 >
-                  {t('common.close')}
+                  {t('common.close', { defaultValue: 'Close' })}
                 </button>
               </div>
             </div>

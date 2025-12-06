@@ -16,8 +16,8 @@ const getStatusBadge = (status) => {
     case "Active":
     case "active":
       return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20";
-    case "Stop": 
-    case "stop":
+    case "Inactive": 
+    case "inactive":
       return "bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20";
     default: return "bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20";
   }
