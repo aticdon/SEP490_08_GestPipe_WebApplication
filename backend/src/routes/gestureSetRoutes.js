@@ -167,8 +167,24 @@ router.post('/publish', protect, authorize('admin', 'superadmin'), async (req, r
           }
         );
 
-        // Step 3: Create new version record
-        const versionName = `v1.0.${Date.now().toString().slice(-6)}`;
+        // Step 3: Create new version record with incremental version to avoid duplicates
+        const lastVersion = await Version.findOne({ gestureSetType: 'gestureset' })
+          .sort({ created_at: -1, _id: -1 })
+          .lean();
+
+        let nextIndex = 1;
+        if (lastVersion?.name) {
+          const match = /v1\.0\.(\d+)/i.exec(lastVersion.name);
+          if (match && !Number.isNaN(Number(match[1]))) {
+            nextIndex = Number(match[1]) + 1;
+          } else {
+            // Fallback: count existing gesture set versions
+            const count = await Version.countDocuments({ gestureSetType: 'gestureset' });
+            nextIndex = count + 1;
+          }
+        }
+
+        const versionName = `v1.0.${nextIndex}`;
         
         const newVersion = new Version({
           name: versionName,

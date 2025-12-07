@@ -3,7 +3,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, Hand, UserCog, User as UserIcon, Layers, FileCheck } from 'lucide-react';
+import { LayoutGrid, Hand, UserCog, User as UserIcon, Layers, FileCheck, Package } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher'; 
 
 const Sidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
@@ -19,6 +19,7 @@ const Sidebar = ({ theme, onLogout }) => { // Thêm onLogout (từ AdminLayout)
     // ========================
     { id: 'admin', label: t('sidebar.adminManagement', { defaultValue: 'Admin Management' }), icon: UserCog, path: '/admin-list' },
     { id: 'user', label: t('sidebar.userManagement', { defaultValue: 'User Management' }), icon: UserIcon, path: '/user-list' },
+    { id: 'gesture-set-management', label: t('sidebar.gestureSetManagement', { defaultValue: 'Gesture Set Management' }), icon: Package, path: '/gesture-set-management' },
     { id: 'versions', label: t('sidebar.version', { defaultValue: 'Version' }), icon: Layers, path: '/version-list' },
   ];
 
