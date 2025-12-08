@@ -91,13 +91,13 @@ const GESTURE_TEMPLATES = {
   },
   "end": {
     "left_fingers": [0, 0, 0, 0, 0],
-    "right_fingers": [1, 1, 1, 1, 1],
+    "right_fingers": [0, 0, 0, 0, 1],
     "main_axis_x": 1,
     "main_axis_y": 1,
     "delta_x": 0.0,
     "delta_y": 0.0,
     "is_static": true,
-    "description": "End - All fingers extended, static hold"
+    "description": "End - Only pinky finger extended, static hold"
   },
   "home": {
     "left_fingers": [0, 0, 0, 0, 0],
@@ -454,7 +454,12 @@ function GesturePracticeML({ gestureName, onClose, theme = 'dark' }) {
     const targetFingers = template.right_fingers;
     const fingersMatch = rightFingers.every((f, i) => f === targetFingers[i]);
     
-    console.log(`🔵 Static ${gestureName}: [${rightFingers.join(',')}] vs [${targetFingers.join(',')}] = ${fingersMatch ? '✅ MATCH' : '❌ NO MATCH'}`);
+    // Special debug for "end" gesture
+    if (gestureName.toLowerCase() === 'end') {
+      console.log(`🔵 🔍 END GESTURE DEBUG: Detected [${rightFingers.join(',')}] vs Target [${targetFingers.join(',')}] = ${fingersMatch ? '✅ MATCH' : '❌ NO MATCH'}`);
+    } else {
+      console.log(`🔵 Static ${gestureName}: [${rightFingers.join(',')}] vs [${targetFingers.join(',')}] = ${fingersMatch ? '✅ MATCH' : '❌ NO MATCH'}`);
+    }
     
     if (fingersMatch) {
       if (!staticHoldStartTimeRef.current) {
